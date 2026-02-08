@@ -1,0 +1,1474 @@
+1
+Detecting Colluding Sybil Attackers in Robotic
+Networks using Backscatters
+Yong Huang, Wei Wang, Senior Member, IEEE, Tao Jiang, Fellow, IEEE, Qian Zhang, Fellow, IEEE
+Abstract—Due to the openness of wireless medium, robotic
+networks that consist of many miniaturized robots are susceptible
+to Sybil attackers, who can fabricate myriads of ﬁctitious robots.
+Such detrimental attacks can overturn the fundamental trust
+assumption in robotic collaboration and thus impede widespread
+deployments of robotic networks in many collaborative tasks.
+Existing solutions rely on bulky multi-antenna systems to pas-
+sively obtain ﬁne-grained physical layer signatures, making them
+unaﬀordable to miniaturized robots. To overcome this limita-
+tion, we present ScatterID, a lightweight system that attaches
+featherlight and batteryless backscatter tags to single-antenna
+robots for Sybil attack mitigation. Instead of passively “ob-
+serving” signatures, ScatterID actively “manipulates” multipath
+propagation by exploiting backscatter tags to intentionally create
+rich multipath signatures obtainable to single-antenna robots.
+Particularly, these signatures are used to carefully construct sim-
+ilarity vectors to thwart advanced Sybil attackers, who further
+trigger power-scaling and colluding attacks to generate dissimilar
+signatures. Then, a customized random forest model is developed
+to accurately infer the identity legitimacy of each robot. We
+implement ScatterID on the iRobot Create platform and evaluate
+it under various Sybil attacks in real-world environments. The
+experimental results show that ScatterID achieves a high AUROC
+of 0.987 and obtains an overall accuracy of 95.4% under basic
+and advanced Sybil attacks. Speciﬁcally, it can successfully detect
+96.1% of fake robots while mistakenly rejecting just 5.7% of
+legitimate ones.
+Index
+Terms—Robotic
+network,
+Sybil
+attack
+detection,
+backscatter
+I. Introduction
+The continuous advancement of wireless technologies has
+promised to facilitate eﬀective collaboration among a team
+of small and agile robots, which enables a wide spectrum
+of compelling applications, such as surveillance [2], consen-
+sus [3], aerial wireless coverage [4] and search and rescue [5].
+Although the openness of wireless medium delivers on the
+promise for eﬃcient and agile collaboration, it also exposes
+robots to cyber attacks. A particular detrimental attack in
+robotic networks is the Sybil attack, which easily subverts
+the fundamental trust assumption in robotic collaboration by
+Part of this work has been presented at IEEE INFOCOM 2020 [1].
+This work was supported in part by the National Key R&D Program
+of China under Grant 2020YFB1806606, National Science Foundation of
+China with Grant 62071194, 61729101, 91738202, Young Elite Scientists
+Sponsorship Program by CAST under Grant 2018QNRC001. (Corresponding
+author: Wei Wang.)
+Y. Huang, W. Wang and T. Jiang are with the School of Electronic
+Information and Communications, Huazhong University of Science and
+Technology, Wuhan 430074, China (e-mail:{yonghuang, weiwangw, tao-
+jiang}@hust.edu.cn).
+Q. Zhang is with Department of Computer Science and Engineering, Hong
+Kong University of Science and Technology, Clear Water Bay, Hong Kong,
+China (e-mail:qianzh@cse.ust.hk).
+forging a large number of fake identities to gain a dispro-
+portionate inﬂuence in the network [6], [7]. For instance, by
+forging many IDs with excessive demands, a Sybil attacker
+can easily deplete valuable bandwidth resources from other
+genuine agents in a robotic network.
+However, due to the ad hoc, dynamic, and miniaturized
+characteristics of robotic platforms, the Sybil attack mitigation
+in robotic networks still remains to be a challenging issue.
+Traditional pre-shared key (PSK) management schemes pre-
+sume prior trust among network nodes [8]–[11], which are
+diﬃcult to implement in ad hoc robotic networks where robots
+often go in and out. Alternatively, research eﬀorts [12]–[17]
+measure received signals strength indicator (RSSI), channel
+state information (CSI) and angle of arrival (AoA) features in
+wireless physical layer (PHY) to verify the spatial uniqueness
+of each node. However, RSSI and CSI based techniques [12]–
+[15] not only need collaboration among multiple receivers
+or antennas, but also require all nodes to be stationary or
+semi-stationary. Although ﬁne-grained AoA signatures can be
+extracted to detect nodes in close proximity under dynamic
+channels [16], [17], these approaches either rely on large
+multi-antenna arrays [16] or require unnecessary robotic mo-
+tions, such as in-place spin with two antennas [17]. They are
+ill-suited to a team of robots individually with limited payload
+and hardware capabilities.
+In this paper, we argue that the fundamental hurdle in
+realizing lightweight Sybil-resilient solutions lies in that these
+PHY-based innovations focus on passively “observing” signal
+propagation signatures, which require bulky multi-antenna sys-
+tems to capture ﬁne-grained information. This paper explores a
+new approach: can we instead actively “manipulate” multipath
+propagation, to make conventionally multi-antenna-exclusive
+signatures also obtainable to a single antenna? If we could alter
+multipath propagation by just attaching several featherlight and
+batteryless backscatter tags to existing single-antenna robots,
+it would not require any hardware modiﬁcation or incur load
+burden to the robots.
+This paper proposes a lightweight Sybil attack detection
+system, ScatterID, which attaches featherlight and batteryless
+backscatter tags to single-antenna robots for defeating Sybil
+attackers who are even capable of launching advanced power-
+scaling and colluding attacks. Our fundamental insight is
+that when backscatter tags communicate by intermittently
+absorbing and reﬂecting ambient radio signals, the multipath
+between a pair of transceivers changes correspondingly [18].
+Such fast changes, i.e., reﬂections from tags, provide unique
+spatial properties of the communication pair. In particular,
+backscattered signal strengths are highly correlated to dis-
+arXiv:2012.14227v1  [cs.CR]  28 Dec 2020
+ScatterID robot
+Sybil attacker
+Sybil attacker
+Fake robots
+Backscatter tags
+Basic attacks
+Sybil attacker
+Colluding attacks
+Fake robots
+Fig. 1. Illustration of Sybil attacks in a robotic network. Robotic attackers
+can launch various types of Sybil attacks.
+tances between transceivers with respect to tags. By aﬃxing
+several tags on a robot, as shown in Fig. 1, other robots’
+trajectory information can be conveyed in backscattered signal
+traces. The spatial correlation indicates that similar backscat-
+ter signatures come from the same moving robot with a
+high probability. In this way, a ScatterID robot can exploit
+backscatter signal traces to generate unforgeable PHY IDs for
+its neighboring robots and thereafter discover ﬁctitious ones
+among them by ﬁnding similar PHY IDs.
+We realize the above idea by tackling the following two
+challenges.
+1) How to exploit backscatter tags to construct sensitive
+signal proﬁles for hardware-constrained and dynamic robots?
+With merely one antenna, a robotic platform cannot acquire
+ﬁne-grained signal signatures, such as AoA information, for
+reliable attack detection in dynamic channel states. To deal
+with this challenge, we take sequential backscatter signatures
+of each robotic transmitter as a signal proﬁle to characterize
+its long-term spatial information. Speciﬁcally, when hearing
+data transmission from a surrounding robot, a ScatterID
+robot controls its tags to reﬂect wireless signals in turn for
+avoiding overlapping among their backscattered signals. These
+backscattered signals are unique to the transmitter’s location.
+In this way, the ScatterID robot continuously reﬂects a series
+of transmissions to obtain a signal proﬁle that is sensitive to
+the transmitter’s trajectory.
+2) How to eﬀectively detect the presence of fake robots
+based on backscatter signatures under various Sybil attacks?
+A Sybil attacker can scale its transmission power for each
+fake ID, making its backscatter signature diﬀerent from others’
+in each transmission. In addition, attackers can collude with
+each other and randomly switch fake IDs in each transmission
+to disturb their long-term spatial similarity. Consequently,
+these attacks will incur signiﬁcantly diﬀerent signal proﬁles.
+To defend against such detrimental attacks, we propose an
+eﬀective algorithm for attack-resilient robot veriﬁcation. In
+particular, it ﬁrst leverages Cosine distance to measure angular
+diﬀerences between any two proﬁles while mitigating power-
+scaling attacks. Then, it picks out representative features to
+reliably indicate each robot’s similarity with respect to others
+for detecting colluding Sybil attackers. Based on extracted
+similarity vectors, a customized random forest model is de-
+signed to verify the legitimacy of each robot.
+Summary of Results. We implement our system with
+iRobot Create robots, GNURadio/USRP B210 and backscatter
+tags using commercial oﬀ-the-shelf circuit components, and
+extensively evaluate our system under various Sybil attacks
+in typical indoor and outdoor environments. The evaluation
+results show that our system obtains an accuracy of 95.5%
+under basic and power-scaling attacks and an accuracy of
+95.3% under colluding attacks. Overall, it can successfully
+detect 96.1% of fake robots and meanwhile mistakenly reject
+just 5.7% of legitimate robots.
+Contributions. The main contributions of this work are
+summarized as follows.
+• We propose ScatterID, a lightweight Sybil attack de-
+tection system. It exploits featherlight and batteryless
+backscatter tags to actively create rich multipath signa-
+tures, which are obtainable to single-antenna robots.
+• ScatterID eﬀectively measures angular distances among
+signatures of diﬀerent robots and further selects repre-
+sentative features from them, which makes it resilient to
+Sybil attackers with power-scaling and colluding abilities.
+• ScatterID develops a customized random forest model
+that suits for backscatter signatures, which enables our
+system to accurately detect the existence of Sybil attack-
+ers while maintaining low computational overhead.
+• We implement ScatterID on commercial robotic platforms
+and evaluate it under various Sybil attacks. The results
+show that ScatterID has eﬀective resistance to not only
+basic and power-scaling attacks but also colluding attacks
+that are even never shown in the training phase.
+II. Backscatter Enabled Signatures for Sybil Attack
+Detection
+A. Sybil Attacks in Robotic Networks
+We focus on a general multi-robot network, where a team
+of miniaturized mobile robots coordinates their actions by ex-
+changing information with each other in an ad hoc manner [3],
+[19]. In the robotic team, each robot has limited payload
+and hardware capabilities, and it is equipped with only one
+antenna for data transmission and reception. Moreover, all
+mobile robots have distinctive moving paths within a certain
+area to perform a given task, since multi-robot systems are
+usually spatially distributed to complete their tasks in a time-
+eﬃcient way [20].
+In the robotic network, we consider that one robot commu-
+nicates with its N neighboring robots during task performing.
+However, some of these robots may be ﬁctitious and originate
+from the same robot entity. Such attacks can be launched by
+Sybil attackers to gain unfair inﬂuence in the robotic network
+at low cost [6]. Due to the ad hoc and dynamic characteristics
+of robotic platforms, traditional PSK schemes are diﬃcult to
+maintain and therefore PHY signatures are widely exploited
+to defend against Sybil attacks in wireless networks. Hence,
+this work considers not only the basic Sybil attack but also
+two advanced Sybil attacks, which are launched by smart
+adversaries to increase the chance of avoiding PHY-based
+detection. The advanced Sybil attacks in the robotic network
+include power-scaling attacks and colluding attacks [13], [14].
+Speciﬁcally, let us assume that Nc Sybil attackers fabricate Nf
+fake robots in N neighboring robots. Three types of Sybil
+attacks are deﬁned as follows.
+• Basic Attacks. Each attacker sends messages using mul-
+tiple fake IDs for masquerading many ﬁctitious robots
+and obtaining disproportionate resources in the network.
+• Power-Scaling Attacks. A Sybil attacker varies its trans-
+mit power for each fake ID in every transmission. Such
+attacks can accordingly change the power of received
+signals and render fake IDs to have backscattered signals
+with signiﬁcantly diﬀerent amplitudes.
+• Colluding Attacks. Nc Sybil attackers collude with each
+other and share Nf fake IDs during task performing.
+Speciﬁcally, all attackers select Nc non-overlapping ID
+subsets from Nf fake IDs at each transmission slot and
+change their selections at diﬀerent slots. Such attacks
+make fake IDs to change among diﬀerent moving at-
+tackers and thus destroy the long-term similarity between
+PHY signatures of fake IDs.
+The remaining N−N f IDs that are not spawned are considered
+to be legitimate robots.
+B. Characterizing Backscattered Signals
+Existing approaches to thwart Sybil attacks mainly rely
+on bulky multi-antenna systems, which are unaﬀordable for
+miniaturized robotic platforms. To overcome this dilemma,
+we advocate that lightweight and batteryless backscatter tags
+can provide ﬁne-grained PHY signatures that are obtainable to
+single-antenna robots. According to [18], when a transmitter is
+emitting a carrier signal x(n), a receiver that is surrounded by
+K backscatter tags can receive the signals from the transmitter
+and tags at the same time. Thus, at the receiver side, the
+received signal y(n) is a composite, which can be given as
+y(n) = x(n) +
+K
+X
+k=1
+αkbk(n)x(n) + η(n),
+(1)
+where αk and bk(n) are, respectively, the reﬂection coeﬃcient
+and the data bits of kth tag, and η(n) is the environmental noise.
+In Eq. (1), bk(n) is generated by switching the impedance of
+tag antenna between two states, which makes the kth tag to
+absorb and reﬂect incident signal x(n) intermittently.
+The fast switching between tag states can dynamically
+change the multipath propagation between the transmitter
+and receiver, and such changes are highly correlated to the
+locations of transceivers with respect to tags. Since the mul-
+tipath propagation between the transceiver pair is constant,
+we consider it as a compound path that is equivalent to a
+direct path in free space. Hence, we can focus on the multipath
+changes incurred by backscatter tags. Speciﬁcally, according
+to Friis path loss theory [21], the reﬂected signal strength
+Pre flected by the kth tag can be expressed as
+Pre flected = PtGt
+4πd2
+kt
+×
+λ2Gr
+16π2d2
+kr
+× T(λ,Gk, αk),
+(2)
+where Pt is the transmission power, dkt and dkr the tag’s
+equivalent distances to the transmitting and receiving antennas
+4
+8
+12
+Sample index
+0.05
+0.1
+Tag 1
+4
+8
+12
+Sample index
+0.05
+0.1
+Tag 2
+Legitimate robot
+Fake robot 1
+Fake robot 2
+Fig. 2. Backscattered signal traces reﬂected by two tags from one legitimate
+and two fake robots.
+computed based on the compound direct path, Gt and Gr
+the transmitting and receiving antenna gains, respectively.
+Moreover, T(·) is a function of the wavelength λ, the antenna
+gain Gk of the tag and its reﬂection coeﬃcient αk. Based on
+Eq. (2), we can ﬁnd that the backscattered signal strength
+Pre flected is highly dependent on the transmission power and
+the relative distances of the kth tag in terms of transmitting
+and receiving antennas. By aﬃxing the kth tag on a mobile
+robot, dkr is a ﬁxed distance, and Pt and dkt are only variables
+in the Eq. (2). Therefore, the reﬂected signal strength highly
+correlates with transmission power and the distance between
+the robotic communication pair. In this way, given a constant
+transmission power Pt, we can construct a spatial-related
+signature relying on reﬂected signals from K backscatter tags.
+C. Feasibility Study
+We perform a set of preliminary experiments to verify the
+above idea using backscatter tags, moving robotic platforms
+and USRP nodes. To avoid interference between the carrier
+signal x(n) and reﬂected signals PK
+k=1 αkbk(n)x(n) in Eq. (1),
+we implement frequency-shift backscatter tags based on recent
+work [22]–[24]. Moreover, the tags are set to reﬂect ambient
+signals in turns for avoiding overlapping among backscattered
+signals from diﬀerent tags. In the experiment, we attach two
+tags to one USRP node who logs backscattered signal traces
+in a ﬁxed position. We place two USRP nodes on diﬀerent
+moving platforms to emulate one legitimate robot and one
+Sybil attacker with two diﬀerent identities, respectively. Both
+the legitimate robot and Sybil attacker transmit packets with
+the same transmission power while moving around in diﬀerent
+trajectories. We extract the backscattered signal traces of two
+tags and plot the corresponding results in Fig. 2.
+From Fig. 2, we can observe that for two fake robots,
+their backscattered signal traces are nearly identical to each
+other. This is because that from the same moving robot, their
+signals experience similar propagation paths that are created
+by two tags. Whereas, for a pair of legitimate and fake robots,
+their signal propagations from the transmitter to the backscat-
+ter tags are diﬀerent due to distinctive trajectories. Thus,
+their backscattered signal traces are uncorrelated with each
+other. This observation veriﬁes that the reﬂected signals from
+backscatter tags are highly sensitive to robotic trajectories, and
+Signal Profile Construction
+Fake Robot Detection
+Backscattered Signal 
+Segmentation
+Signature Extraction & 
+Profile Construction
+Angular Difference 
+Measurement
+Similarity Vector 
+Construction
+F
+G
+d
+Identity Verification
+Profile Similarity Measurement
+ScatterID 
+robot
+O
+min
+or
+Real
+Fake
+θ
+Sort
+ 
+Aggregation
+Backscatter traces
+Fig. 3.
+System ﬂow of ScatterID. It contains three core components, i.e.,
+Signal Proﬁle Construction, Proﬁle Similarity Measurement and Fake Robot
+Detection.
+they can be further utilized to construct a unique signal proﬁle
+for each moving robot.
+III. Backscatter Signature Based Sybil Attack Detection
+A. System Overview
+ScatterID is a lightweight system that provides eﬀective
+resilience to various types of Sybil attacks in multi-robot
+networks. Speciﬁcally, when hearing data transmission from
+surrounding robots, a ScatterID robot controls its tags to
+backscatter their signals. Then, ScatterID extracts their signal
+proﬁles that capture robotic spatial information. Next, to
+mitigate potential power-scaling attacks, it calculates Cosine
+distances among signal proﬁles. Moreover, to deal with col-
+luding attacks, it constructs a similarity vector for each proﬁle
+by selecting the minimal value from distances with respect
+to the others in each transmission. Based on the similarity
+vector, ScatterID leverages a classiﬁcation model to output a
+detection decision for each robot. If one surrounding robot is
+detected to be ﬁctitious, the ScatterID robot terminates their
+connection link. Otherwise, the ScatterID robot continues their
+communication.
+As illustrated in Fig. 3, the core of our system includes three
+components – Signal Proﬁle Construction, Proﬁle Similarity
+Measurement and Fake Robot Detection.
+• Signal Proﬁle Construction. This component ﬁrst seg-
+ments the backscattered signal from the received signal,
+and it then eﬀectively extracts the reﬂected signals from
+all tags as a multipath signature in each transmission.
+Then, a signal proﬁle can be obtained as a sequence of
+signatures for each neighboring robot.
+• Proﬁle Similarity Measurement. After proﬁling all
+neighboring robots, this component measures the angular
+diﬀerences among signal proﬁles using Cosine distance
+for defending against power-scaling attacks. Then, it
+extracts a vector of minimal distances from a distance
+matrix to eﬀectively mitigate colluding Sybil attacks.
+• Fake Robot Detection. This component detects the pres-
+ence of fake robots using a customized random forest
+model. In particular, it sorts each similarity vector in
+an ascent manner, inputs the sorted vector into multiple
+decision trees and aggregates all prediction results to
+make its ﬁnal decision.
+1000
+3000
+5000
+Sample index
+0.01
+0.02
+Amplitude
+Raw signal
+1000
+3000
+5000
+Sample index
+0.01
+0.02
+Amplitude
+Averaged signal
+Multipath signature
+2
+4
+0.01
+0.02
+Backscattered signal
+Fig. 4.
+Backscattered signal segmentation and signature extraction. The
+red segment represents a backscattered signal, and the green bars indicate
+extracted backscatter signatures.
+B. Signal Proﬁle Construction
+The ﬁrst step of ScatterID is to construct sensitive signal
+proﬁles for all surrounding robots. These proﬁles are carefully
+constructed based on a sequence of backscattered signals to
+reliably provide unique spatial properties of moving robots.
+Backscattered Signal Segmentation. To update backscat-
+tered signals, a ScatterID robot controls all tags to reﬂect data
+packets in turns for avoiding overlapping between backscat-
+tered signals from diﬀerent tags and thereafter extracts a
+segment of backscattered signal from received signals period-
+ically. Since the received signal may contain the component
+without tags’ reﬂections, it is highly desirable to detect and
+segment the backscattered component from the received signal.
+To achieve this goal, our system ﬁrst adopts a moving
+average method [18] to smooth the received signal. Fig. 4
+plots an instance of a received signal and the corresponding
+smoothing result. As the ﬁgure shows, such smoothing oper-
+ations enable our system to eﬀectively remove signal noise
+and reliably decode transmitted message from tags. Next, we
+leverage tags’ transmitted message to determine the start and
+end of backscattering in the averaged signal. Speciﬁcally, the
+transmitted message is a known binary array of zeros and ones,
+which are encoded in the backscattered signal to diﬀerentiate
+each tag’s reﬂection from others. Thereby, the backscattered
+component of the averaged signal and the tags’ binary array
+are highly correlated. Hence, we can correlate the averaged
+signal s(n) with the binary array i(n) to detect when tags begin
+reﬂecting signals. The correlation result c(n) can be written as
+c(n) =
+T
+X
+t=1
+s(n + t −1) × i(t),
+(3)
+where T is the length of i(n). According to Eq. (3), c(n)
+will have the highest peak when the backscattered signal
+and i(n) completely overlap. Thus, our system identiﬁes the
+backscattering start tstart by ﬁnding n with the maximum
+value in c(n). Moreover, as the length of the backscattered
+signal equals to T, we can accordingly obtain the end of
+backscattering as tend = tstart+T. After extracting tstart and tend,
+our system can accurately segment the backscattered signal B:
+B = (b1, b2, · · · , bK),
+(4)
+where bi is the reﬂected component by the ith tag and K is
+the number of tags used in our system.
+Signature Extraction. Now that we have picked the
+backscattered component out of the received raw signal, we
+take the next step to extract a multipath signature from it.
+As depicted in Fig. 4, the backscattered signal consists of not
+only the tags’ reﬂections but also the unwanted reﬂections
+from ambient environments. To extract reliable multipath
+features from each tag, ScatterID leverages the fact that
+the diﬀerence between reﬂected and non-reﬂected samples is
+caused by the tags’ reﬂections. Therefore, by subtracting two
+kinds of samples, we can eﬀectively eliminate environmental
+reﬂections and thereafter obtain the reﬂections from all tags.
+Mathematically, with the backscattered signal of the ith tag
+bi(n) in Eq. (4), we assume that there are N1 reﬂected and N0
+non-reﬂected samples. Hence, the reﬂection caused by the ith
+tag pi can be computed by
+pi = 1
+N1
+N1
+X
+n=1
+bi(n|ref.) −1
+N0
+N0
+X
+n=1
+bi(n|non −ref.).
+(5)
+As previously analyzed in Section II, the tag’s reﬂection pi
+highly depends on the distance between the tag and signal
+resource. Thus, with multiple backscatter tags, our system
+can construct a multipath signature that provides location
+information of the signal resource. Formally, based on K tags’
+reﬂections, a multipath signature f can be expressed as
+f = (p1, p2, · · · , pK).
+(6)
+Proﬁle Construction. To this end, ScatterID can construct a
+signal proﬁle for each neighboring robot. Due to the mobility
+of robotic platforms, multipath signatures from the same Sybil
+attacker may have a poor similarity in each transmission.
+To deal with this issue, our system periodically extracts a
+multipath signature from each robot’s backscattered signal
+traces, and it takes a sequence of successive multipath sig-
+natures as a signal proﬁle for reliably capturing its trajectory
+information. For fake robots forged by the same moving
+attacker, their backscattered signal traces have the same trend
+and are nearly identical to each other, as depicted in Fig. 2.
+Hence, by characterizing long-term spatial information, their
+signal proﬁles will be similar to each other. Formally, a signal
+proﬁle F of each moving robot can be expressed as
+F = [f1; f2; · · · ; fL],
+(7)
+where fl denotes the lth multipath signature and L is the number
+of signatures.
+C. Proﬁle Similarity Measurement
+In the robotic network, Sybil attackers can trigger power-
+scaling and colluding attacks. To mitigate these threats, Scat-
+terID proceeds to transform their signal proﬁles into desirable
+similarity vectors that are resilient to various types of Sybil
+attacks as shown in Fig. 5.
+Similarity Vector Construction. Consider that there are
+N neighboring robots who communicate with the ScatterID
+robot, and a set of their signal proﬁles can be denoted as
+{F1, F2, · · · , FN}. Based on these proﬁles, we measure the
+Signal profiles
+3D distance matrix
+2D distance matrixs
+Similarity vectors
+K×L
+N×N×L
+(N-1)×L
+1×L
+Distance
+measurement
+Transformation
+Min
+extraction
+  
+  
+  
+ 
+   
+   
+   
+  
+  
+  
+Size
+Fig. 5.
+Work ﬂow of the proﬁle similarity measurement. N is the number
+of surrounding robots, K the number of tags and L the number of multipath
+signatures in a signal proﬁle.
+distance between every two proﬁles and thus obtain a 3D
+distance matrix D as
+D =
+
+d12
+· · ·
+d1N
+d21
+· · ·
+d2N
+...
+...
+...
+...
+dN1
+dN2
+· · ·
+
+,
+(8)
+where dmn is the distance measurements with respect to two
+proﬁles Fm and Fn. Since a signal proﬁle is comprised of
+L backscatter signatures, ScatterID calculates the distances
+between Fm and Fn in a pairwise manner, and it thereafter
+outputs a L-dimensional distance vector as
+dmn = (dmn
+1 , dmn
+2 , · · · , dmn
+L ),
+(9)
+where dmn
+l
+= dist(fml, fnl), the distance between the lth rows of
+Fm and Fn. Compared to a scalar distance, the distance vector
+dmn contains the multipath signature diﬀerences between two
+moving robots within a certain period, and thus provides ﬁner-
+grained information about their long-term similarity. To obtain
+all distances with respect to the nth robot, we extract a 2D
+distance matrix from D as
+ˆDn =
+
+d1n
+d2n
+...
+dNn
+
+=
+
+d1n
+d1n
+· · ·
+d1n
+L
+d2n
+d2n
+· · ·
+d2n
+L
+...
+...
+· · ·
+...
+dNn
+dNn
+· · ·
+dNn
+L
+
+,
+(10)
+where ˆDn has a size of (N −1) × L.
+For a group of smart attackers, they can collude with each
+other and launch Sybil attacks. By changing between diﬀerent
+moving attackers, fake IDs will have more dissimilar signal
+traces in the transmission period, making themselves harder to
+be detected based on long-term signatures. To defend against
+such detrimental attacks, we construct a similarity vector for
+each robot. Speciﬁcally, we pick out the minimal distance in
+each column of ˆDn to indicate the similarity of the nth robot
+with respect to the remaining robots in each transmission.
+Thus, we can obtain a similarity vector sn as
+sn =
+
+min
+n
+din
+o
+1≤i≤N , min
+n
+din
+o
+1≤i≤N , · · · , min
+n
+din
+L
+o
+1≤i≤N
+
+=
+
+sn
+1, sn
+2, · · · , sn
+L
+
+,
+(11)
+where
+n
+din
+l
+o
+1≤i≤N represents all elements of the lth column
+in ˆDn. The intuition behind this processing is that whether
+𝛉𝟏 
+𝐩 
+𝐪 
+𝐟 
+𝐠 
+O
+= 𝟏. 𝟐 𝐟 
+= 𝟎. 𝟓 𝐠 
+O
+Scaling
+𝛉𝟐 
+𝐝𝟏 
+𝐝𝟐 
+Fig. 6. Illustration of power-scaling attacks and Cosine distance. After power-
+scaling attacks, Cosine distance remains the same, but Euclidean distance is
+distorted.
+the triggered attacks are colluding or not, there always exist
+two fake IDs that come from the same attacker in each
+transmission, thus the distance between their signatures should
+be very small. In contrast, a legitimate ID has a diﬀerent
+backscatter signature with the other IDs’ in a high probability
+and consequently has a large signature distance from the
+others. Hence, via selecting the minimum within the distances
+in each transmission, a similarity vector sn would have large
+values for legitimate robots and small values for fake robots
+spoofed by Sybil attackers.
+Angular Diﬀerence Measurement. Now that we proceed
+to deal with power-scaling attacks, where a clever attacker
+changes its transmission power to emulate diﬀerent fake
+robots. Speciﬁcally, according to Eq. (2), by intentionally
+changing Pt in each transmission, the attacker can manipulate
+f in Eq. (6) with a varying scale coeﬃcient α for each identity.
+Such an operation scales the reﬂected signals by all tags and
+further leads to a scaled signature f′ = (αp1, αp2, · · · , αpK),
+which consequently renders our system ineﬀective in discov-
+ering two fake robots. Since a similarity vector sn consists of
+distances between two backscatter signatures and is the pro-
+cessing unit for subsequent identity veriﬁcation, the distance
+metric dist(·, ·) should be carefully determined for resilience
+to power-scaling attacks.
+As shown in Fig. 6, after power-scaling attacks, two signa-
+ture vectors f and g are both scaled into p and q in the feature
+space with diﬀerent scale coeﬃcients α1 = 1.2 and α2 = 0.5,
+respectively. Such transformation greatly changes the lengths
+of two signatures and distorts their Euclidean distance, i.e.,
+d1 , d2, making Euclidean metric ineﬀective in capturing their
+similarity information. To ﬁnd an eﬀective metric, we observe
+that under power-scaling attacks, although the lengths of two
+signatures are distorted, their directions remain unchanged.
+Speciﬁcally, the directional diﬀerence of f and g are the same
+with that of p and q, i.e., θ1 = θ2. Hence, instead of using the
+length diﬀerence, our system should rely on the directional
+diﬀerence between two backscatter signatures for distance
+measurement. For this purpose, we use Cosine distance to
+measure the directional diﬀerence between any two multipath
+signatures. Formally, as depicted in Fig. 6, the Cosine distance
+between p and q is deﬁned as
+distcos(p, q) = 1 −
+⟨p, q⟩
+∥p∥2 ∥q∥2
+,
+(12)
+Τ
+Sort
+Aggregation
+H Decision Trees
+  
+   
+     
+     
+1
+    
+    
+Input
+Output
+Predictions
+1
+or
+1
+or
+1
+or
+ 
+   
+Fig. 7. Our RF model for fake robot detection. ”0” stands for a real robot
+and ”1” for a fake one.
+where ⟨·, ·⟩is the inner product and ∥·∥2 the L2 norm. Ac-
+cording to Eq. (12), the scaling coeﬃcients α1 and α2 will be
+eliminated, making our system eﬀective in mitigating power-
+scaling attacks from Sybil attackers.
+D. Fake Robot Detection
+Based on similarity vectors of all robots, we proceed to
+perform fake robot detection.
+Identity Veriﬁcation. Given a similarity vector si, we would
+like to construct a detection function F (·) such that
+F (si) =
+( 1 ,
+if
+ith robot is fake,
+0 ,
+if
+ith robot is real.
+(13)
+For this purpose, we exploit a data-driven algorithm to ﬁt F (·)
+with our labeled dataset C = {(si, yi)}i=1:M, where M is the
+number of included samples and yi ∈{0, 1} the corresponding
+label. In the component of fake robot detection, the selected
+detection algorithm should be lightweight to implement on
+robotic platforms with limited storage and computation capa-
+bilities. Besides, it should have high detection performance
+under high robotic movements and environmental dynamics.
+To satisfy these requirements, we resort to the random forest
+(RF) model. Generally, the RF model is a well-known en-
+semble learning method used in many real-world applications,
+and it works by building a collection of biased decision trees
+and aggregating their results for a ﬁnal outcome [25]. On the
+one hand, for each classiﬁcation decision, the RF model only
+needs to simply average outputs of all internal decision trees.
+Thus, its computational complexity is just linearly related
+to the number of lightweight and easily-implement decision
+tree models. On the other hand, instead of relying on one
+single base classiﬁer, the RF model consults many relatively
+uncorrelated decision trees, which together act as a decision
+committee, and outputs the decision with the most votes. In
+this way, the ﬁnal outcome of the RF model is more accurate
+and stable, and outliers caused by environmental noise has
+little impact on it. In our experiment, we compare the RF
+model with other widely-used machine learning models and
+show that it achieves the highest detection accuracy with
+a moderate testing time for each sample, which veriﬁes its
+merits of high performance and low complexity. Hence, we
+adopt a RF model to perform the task of fake robot detection.
+1
+3
+5
+7
+9
+Feature index
+-0.05
+0.05
+0.1
+0.15
+0.2
+Mean with Std.
+(a) Unsorted.
+2
+4
+6
+8
+10
+Feature index
+-0.05
+0.05
+0.1
+0.15
+0.2
+Mean with Std.
+(b) Sorted.
+Fig. 8. Mean and standard deviation of sample features in our training dataset.
+The sort operation can eﬀectively diﬀerentiate feature distributions.
+Speciﬁcally, as shown in Fig. 7, our RF model ﬁrst makes
+a bunch of binary predictions from H decision trees with
+respect to si. Then, it aggregates all intermediate predictions
+and outputs the ﬁnal outcome based on its decision criterion.
+In the ﬁrst step, we train
+H
+biased decision trees
+{T1(·), T2(·), · · · , TH(·)} as base classiﬁers for label predic-
+tions. Since making decision trees more uncorrelated is es-
+sential for a RF model, two dimensions of randomness are
+introduced to decorrelate trees during tree building. First,
+we construct H independent data subsets {C1, C2, · · · , CH} by
+sampling M times with replacement for each subset, known
+as bootstrapping, from the original dataset C and train the tree
+Th(·) on the subset Ch only without pruning. The bootstrapping
+can introduce lower correlation between any two subsets and
+thus force their trees to capture diﬀerent trends in the dataset
+C. Second, we randomly select 1 ≤z ≤L features out
+of a similarity vector when splitting tree nodes, i.e, making
+decision rules, to further introduce diversity between any two
+trees and randomness into the model. In our RF model, we set
+z = log2 L according to [25]. However, based on the deﬁnition
+in Eq. (11), a similarity vector si is consisted of a time series
+of distance features, and thus each feature, i.e., one attribute
+of samples, contains the same type of data points and would
+has a similar distribution with the others in the dataset C. To
+verify this, we compute the mean and standard deviation of
+each feature in our training dataset. As Fig. 8 (a) shows, all
+features have the nearly same statistics, implying that their
+distributions are very close to each other. This high similarity
+of features would enlarge the correlation between trees and
+eventually undermine the eﬀectiveness of the random feature
+selection. To address this problem, we sort every si in an ascent
+manner before tree building as
+ˆsi = sort(si) =
+
+ˆsi
+1, ˆsi
+2, · · · , ˆsi
+L
+
+,
+(14)
+where ˆsi
+l ∈si and ˆsi
+1 ≤ˆsi
+2 ≤· · · ≤ˆsi
+L. As shown in Fig. 8 (b),
+both the mean and standard deviation increase as the feature
+index grows after the sort operation. This observation suggests
+that the sorted features have more diﬀerent distributions, which
+will bring more diversity in the random feature selection and
+thus result in more biased and unrelated trees. Finally, given
+iRobot 
+USRP 
+ScatterID robot
+Legitimate
+/Sybil robot
+STEP-MAX10 
+FPGA
+Backscatter tag
+Fig. 9. Experimental platform. We implement our system using USRP nodes,
+backscatter tags and iRobot Create robots. All tags are controlled by an Altera
+STEP-MAX10 FPGA.
+a similarity vector ˆsi, any tree classiﬁer Th(·) outputs a label:
+Th(ˆsi) =
+( 1 ,
+predicted as a fake robot,
+0 ,
+predicted as a real robot.
+(15)
+In the second stage, we aggregate H intermediate results
+{T1(ˆsi), T2(ˆsi), · · · , TH(ˆsi)} from all decision trees to make
+our ﬁnal prediction. For simplicity, we consider that the
+importance of each tree is equal to
+H , and then select the
+label with majority votes as the ﬁnal outcome. Formally,
+given a similarity vector si, our RF model RF (·) predicts the
+legitimacy of the ith robot as
+RF (si) =
+(
+1 ,
+if 1
+H
+PH
+h=1 I (Th(ˆsi) = 1) ≥0.5,
+0 ,
+otherwise.
+(16)
+In Eq. (16), I(·) represents the indicator function and ˆsi is the
+sorted version of si.
+IV. Implementation and Evaluation
+A. Implementation
+As shown in Fig. 9, we implement our system using iRobot
+Create robots, backscatter tags, and GNURadio/USRP B210
+nodes. We prototype four backscatter tags using oﬀ-the-shelf
+circuit components according to [18]. In particular, each tag is
+equipped with one omnidirectional antenna with 3 dBi gain,
+and it uses the ADG902 RF switch to alternate its antenna
+impedance between two states for absorbing and reﬂecting
+incident signals. All tags are controlled by an Altera STEP-
+MAX10 FPGA to backscatter signals with a frequency shift
+of 20 MHz for avoiding interference between the carrier
+and backscattered signals and transmit data with a bitrate
+of 4 Kbps in succession for avoiding overlapping among
+backscattered signals from diﬀerent tags. Moreover, a total of
+ﬁve commercial iRobot Create robots are leveraged throughout
+the experiment. Speciﬁcally, to build a ScatterID robot, one
+robot is equipped with four backscatter tags and a USRP node
+that has a single antenna. The USRP node is surrounded by
+tags at a distance of 12 cm, and all tags are placed about 15 cm
+away from each other, which can avoid similar propagation
+signatures of all tags when backscattering surrounding sig-
+nals [26]. The left four robots, each of which is equipped with
+one USRP node that has one antenna, act as neighboring robots
+of the ScatterID robot. Among neighboring robots, two of
+Legitimate robot
+Sybil attacker
+SactterID robot
+Backscatter tag
+Moving path
+Outdoor
+8m
+10m
+Indoor
+4.5m
+5.5m
+Fig. 10. Floor plans of experimental environments. We evaluate our system
+in the indoor and outdoor environments.
+them are used as Sybil attackers and two as legitimate robots.
+In addition, all USRP nodes carried by robotic platforms are
+conﬁgured to communicate in the 2.4 GHz ISM band.
+B. Evaluation Methodology
+Experimental Setup. In our experiment, we evaluate the
+performance of ScatterID in both indoor and outdoor environ-
+ments. Speciﬁcally, the experimental settings include an oﬃce
+room with a size of 4.5 m × 5.5 m and a building rooftop with
+an area of 8 m × 10 m as depicted in Fig. 10. The oﬃce room
+is a typical multipath-rich environment, which contains some
+furniture and surrounding walls. The rooftop is a multipath-
+poor area with a few walls and roof guardrails. According to
+the speed conﬁgurations in [27], [28], we set all robots to move
+with a speed of 20 cm/s for easily controlling them at the same
+time. Based on this moving speed, we set the ScatterID robot
+to update multipath signatures in every 0.6 s, which can avoid
+similar signal propagation of successive signatures and keep
+their distinguishability [26]. Note that generally, the shorter the
+updating interval, the higher the detection accuracy. However,
+based on the above analysis, the interval that is shorter than
+0.6 s will increase the information redundancy in a signal
+proﬁle and consequently lead to a marginal accuracy gain.
+To launch basic Sybil attacks, a robotic attacker broadcasts
+signals with two or three IDs at the same time. Moreover, it
+can trigger power-scaling attacks by changing its transmission
+power for each fake ID using a random scaling coeﬃcient
+from the set {0.3, 0.6, 0.9}. To launch colluding attacks, we
+ﬁrst set two Sybil attackers to together use a total of four fake
+IDs. Then, in each transmission, one attacker is controlled to
+randomly take two of these fake IDs to communicate with
+the ScatterID robot, and the other attacker is set to use the
+left two fake IDs for communication. Finally, we conduct our
+experiment over diﬀerent days in the two environments and
+yield backscattered signal traces of six-hour in total.
+Datasets. We extract signal proﬁles from the collected radio
+traces and compute their similarity vectors as described in
+Section III. Then, we label the similarity vectors based on
+corresponding robot legitimacy and obtain about 20K labeled
+samples. Therein, about 60% of them are positive and about
+40% are negative. For better evaluating our RF model, we
+construct two datasets – Dataset A and Dataset B. Dataset A
+Fig. 11. AUROCs in terms of diﬀerent proﬁle sizes. The red mark corresponds
+to the selected size with K = 4 and L = 10.
+contains about 15K labeled samples that are collected under
+basic and power-scaling attacks. Dataset B contains about 5K
+labeled samples that are collected under colluding attacks.
+In our experiment, we implement our RF model on Matlab.
+During evaluation, we use dataset A for training and testing.
+Speciﬁcally, we randomly partition dataset A into three subsets
+and use 3-fold cross-validation for evaluating our RF model.
+In each subset, samples from indoor and outdoor environments
+are included. Moreover, we leverage dataset B for testing only
+to verify the system’s resistance to colluding attacks.
+Evaluation Metrics. To demonstrate the performance of the
+proposed system, we use the following metrics.
+• Accuracy. It is computed as the ratio of the total number
+of robots that are correctly recognized to the number of
+legitimate and fake robots.
+• True positive rate (TPR). It is the ratio of the number
+of fake robots that are successfully detected to the total
+number of fake robots.
+• False positive rate (FPR). It is the ratio of the number
+of legitimate robots that are mistakenly recognized to the
+total number of legitimate robots.
+• Receiver operating characteristic (ROC) curve. It is a
+curve in terms of TPRs and FPRs with varying discrimi-
+nation thresholds in [0, 1]. A ROC curve with high TPRs
+and low FPRs stands for a good binary classiﬁer.
+• Area under the ROC curve (AUROC). It is a numeric
+metric to measure the discrimination performance of a
+binary classiﬁer and computed as the area under ROC
+curve, falling into [0.5, 1]. The closer the AUROC is to
+one, the better performance is achieved by a classiﬁer.
+As 3-fold cross-validation is used during evaluation, we aver-
+age all metric values in 3-fold validations as the ﬁnal results.
+C. Experimental Results
+Proﬁle Size Determination. Since a signal proﬁle F is
+a fundamental unit for similarity measurement and identity
+veriﬁcation, the ﬁrst step of our experiment is to decide its
+size. According to Eq. (7), the proﬁle size is dependent on
+two parameters K and L, i.e., the numbers of backscatter tags
+and multipath signatures, respectively. Generally, the larger
+0
+0.2
+0.4
+0.6
+0.8
+FPR
+0.2
+0.4
+0.6
+0.8
+TPR
+ AUROC=0.987
+ROC curve
+Reference line
+Fig. 12.
+ROC curve of our system. Its AUROC reaches to 0.987 and the
+reference line represents the random guessing model.
+ 
+TPR 
+FPR 
+Accuracy 
+Indoor 
+95.4% 
+5.3% 
+95.1% 
+Outdoor 
+97.5% 
+6.4% 
+95.9% 
+Overall 
+96.1% 
+5.7% 
+95.4% 
+Fig. 13. System performance in diﬀerent environments.
+the proﬁle size is, the more information will be provided
+and thus the better performance will be achieved by our
+system. However, increasing the proﬁle size will also incur
+more computation complexity and time consumption. Thus,
+a small-size proﬁle that guarantees high performance is de-
+sired. Considering that Sybil attacker detection is a binary
+classiﬁcation task, we leverage the AUROC metric to com-
+prehensively measure the system performance under diﬀerent
+proﬁle sizes for eﬀective proﬁle size determination. For this
+purpose, we ﬁrst extract signal proﬁles with diﬀerent sizes
+from the collected radio traces by varying K and L from 2
+to 4 and 16, respectively. Then, we train and test our RF
+model on corresponding proﬁle samples. Next, we calculate
+ROC curves in terms of diﬀerent size parameters and compute
+corresponding AUROC values. As depicted in Fig. 11, we
+observe that AUROC has the lowest value 0.783 with K = 2
+and L = 2 and the highest value 0.994 with K = 4 and L = 16.
+In addition, AUROC value basically rises up as both K and L
+increase, which is in line with the above analysis. Moreover,
+for the number of tags, four tags ensure that all AUROC values
+are more than 0.95. For the number of signatures, AUROC
+grows quickly at the beginning and has marginal growth when
+L exceeds 10. Therefore, we choose ten successive multipath
+signatures from four backscatter tags as a signal proﬁle.
+Overall Performance. Based on the determined proﬁle
+size, we illustrate the overall performance of ScatterID in our
+experiment. First, we show the ROC curve of our system as
+well as its AUROC to present its capability of discriminating
+legitimate robots and Sybil attackers. As depicted in Fig. 12,
+the ROC curve closely follows the left-hand and top borders
+of the ROC space, which suggests that high TPRs and low
+FPRs are mainly achieved when the discrimination threshold
+TPR
+FPR
+TPR
+FPR
+Accuracy
+0.2
+0.4
+0.6
+0.8
+0.9640.977
+0.056 0.05
+0.959
+0.422
+0.0590.064
+0.954
+0.845
+Basic+Ps
+Colluding
+Overall
+Ours
+Baseline
+Fig. 14. Performance of our and baseline models under various Sybil attacks.
+Ps stands for power-scaling attacks.
+varies in [0, 1]. Accordingly, the ROC curve yields a high
+AUROC of 0.987, which is close to the ideal case. To further
+illustrate the eﬀectiveness of our system, we summarize its
+performance in the indoor and outdoor environments as well
+as the overall performance with respect to TPR, FPR and
+accuracy in Fig. 13. Compared with the outdoor environment,
+the indoor setting has much richer multipath due to scattering
+and reﬂections from surrounding furniture items and walls.
+As shown in Fig. 13, such multipath eﬀects make our system
+obtain a lower TPR in the indoor setting. This is due to the fact
+that rich multipath propagations disturb backscatter signatures
+from the same attacker and render them less similar to each
+other, which consequently causes more positive samples to be
+mistakenly recognized as negative ones. In the same way, the
+multipath eﬀects enlarge the discrepancy of negative samples
+and thus lead to a lower FPR. Furthermore, environment
+noise in backscattered signals will impact ScatterID’s perfor-
+mance. In general, the lower the signal-to-noise ratio (SNR)
+of backscattered signals, the less similarity between multipath
+signatures of two fake robots is. To address this issue, our
+system adopts a moving average method to remove signal
+outliers, subtracts reﬂected samples from non-reﬂected ones
+to eliminate environmental reﬂections, and takes a signature
+sequence as a detection unit to enhance the similarity between
+two illegitimate signatures under environment dynamics. As
+Fig. 13 shows, ScatterID achieves high performance in each
+environment with an accuracy more than 95%, which demon-
+strates its robustness to environment noise. To sum up, our
+system has a detection accuracy of 95.4%. In particular, it
+can successfully mitigate 96.1% of Sybil attacks and correctly
+recognize 94.3% of legitimate traﬃc. The above results show
+the eﬀectiveness and robustness of the proposed system in
+discriminating between legitimate and fake robots.
+Performance under Various Sybil Attacks. Next, we show
+that our system has resistance to various Sybil attacks. To
+illustrate these merits, we set up a baseline system that is
+developed in our previous work [1]. In the baseline system,
+attackers with basic and power-scaling ability are taken into
+consideration. Similarly, we train and test the baseline model
+on the backscatter traces under basic and power-scaling attacks
+with 3-fold cross-validation, and use the traces under colluding
+0
+0.2
+0.4
+0.6
+0.8
+Normalized distance
+0.2
+0.4
+0.6
+0.8
+CDF
+Positive-Cos.
+Negative-Cos.
+Positive-Euc.
+Negative-Euc.
+Positive-Che.
+Negative-Che.
+Positive-Man.
+Negative-Man.
+0.1
+0.15
+0.2
+0.85
+0.9
+0.95
+Fig. 15.
+CDFs of positive and negative samples using Cosine, Euclidean,
+Chebyshev and Manhattan distances.
+attacks for testing only.
+Fig. 14 illustrates the detection performance of our and
+baseline systems under various types of Sybil attacks. As
+the ﬁgure shows, we can observe that our system has very
+close performance in the two attack scenarios and achieves a
+TPR of more than 95% and a FPR of less than 6% in each
+scenario. This is due to that our system extracts representative
+features from a distance matrix to form a similarity vector,
+which is resilient to ID switching between colluding attackers
+as explained in Section III. However, colluding attacks still
+render a TPR decrease by 0.5% and a FPR increase by 0.3%.
+These small gaps may be caused by the fact that samples
+under colluding attacks are never used in the training phase,
+making our system obtain slightly low performance in the
+colluding scenario. In addition, when comparing our system
+with the baseline, we have observed that although our system
+has a slight performance degradation with a TPR decline of
+1.3% and a FPR increase of 0.6% under basic and power-
+scaling Sybil attacks, it achieves a signiﬁcant performance
+improvement with a TPR increase of 53.7% and a FPR de-
+crease of 0.5% under colluding Sybil attacks. Moreover, when
+it comes to the overall performance, our system obtains an
+accuracy increase of 10.9% in comparison with the baseline.
+The reason is that in colluding attacks, a Sybil attacker can
+collude with others and use a random subset of fake IDs in
+each transmission, which consequently makes itself hard to be
+detected by the baseline system. Furthermore, the two systems
+obtain low FPRs in two attack scenarios, because the attacks
+launched by Sybil attackers have little impact on the system’s
+capability of correctly recognizing legitimate robots. Based
+on the above observations, we conclude that our system is
+resilient to various Sybil attacks and has an improvement in
+overall performance when compared with the baseline.
+Eﬀectiveness of Cosine Distance. We further check the
+eﬀectiveness of Cosine distance used in proﬁle distance mea-
+surement. In our application, Cosine distance has an advantage
+over other distances with its ability to mitigate power-scaling
+attacks. To illustrate this advantage, we calculate similarity
+vectors based on Eq. (11) using Cosine, Euclidean, Chebyshev
+and Manhattan distances, respectively, and obtain four sample
+datasets corresponding to diﬀerent distance metrics. Then, we
+TPR
+FPR
+TPR
+FPR
+0.2
+0.4
+0.6
+0.8
+1 0.993
+0.55
+0.044
+0.172
+0.957 0.924
+0.067
+0.205
+Ps
+Non-Ps
+Cosine
+Chebyshev
+Euclidean
+Manhattan
+Fig. 16. Performance using diﬀerent distance metrics. Ps stands for power-
+scaling attacks. We only annotate TPRs and FPRs of Cosine and Euclidean
+distance metrics for brevity.
+normalize all feature points in the four datasets and compute
+the cumulative distribution functions (CDFs) of their positive
+and negative samples, respectively.
+As plotted in Fig. 15, the positive CDFs of four metrics
+are basically higher than the negative ones, because positive
+samples are from Sybil attackers and their distance features
+are generally smaller. However, it can be clearly observed
+that Cosine distance has a steeper positive CDF and a ﬂatter
+negative CDF in comparison to the other three distances.
+The observation implies that Cosine distance that captures
+angular diﬀerences is more eﬀective in measuring distances
+between any two backscatter signatures under power-scaling
+attacks. To further demonstrate this, we train and test our RF
+model on the Cosine, Euclidean, Chebyshev and Manhattan
+datasets, respectively, and report its performance with and
+without power-scaling attacks in Fig. 16. As the ﬁgure shows,
+Cosine distance achieves comparable performance in the two
+attack scenarios and has a TPR larger than 95% and a FPR
+smaller than 7% in each scenario. This is because that in each
+transmission, backscattered signal strengths are proportional
+to transmission power, and thus a varying coeﬃcient can
+be eliminated during Cosine distance calculation. However,
+it can be found that Euclidean distance obtains a very low
+TPR of 55% in the power-scaling scenario, which indicates
+that it can not handle such attacks. In addition, the FPRs of
+Euclidean distance in the two attack scenarios are relatively
+high, which renders it inapplicable in reliably recognizing
+legitimate robots. The same observations can be found in
+Chebyshev and Manhattan distances. To conclude, Cosine
+distance is an eﬀective metric in proﬁle distance measurement
+and makes our system resilient to power-scaling attacks.
+Eﬀectiveness of Our RF Model. Finally, we demonstrate
+the eﬀectiveness of our RF model for fake robot detection.
+We compare our RF model with other machine learning
+models. To do this, we choose several widely-used models,
+i.e., logistic regression (LR), naive Bayes (NB), support vec-
+tor machine (SVM), decision tree (DT) and long-short-term
+memory (LSTM) network with 30 hidden units, as baselines
+for comparison. Similarly, we use two-thirds of Dataset A
+for training baselines and the left third as well as Dataset B
+RF
+LR
+NB
+SVM
+DT
+LSTM
+0.85
+0.9
+0.95
+10-4
+10-3
+10-2
+10-1
+0.954
+0.938
+0.912
+0.916
+0.921
+0.94
+Accuracy
+Testing time (ms)
+Fig. 17. Overall detection accuracy and testing time for each sample using
+diﬀerent machine learning models.
+for testing them. We report their overall detection accuracy
+as well as run time for each testing sample in Fig. 17.
+It can be observed that although NB achieves the lowest
+testing time less than 0.001ms per sample, it also has the
+lowest accuracy of 91.2%. Moreover, SVM obtains the highest
+testing time of about 0.036ms per sample, while having a
+low detection accuracy of 91.6%. However, our RF model
+achieves the highest accuracy of 95.4% and has a moderate
+testing time of about 0.004ms per sample. Note that with
+more hidden units, LSTM network is expected to achieve a
+better detection accuracy, while inevitably incurring higher
+computational overhead. Considering the above observations,
+we conclude that the RF model achieves the best performance
+compared with the other ﬁve machine learning models in our
+application.
+Moreover, we present the impact of the sort operation and
+the number of decision trees on our RF model. For this
+purpose, we train and test our model with and without the sort
+operation multiple times by changing the number of decision
+trees from 5 to 50, and report the accuracy on Dataset B
+in Fig. 18. Note that the sort operation is introduced in our
+RF model for diﬀerentiating feature distributions and boosting
+the eﬀectiveness of random feature selection as mentioned
+in Section III. As the ﬁgure shows, the system with the
+sort operation always has a higher accuracy on Dataset B.
+Considering that Dataset B is never used for training, we
+conclude that the sort operation is capable of improving the
+generalization performance of our system. Additionally, the
+number of decision trees in a RF model has an impact on
+its prediction ability. Generally, the more decision trees are
+adopted, the better performance is achieved. As shown in
+Fig. 18, we observe that the system’s accuracy rises up as the
+tree number increases at ﬁrst, and then it becomes relatively
+steady after 30 trees. Based on this observation, we adopt 30
+decision trees in our RF model.
+V. Related Work
+Multi-Robot Networks. Recent years have witnessed the
+proliferation of multi-robot networks in many emerging appli-
+cations such as surveillance [2], exploration [29] and cover-
+age [30], [31]. In these applications, one of the key research
+issues is how to eﬀectively cooperate among robots to achieve
+10
+20
+30
+40
+50
+Number of decision trees
+0.93
+0.94
+0.95
+0.96
+Accuracy
+With sort
+Without sort
+Fig. 18.
+Impact of the sort operation and number of decision trees. The
+dashed vertical line represents the number of trees used in our RF model.
+high-quality overall performance. However, eﬀective coopera-
+tion is based on the assumption that all claimed identities are
+accurate and trustful, which can be easily undermined by Sybil
+attackers who can masquerade a myriad of ﬁctitious robots.
+Backscatter
+Communications. Nowadays, backscatters
+have become one of the most energy-eﬃcient communication
+primitives. In [18], ambient backscatter is originally proposed
+to facilitate two simple and batteryless tags to communicate
+with each other. After that, a variety of novel techniques,
+such as WiFi backscatter [22], FS backscatter [32], FM
+backscatter [24] and LoRa backscatter [33], are successively
+developed to achieve high energy eﬃciency in backscatter
+communications. Beyond their benign uses, backscatter has
+increasingly been used in other applications such as on-body
+device authentication [34] and object tracking [35]. In [36],
+backscatter tags are used to shield static Internet of Things
+(IoT) networks from spooﬁng attacks, where attackers try to
+masquerade other legitimate nodes. Diﬀering from [36], we
+consider Sybil attacks in dynamic robotic networks and pro-
+vide eﬀective resilience to basic and advanced Sybil attacks.
+Sybil Attack Mitigation. Sybil attacks have been widely
+considered in multi-node networks [6], [7], [15]. The past
+solutions for Sybil attack mitigation are mainly falling into
+two categories. (i) Cryptographic-based approaches [8], [37]
+assume prior trust among network nodes and require computa-
+tionally expensive PSK management schemes. These require-
+ments, however, cannot be satisﬁed in ad hoc and miniaturized
+robotic platforms. (ii) Non-cryptographic approaches [12]–
+[17] use wireless PHY information to discriminate between
+real and fake nodes. However, these approaches passively
+observe PHY features using bulky multiple antennas and thus
+do not suit to miniaturized robots with limited payload and
+hardware capabilities. To transcend these limitations, our work
+adopts backscatter tags to actively capture ﬁne-grained PHY
+features and constructs sensitive signal proﬁles that are easily
+obtainable to single-antenna robots for Sybil attack detection.
+Machine Learning in Wireless Security. Machine learning
+algorithms have been increasingly applied to enhance the secu-
+rity performance of wireless communication systems. In [38],
+a neural network is designed to perform user authentication
+relying on WiFi signals. In [39], an adversarial model is
+proposed to authenticate on-body devices under various user
+body motions. Moreover, the work [40] proposes a logistic
+regression model to reduce communication overhead between
+MIMO landmarks and its security agent. Our work develops
+a RF model that is suitable for backscatter signatures and can
+reliably detect Sybil attacks in robotic networks.
+VI. Conclusion
+This paper presents ScatterID, a lightweight system against
+Sybil attacks for networked and miniaturized robots in many
+cooperative tasks. Instead of passively measuring PHY fea-
+tures using bulky multiple antennas, ScatterID utilizes feath-
+erlight backscatter tags to actively manipulate multipath prop-
+agation and creates salient multipath features obtainable to
+single-antenna robots. These features are used to identify the
+spatial uniqueness of each moving robot under Sybil attackers
+with power-scaling and colluding abilities. We implement
+our system on commercial oﬀ-the-shelf robotic platforms and
+extensively evaluate it in typical indoor and outdoor environ-
+ments. The experimental results show that ScatterID achieves
+a high AUROC of 0.987 and an overall accuracy of 95.4%
+for identity veriﬁcation. In addition, it can successfully detect
+96.1% of fake robots while mistakenly rejecting just 5.7% of
+legitimate ones.

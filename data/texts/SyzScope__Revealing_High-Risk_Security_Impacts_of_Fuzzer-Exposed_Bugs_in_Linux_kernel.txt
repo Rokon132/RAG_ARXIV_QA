@@ -1,0 +1,1668 @@
+SyzScope: Revealing High-Risk Security Impacts of Fuzzer-Exposed Bugs in
+Linux kernel
+Xiaochen Zou
+UC Riverside
+Guoren Li
+UC Riverside
+Weiteng Chen
+UC Riverside
+Hang Zhang
+UC Riverside
+Zhiyun Qian
+UC Riverside
+Abstract
+Fuzzing has become one of the most effective bug ﬁnd-
+ing approach for software. In recent years, 24*7 con-
+tinuous fuzzing platforms have emerged to test critical
+pieces of software, e.g., Linux kernel. Though capable of
+discovering many bugs and providing reproducers (e.g.,
+proof-of-concepts), a major problem is that they neglect a
+critical function that should have been built-in, i.e., eval-
+uation of a bug’s security impact. It is well-known that
+the lack of understanding of security impact can lead to
+delayed bug ﬁxes as well as patch propagation. In this
+paper, we develop SyzScope, a system that can auto-
+matically uncover new “high-risk” impacts given a bug
+with seemingly “low-risk” impacts. From analyzing over
+a thousand low-risk bugs on syzbot, SyzScope success-
+fully determined that 183 low-risk bugs (more than 15%)
+in fact contain high-risk impacts, e.g., control ﬂow hijack
+and arbitrary memory write, some of which still do not
+have patches available yet.
+Introduction
+Fuzzing is one of the most proliﬁc approaches to dis-
+cover bugs in software. Nowadays, it is even becom-
+ing an integral part of the software development pro-
+cess.
+For example, OSS-Fuzz [25] is a popular plat-
+form that can fuzz open-source software continuously.
+In addition to OSS-Fuzz which targets primarily user-
+space applications, there is also an continuous fuzz test-
+ing platform called syzbot [28] dedicated to fuzz testing
+Linux kernels. The platform has been operational since
+2017. Equipped with the state-of-the-art kernel fuzzer
+Syzkaller [29], it has already reported more than 4,000
+bugs to date.
+Despite the huge success, such continuous fuzzing
+platform leads to a major challenge — the rate of bug dis-
+covery is much higher than the rate of bug ﬁxes. Taking
+the syzbot platform as an example, at the time of writing
+(Jun 2021), we ﬁnd that it takes on average 51 days to ﬁx
+a bug (over 3,396 ﬁxed bugs), whereas it takes less than
+0.4 day for syzbot to report a new bug.
+Another critical challenge is the patch propagation to
+downstream kernels [52], e.g., various PC distributions
+such as Ubuntu, and the smartphone OS - Android. Even
+if the syzbot bugs are patched in Linux, there is often a
+lack of knowledge on which patched bugs are security-
+critical. This can have a signiﬁcant impact on patch prop-
+agation delays [52]. One prominent example is CVE-
+2019-2215 [17], a use-after-free bug that can root most
+Android devices (e.g., Samsung Galaxy S9). It was ini-
+tially reported by syzbot and ﬁxed in Linux upstream in
+52 days [16]. Unfortunately, it took over a year for the
+patch to propagate to downstream Android kernels due
+to the lack of knowledge on its security impact. In fact,
+it was only until after bad actors were caught exploiting
+this vulnerability in the wild did Google start to realize
+its severity and obtained a CVE number [17].
+The previous two challenges illustrate a critical deﬁ-
+ciency in today’s continuous fuzzing platforms — lack of
+automated bug triage, or bug impact analysis. The goal
+of this paper is to bridge this gap in the context of Linux
+kernel bugs. Performing automated bug impact analyses
+is challenging and an active area of research, especially
+in the kernel space. Recently, Wu et al. proposed a solu-
+tion called sid on inferring the security impact of a patch
+statically [47], e.g., use-after-free, or out-of-bound mem-
+ory access. However, due to the nature of the analysis
+being completely static, it has to make tradeoffs between
+soundness and completeness. Furthermore, without an
+actual reproducer, it falls short in determining whether
+the bug is actually triggerable and exploitable in reality.
+On the other end of the spectrum, there has been recent
+progress on automated exploit generation against kernel
+bugs, fully demonstrating the exploitability of a bug by
+turning a reproducer into an actual exploit. Fuze [49] and
+KOOBE [20] are two representative studies that target
+use-after-free (UAF) and out-of-bound (OOB) memory
+arXiv:2111.06002v1  [cs.CR]  11 Nov 2021
+access bugs respectively.
+However, fuzzer-generated bug reports often do not
+contain the real security impact. For example, as we ﬁnd
+in our experiments, a WARNING error can in fact lead
+to UAF or OOB. Furthermore, while UAF and OOB bug
+types are arguably the most impactful bug types that lead
+to most real-world exploits, not all of them are created
+equal. For example, a write primitive, as opposed to read,
+is always more dangerous than a read, potentially caus-
+ing corruption of critical pieces of data (e.g., function
+pointer), leading to arbitrary code execution and privi-
+lege escalation. Similarly, a function pointer dereference
+primitive is also more dangerous than a read primitive.
+We deﬁne the high-risk and low-risk impacts in §2.2.
+As evidence that such a distinction between high-risk
+and low-risk bugs already exists, we ﬁnd, from syzbot’s
+historical data, that UAF/OOB write bugs are often ﬁxed
+much sooner than UAF/OOB read bugs — 37 days vs. 63
+days for UAF and 29 days vs. 89 days for OOB in terms
+of average attempt-to-ﬁx delay. In addition, we also look
+at the patch propagation delays from upstream to down-
+stream using Ubuntu Bionic as an example. Patches for
+WARNING errors have an average delay of 83 days vs.
+59 in the case of patches for OOB write bugs.
+In lieu of the above, the goal of this paper is to check
+whether any of the seemingly low-risk bugs (e.g., the
+ones with read primitives or simply an assertion error)
+can be turned into high-risk (e.g., write primitive or func-
+tion pointer dereference?) To this end, we design a sys-
+tem called SyzScope that takes a reproducer and the cor-
+responding bug report as input and produces a report on
+any high-risk impacts that are associated with the bug
+(and optionally new PoCs that exhibits such high-risk
+impacts). SyzScope has two distinct modes of opera-
+tions with respect to the two challenges aforementioned
+(details are in §3). First, to evaluate the security impact
+of open bugs and facilitate prioritized bug ﬁxing, we per-
+form a combination of static analysis and symbolic exe-
+cution to look beyond the initial bug impact reported by
+the reproducer. Second, to evaluate the security impact
+of ﬁxed bugs and facilitate timely patch propagation, we
+additionally allow a fuzzing component as we can use
+the patch to conﬁrm whether new impacts belong to the
+same bug.
+Surprisingly, after analyzing thousands of seemingly
+low-risk bugs published on syzbot, SyzScope found 183
+bugs have high-risk impacts. Along the process, we have
+identiﬁed the limitations of the current bug reports and
+believe SyzScope is a great complement to recognize the
+hidden impacts of a bug.
+In summary, this paper makes the following contribu-
+tions:
+• We propose SyzScope, a system that can automatically
+evaluate the impact of a given seemingly low-risk bug
+Bug type
+Bug Impact
+Sanitizer: KASAN
+use-after-free (UAF)
+out-of-bounds (OOB)
+double-free
+Sanitizer: KCSAN
+data race
+Sanitizer: KMSAN
+uninitialized use
+Sanitizer: UBSAN
+variety*
+Kernel: WARNING / INFO / BUG
+Assertions on any unexpected behaviors
+Kernel: GPF
+corrupted pointer dereference
+* UBSAN (Undeﬁned Behavior Sanitizer) can detect a variety of impacts
+Table 1: Main impacts of bugs on syzbot
+and uncover its true nature. The system can be easily
+integrated into the pipeline of syzbot.
+• To achieve both accuracy and scalability, we have
+packaged together fuzzing, static analysis, and sym-
+bolic execution together to achieve the end goals. To
+facilitate reproduction and future research, we open
+source the system [11].
+• Our tool successfully converts 183 seemingly low-risk
+bugs on syzbot to high-risk bugs including 42 of them
+with control ﬂow hijacking primitives and 173 with
+write primitives.
+Background and Overview
+2.1
+Syzbot and Bug Reporting
+As mentioned earlier, syzbot is a platform that contin-
+uously fuzzes the Linux mainline kernel branches. The
+kernel version advances on a daily basis so that syzbot
+always fuzzes the latest version. All discovered bugs are
+not only sent to kernel developers and maintainers but
+also published on an open dashboard in real time [28].
+For every bug, it also includes valuable information such
+as bug reports (e.g., call trace, perceived bug impact),
+valid reproducers, speciﬁc kernel source version where
+the bug was found, kernel conﬁguration ﬁles, and patches
+(if available). This is a valuable data source that is also
+suitable for automated analysis.
+Bug detectors.
+Syzbot uses the state-of-the-art ker-
+nel fuzzer Syzkaller [29] which relies on handcrafted
+“templates” or speciﬁcations that encode various knowl-
+edge about syscalls, including their relationships (e.g.,
+open() and close()) and the domain of syscall argu-
+ments. During fuzzing, test cases will be generated ac-
+cording to the templates and mutation on the test cases
+will occur as well.
+Most importantly, there are two
+general mechanisms to catch bugs at runtime. First, it
+leverages various sanitizers that instrument the kernel
+code to catch memory corruption bugs, including Ker-
+nel Address Sanitizer (KASAN) [18], Kernel Concur-
+rency Sanitizer (KCSAN) [26], and Kernel Memory San-
+itizer (KMSAN) [27], each capable of catching a certain
+class of bugs (categorized by their impacts, e.g., use-
+after-free). Undeﬁned Behavior Sanitizer (UBSAN) [13]
+is a special sanitizer that is recently enabled and can de-
+tect a variety of bug impacts [43]. Second, it relies on the
+kernel itself with its built-in assertions such as BUG and
+WARNING representing uncategorized errors and unex-
+pected behaviors, as well as exception handling, e.g.,
+general protection fault (GPF) due to accessing invalid
+memory pages. Whenever a bug is discovered, it must be
+caught by one of the mechanisms. The details are listed
+in Table 1. In fact, the title of a bug report is automat-
+ically generated according to the detection mechanism
+and the perceived bug impact. For example, the bug title
+“KASAN: use-after-free Read in hci dev do open” indi-
+cates that it is caught by KASAN and the perceived bug
+impact is use-after-free read.
+Limitations of the current bug detectors. One princi-
+ple currently embraced by fuzzers is that the execution
+of some buggy input stops as soon as any bug impact
+is discovered. This is because the goal of a fuzzer is to
+discover new bugs and ﬁx them. When the ﬁrst error
+is caught, it is pointless to let the program continue ex-
+ecuting because it is already in a corrupted state. Any
+subsequent buggy behaviors are further and further away
+from the root cause of a bug, and therefore do not really
+contribute in understanding and ﬁxing a bug. However,
+this principle does not help with realizing the maximum
+impact of a bug. In fact, it is the opposite of what we
+need because a bug can often lead to multiple impacts,
+some of which may not be immediately uncovered and
+may even require additional syscall invocations to mani-
+fest.
+2.2
+High-Risk vs. Low-Risk Bug Impacts
+Based on the recent literature [49, 20, 47, 48] and
+the recent high-proﬁle bugs that are exploited in prac-
+tice [44, 32, 17], we deﬁne high-risk bug impacts to be
+the following:
+1. Any UAF and heap OOB bugs1 that lead to a func-
+tion pointer dereference primitive, which is effectively a
+control ﬂow hijacking primitive that can likely lead to an
+end-to-end exploitation (i.e., arbitrary code execution in
+the kernel context) [48]. Such primitives can happen for
+example when the function pointer is located in a freed
+object or out-of-bound memory, and is incorrectly deref-
+erenced.
+2. Any UAF and OOB bugs that lead to a write prim-
+itive, including overwriting a freed object or an object
+out-of-bounds, and in general any writes to unintended
+locations and/or with unintended values (e.g., a write by
+dereferencing an unsafe data pointer). Write primitives,
+as opposed to read, have the opportunity to corrupt con-
+1Subsequently, we refer to heap OOB bugs as OOB bugs for brevity
+trol data (e.g., function pointers) and can be effectively
+turned into control ﬂow hijacking as well. In addition,
+write primitives can be used for data-only attacks that
+achieve privilege escalation without explicitly altering
+the control ﬂow (e.g., by modifying the uid of a pro-
+cess) [23].
+3. Any invalid free bugs. This includes freeing a mem-
+ory area that should not be freed or an already freed ob-
+ject (the latter corresponds to double-free bugs). Invalid
+frees can be turned into a UAF of multiple different can-
+didate objects chosen by an adversary [21]. With the
+freedom of choice of various candidate objects, the like-
+lihood of ﬁnding a function pointer dereference or write
+primitive is high.
+In contrast, a low-risk impact is deﬁned to be any-
+thing other than the above. This includes any UAF or
+OOB bugs that lead to only read primitives (without
+write or function pointer dereference primitives), as well
+as any other impacts such as WARNING, INFO, BUG,
+and GPF, as deﬁned in Table 1. Finally, we will give
+a more detailed breakdown of the high-risk impacts by
+their primitives in §3.3.
+2.3
+Motivating Example
+To illustrate why that is the case, we use a real bug from
+Syzbot [6] as an example to demonstrate how it is possi-
+ble to turn a low-risk slab-out-of-bounds read bug into a
+control ﬂow hijack exploit.
+As shown in Figure 1, the bounds of the iteration
+cp->hash (line 2) can be turned larger than the size of ar-
+ray cp->perfect (which resides on the heap), creating
+a potential OOB situation(the vulnerable object marked
+in green). More precisely, at line 8, an OOB read access
+occurred via exts->actions, leading to a slab-out-of-
+bounds read. Syzkaller stops at line 8 and generates a
+bug report with the title of “KASAN: slab-out-of-bounds
+Read in tcf exts destroy” on syzbot. Interestingly, even
+if we allow the execution to continue forward during
+fuzzing, it will almost always end up with an exception
+at line 14 because it is highly likely that actions[i]
+attempts to retrieve an element from an invalid address,
+i.e., it is equivalent of *(actions+i). Note that actions it-
+self can point to any random location because it was read
+out-of-bounds (see line 8 and 9). As a result, one may
+come to the conclusion this is indeed a low-risk bug.
+However, since the entire exts structure is out-of-
+bounds, it is actually possible for an attacker to control
+the data at an appropriate offset by spraying a number
+of objects nearby [20]. Speciﬁcally, if the correct data
+is sprayed, actions[i] will retrieve an element from
+a valid address and prevent the kernel from crashing at
+line 14. After that, we are able to observe an arbitrary
+address write opportunity at line 16.
+This is because
+1
+static
+void
+tcindex_free_perfect_hash (struct
+tcindex_data *cp) {
+for (int i = 0; i < cp->hash; i++)
+tcf exts destroy(&cp->perfect[i].exts);
+kfree(cp ->perfect);
+}
+7
+void
+tcf_exts_destroy (struct
+tcf_exts *exts) {
+if (exts->actions)
+tcf action destroy(exts->actions);
+}
+12
+int
+tcf_action_destroy (struct
+tc_action *
+actions[]) {
+struct
+tc_action *a;
+for (i = 0; i < TCA_ACT_MAX_PRIO
+&&
+actions[i]; i++) {
+a = actions[i];
+actions[i] = NULL;
+// AAW
+ret =
+tcf idr release(a);
+}
+}
+21
+int
+__tcf_idr_release (struct
+tc_action *p) {
+if (
+tcf action put(p, ...))
+...
+}
+26
+static
+int
+__tcf_action_put (struct
+tc_action
+*p, ...) {
+struct
+tcf_idrinfo *idrinfo = p->idrinfo;
+if ( refcount_dec_and_mutex_lock (&
+p->tcfa refcnt, &idrinfo->lock)) {
+...
+tcf action cleanup(p);
+}
+}
+34
+static
+void
+tcf_action_cleanup (struct
+tc_action *p) {
+if (p->ops->cleanup)
+p->ops->cleanup(p);
+// FPD
+}
+AAW = Arbitrary address write
+FPD = Function pointer dereference
+Figure 1: A slab-out-of-bounds Read bug on syzbot
+the pointer action comes from the OOB memory exts,
+which means action can potentially point to any arbi-
+trary memory address. Even further down, we can see a
+control ﬂow hijack opportunity arises at line 36 through
+a function pointer dereference, where the value of the
+function pointer p is controlled by an attacker as well
+(basically actions[i]). By now, we can conclude that
+this bug is actually very much high risk and needs to be
+patched as soon as possible. Interestingly, no one seemed
+to have realized the potential impact of the vulnerabil-
+ity. As a result, the bug was silently ﬁxed without any
+CVE being assigned and it took almost 4 months (much
+longer than the average time-to-ﬁx). The fact that there is
+no CVE assigned would also delay downstream kernels
+from applying the patch.
+2.4
+Goals and Non-Goals
+Goals. SyzScope aims to reveal high-risk impacts of a
+seemingly low-risk bug by analyzing subsequent behav-
+iors since the ﬁrst reported impact and alternative paths
+where high-risk impacts may be located. As alluded to
+earlier, we believe there are two beneﬁts provided by
+SyzScope. First, it will facilitate prioritized bug ﬁxing.
+This is especially important given that the number of
+kernel bugs that are discovered on a daily basis due to
+continuous fuzzing and the transparency offered by the
+syzbot platform. Second, it will speed up the patch prop-
+agation in Linux-derived ecosystems. Even when a patch
+is already available in Linux mainline, it can take months
+and even years to propagate to all its downstream kernels,
+e.g., Android [47, 52].
+Non-goals.
+SyzScope does NOT aim to produce an
+end-to-end exploit automatically, which would require
+the automation of a number of additional steps such as
+reliable heap feng shui, bypass of various defenses in-
+cluding KASLR, SMEP, and SMAP [48].
+Therefore,
+we do not claim that the high-risk impacts we deﬁned
+are 100% exploitable. Instead, we aim to uncover as
+many such high-risk impacts as possible, within a rea-
+sonable time and resource budget. The more high-risk
+impacts, the more likely an exploit can be generated. In
+fact, our work is complementary to the research on au-
+tomated exploit generation. For example, KOOBE [20]
+is designed to take an OOB write bug and turn it into a
+control ﬂow hijack primitive. SyzScope can turn a seem-
+ingly non-OOB bug or an OOB read into an OOB write
+such that KOOBE can take it further and prove its actual
+exploitability. Finally, SyzScope does NOT aim to eval-
+uate bugs whose impacts are outside of the types listed
+in Table 1.
+Design
+In this section, we describe the design of SyzScope. The
+intuition driving the design is that uncovering more im-
+pacts of a bug is fundamentally a search problem. In-
+terestingly, even though a fuzzer is designed to essen-
+tially search through an input space as well, its goal is
+to optimize for maximum code coverage and/or number
+of bugs; it is never to maximize the impacts of a given
+bug. Therefore, SyzScope is designed to perform a much
+more targeted search starting from a PoC that already un-
+covers some impact of a bug.
+High-level Workﬂow The workﬂow is depicted in Fig-
+ure 2, which contains three main components: Vulner-
+able Contexts Exploration, Hidden Impacts Estimation,
+and Validation and Evaluation. They correspond to the
+three main techniques that we leverage and integrate to-
+gether: fuzzing, static analysis, and dynamic symbolic
+Deployer
+Low-risk bug
+（PoC, report)
+Kernel
+PoC
+System 
+call
+Build
+Extract
+Distill
+Kernel 
+Fuzzer
+Vulnerable Context Exploration
+Bug 
+Analysis
+Taint 
+Analysis
+Vulnerable 
+Site
+Vulnerable 
+Object
+Hidden Impact Estimation
+PoCs with 
+additional 
+impacts
+Paths to 
+each impact
+Symbolic 
+Execution
+Guide
+Collector
+Valid 
+Additional 
+Uses
+Exploration and Validation
+New 
+Bug 
+report
+PoC 1
+PoC 2
+PoC N
+…
+Read/write
+impacts
+Figure 2: Workﬂow
+void
+__rxrpc_put_peer (struct
+rxrpc_peer *peer) {
+struct
+rxrpc_net *rxnet = peer ->local->rxnet;
+...
+}
+6
+void
+rxrpc_send_keepalive (struct
+rxrpc_peer *peer)
+{
+...
+whdr.epoch=htonl(peer ->local->rxnet->epoch);
+...
+peer ->local->socket->ops->sendmsg()
+...
+}
+Figure 3: Impacts of the same bug located in different
+syscalls
+execution.
+At a high level, given a PoC and its bug
+report that demonstrates some low-risk impact, we ﬁrst
+start with a “fuzzy” approach by performing a targeted
+fuzzing campaign to explore other potential vulnerable
+contexts, i.e., additional impacts. This will allow us to
+cast a wider net early on. Second, given these additional
+PoCs and impacts (where some may be high-risk already
+and may still be low-risk), we then leverage static analy-
+sis to locate any potential high-risk impacts in alternative
+execution paths that we have not yet been able to reach
+during fuzzing.
+Finally, the static analysis will guide
+the execution of symbolic execution to conﬁrm whether
+these high-risk impacts are reachable in practice.
+3.1
+Vulnerable Contexts Exploration
+As can be seen in Figure 2, the vulnerable context
+exploration component takes a seemingly low-risk bug
+(including a PoC and a corresponding bug report), and
+produces one or more new PoCs that exhibit additional
+impacts (either low-risk or high-risk). The problem with
+the original PoC is that it traverses only a single path
+in the kernel and can therefore be very limited in terms
+of impact coverage. By exploring more contexts (i.e.,
+paths) associated with the bug, we are more likely to
+uncover additional impacts. In general, there are two
+logical possibilities that additional impacts are located.
+First, it may be hidden directly behind the reported im-
+pact, i.e., in the same invocation of a syscall as shown
+in Figure 1. Second, it may be triggered in a completely
+different syscall not present in the original PoC, and may
+even require additional syscalls to set up the state before-
+hand and removal of existing syscalls to undo some state.
+Figure 3 illustrates a real case from syzbot (simpliﬁed)
+to show two different impacts of the same bug. In the
+original PoC, it causes peer->local to be freed acci-
+dentally before entering function
+rxrpc put peer(),
+leading to a UAF read. However, the PoC fails to dis-
+cover the additional function pointer dereference which
+is located in rxrpc send keepalive(). In addition,
+rxrpc send keepalive() is not a function reachable
+by
+rxrpc put peer(). Therefore, a good test case
+would need to insert an additional syscall (with the right
+arguments) after the syscall that triggered the free.
+To this end, we will leverage Syzkaller to mutate the
+original PoC and explore any missed additional impacts.
+As mentioned in §2.1, the goal of a fuzzer is never to
+uncover a bug’s maximum impact. However, it is suit-
+able for Syzkaller to search for new contexts that may
+be locked away in a speciﬁc sequence of syscalls [14].
+More speciﬁcally, we deﬁne the original context as the
+execution path exercised by the original PoC. Any new
+context by deﬁnition must be associated with a different
+execution path that must not share the same initial primi-
+tive (UAF/OOB read or write). Along with vulnerable
+context exploration, we also log all the impacts along
+each path and attribute any high-risk impacts to the cor-
+responding context.
+Nevertheless, there are three challenges in making the
+search effective. First, as illustrated earlier in Figure 1,
+an earlier impact can block the execution from exploring
+deeper parts of the code and uncovering additional im-
+pacts. Second, even though a coverage-guided fuzzing
+strategy is approximately aiming to explore more code
+blocks and paths, it does not directly recognize the im-
+portance of impacts. In fact, it is possible that a new im-
+pact is triggered in an already explored path, e.g., OOB
+access can happen in array element access only when an
+argument (representing the array index) of a syscall be-
+comes large enough. Third, we need to ensure that the
+mutated PoC, should it uncover any new impacts, is still
+exercising the same bug. Indeed, if we allow Syzkaller
+to mutate any part of the PoC, e.g., by removing a criti-
+cal syscall or adding arbitrary syscalls, then it is entirely
+possible that the mutated test case will trigger a different
+bug altogether.
+To overcome the challenges, we make two important
+changes to Syzkaller and made an important observation.
+Impact-aware fuzzing. To address the ﬁrst challenge,
+we will attempt to carry on the fuzzing session even when
+impacts are detected (by sanitizers or the kernel itself).
+Speciﬁcally, only a few bugs like general protection fault
+or some BUG impacts are irrecoverable errors (e.g., a
+NULL pointer dereference and divide by zero); other
+ones can be simply safely ignored. For example, when
+an OOB read impact occurs, we simply allow the ker-
+nel to read any data from out-of-bounds memory with-
+out panic and continue executing. This way, it is pos-
+sible that KASAN catches another OOB write eventu-
+ally. To address the second challenge, we note again that
+Syzkaller is an entirely coverage-guided fuzzer, i.e., its
+feedback metric is only the coverage. However, it tends
+to focus its attention and energy quickly on newly cov-
+ered code, leaving covered but potentially buggy code
+space behind. Therefore, we introduced the feedback of
+impact. The idea is that Syzkaller will now consider a
+test case as a seed not only when it discovers any new
+coverage but also when it discovers any new impact. As
+it is rare to discover test cases that uncover new impacts,
+we always assign higher priority to them for mutation.
+Restricted-fuzzing space. By default, Syzkaller con-
+siders all syscalls in the operating system as candidates
+to insert into a test case (during mutation). However,
+clearly this is undesirable for uncovering impacts of a
+speciﬁc bug.
+For instance, a bug in the kvm module
+should not allow the TCP/IP modules’ syscalls, which
+will likely drive the test cases to cover code outside of
+kvm. Therefore, to address the third challenge, we re-
+strict the syscalls to those Syzkaller templates that sub-
+sume the syscalls in the PoC. In addition, we preserve
+all the syscalls in the original PoC and allow only inser-
+tion of syscalls. We also allow the mutation of arguments
+of existing syscalls. This strategy aims at preserving the
+root cause of a bug while still allowing new impacts to
+be discovered. If the above restricted-fuzzing strategy
+cannot uncover any new impacts or coverage (currently
+after a threshold of 5 minutes), we will activate another
+slightly more aggressive fuzzing strategy, where we will
+relax the restrictions to allow syscalls against the entire
+module, e.g., all syscalls related to the networking mod-
+ule or kvm module (one module sometimes can corre-
+spond to multiple templates). In addition, we also allow
+the removals of syscalls in the original PoC (though the
+latter is set to a very low probability).
+Side effects of fuzzing. Unfortunately this does still re-
+sult in test cases that trigger different bugs. In fact, as we
+later ﬁnd out, close to half of the new impacts are associ-
+ated with a completely unrelated bug, where the other
+half are indeed new impacts belonging to the original
+bug. Therefore, we choose to perform fuzzing only when
+we have a strategy to conﬁrm whether a new impact be-
+longs to the original bug. Speciﬁcally, where patches are
+already available, i.e., the second use case of SyzScope
+as discussed in §2.4, we develop a heuristic that can do
+so accurately. The details are deferred to §4.
+3.2
+Hidden Impacts Estimation
+From the previous step, we have likely found more PoCs
+that uncovered additional impacts. However, it is pos-
+sible that they are still low-risk impacts. After all, it is
+challenging for a fuzzer to explore deeper part of the ker-
+nel code, especially when there are complex conditions
+that may prevent it from making progress. Therefore, we
+can invoke the hidden impact estimation component to
+determine whether further high-risk impacts beyond the
+low-risk ones are available. Speciﬁcally, given an exist-
+ing low-risk impact, we leverage static analysis to con-
+duct a type-speciﬁc search. At the moment, we support
+the analysis of two types of low-risk impacts, i.e., UAF
+read and OOB read. Again, we choose them because
+UAF and OOB are two of the most dangerous bug im-
+pact types. In order to discover high-risk impacts such as
+write or function pointer dereference impact, we formu-
+late the problem as a static taint analysis problem as will
+be articulated later.
+This component requires two inputs: a PoC that trig-
+gers one or more UAF/OOB read impacts, and the corre-
+sponding bug report as input. It then extracts two pieces
+of critical information from the report: (1) vulnerable ob-
+ject and (2) vulnerability point(s). A vulnerable object is
+deﬁned to be the freed object (in the UAF case) and the
+object intended to be accessed yet an out-of-bound ac-
+cess occurred (in the OOB case). A vulnerability point is
+the statement where the use of a freed object happens (in
+the UAF case) or the OOB memory access (in the OOB
+case) occurs.
+We ﬁrst observe that the UAF/OOB read impacts are
+due to the read of some data that can be potentially con-
+trolled by an adversary, i.e., either a freed and reﬁlled ob-
+ject or something sprayed next to the vulnerable object.
+This means that any subsequent use of the read memory
+can be potentially dangerous. Speciﬁcally, we consider
+dereferences of function pointers that are derived from
+such memory high-risk impacts, i.e., UAF/OOB function
+pointer dereferences (as mentioned in §2.4). Similarly,
+we consider any dereferences of data pointers that are de-
+rived from such memory high-risk impacts if they lead to
+memory writes (to an attacker-controlled address), e.g.,
+*data ptr = 0.
+The second observation is that UAF/OOB write im-
+pacts are basically writes to the same planted memory
+by an adversary. For example, if a planted object whose
+function pointer is overwritten due to a UAF/OOB write,
+it can potentially lead to arbitrary code execution, as line
+32 in the example presented in Figure 1 shows.
+To summarize, the above high-risk impacts can be for-
+mulated as a static taint analysis problem. For pointer
+dereferences, the taint source will be the vulnerable ob-
+ject. The sink would be the dereference of a pointer (ei-
+ther function pointer or data pointer that leads to a write).
+Whenever any source ﬂows to the sink, we consider it a
+high-risk impact. It is slightly different for UAF/OOB
+write. The taint source is the same. However, we do not
+need any sinks. Instead, whenever any value is written to
+the tainted memory, we consider it a high-risk impact. In
+the example presented earlier in Figure 1, line 16 is such
+a write to the OOB memory.
+In addition to reporting the additional impacts, we also
+record the branches that deﬁnitely need to be taken and
+the ones that deﬁnitely need to be avoided in order to
+reach the them. This is later used to guide the symbolic
+execution. We defer the implementation details of the
+static taint analysis to §4.
+3.3
+Validation and Evaluation
+As shown in Figure 2, this module takes a PoC with po-
+tentially new high-risk impacts, aim to achieve two goals
+in this component: (1) validating the feasibility of reach-
+ing these high-risk impacts, and (2) evaluating the more
+ﬁne-grained impact in terms of the enabled primitives,
+e.g., arbitrary value write vs. constrained value write.
+Validate the feasibility of high-risk impacts. In this
+step, we symbolize the same vulnerable object, i.e., taint
+source in static analysis, dynamically at the point when
+the vulnerable object is ﬁrst read, e.g., an OOB read or
+UAF read. The entire vulnerable object is symbolized
+with the assumption that an attacker can spray desired
+payloads onto the heap. However, a well-known limita-
+tion of symbolic execution is its scalability due to path
+explosion.
+Therefore, we additionally leverage static
+analysis to guide the symbolic execution in two ways: (1)
+When an additional impact is found to be far away(40 ba-
+sic blocks is our current threshold, see the details at 5.2)
+from the initial impact, we take the path guidance from
+static analysis results in terms of which branches must
+and must not be taken. For example, an additional im-
+pact can be located in only a speciﬁc true branch, and
+therefore the false branch does not need to be explored.
+This avoid unnecessary explorations during symbolic ex-
+ecution and therefore speed up the process. Currently we
+choose to apply the guidance only when the additional
+high-risk impact is at least 40 basic blocks away intrapro-
+cedurally . This is because if they are nearby, symbolic
+execution will have no problem locating them anyways.
+Furthermore, we are not able to rule out any potential
+false negatives from static analysis and therefore it is best
+to let symbolic execution explore all possible paths. (2)
+Based on the farthest potential high-risk impact, we limit
+the scope of the analysis up to that point. Otherwise, the
+symbolic execution may continue executing until the end
+of a syscall, taking much more signiﬁcant time.
+Evaluate the ﬁne-grained impacts. As mentioned ear-
+lier in §2.2, the high-risk impacts can include three types
+of primitives: write, func-ptr-deref, and double free. Be-
+low we discuss the write and func-ptr-deref primitive.
+(1) Overwriting symbolic memory. The impact of such
+a write requires a more careful analysis. For example,
+when such an OOB write occurs, it is necessary to un-
+derstand the offset of the write, the length of the write,
+and the data that can be written [20]. Then we can eval-
+uate whether the write is ﬂexible enough to overwrite a
+function pointer in a heap-sprayed object nearby. Since
+such an analysis is already done in [20], we simply refer
+to such writes as UAF write or OOB write and leave them
+to existing work for further triage.
+(2) Write with symbolic data or write to symbolic ad-
+dress.
+When the write target is symbolic or data to-
+be-written is symbolic, We follow a classic deﬁnition
+of a write primitive is “write-what-where” [1]. For the
+“what” dimension, it will be either an “arbitrary value”
+or “constrained value” write, depending on the absence
+or presence of any symbolic constraints on the value. For
+the “where” dimension, it will be either an “arbitrary ad-
+dress” or “constrained address” write, again depending
+on the symbolic constraints of the address. More con-
+cretely, considering a write instruction mov qword ptr
+[rax], rdi. It attempts to store the data in rdi to an
+address stored in rax. If rdi is symbolic, it may be
+considered an arbitrary value or constrained value write.
+Similarly, if rax is symbolic, it may be considered an ar-
+bitrary address or constrained address write. Note that
+KASAN cannot detect such primitives because it is de-
+signed to catch the initial read of freed/OOB memory.
+Subsequent propagation of them via writes may require
+taint tracking.
+(3) Dereferencing symbolic function pointer is de-
+tectable by monitoring the symbolic status of the func-
+tion pointer. Similar to the write primitives, KASAN can
+only detect the initial problematic read, and not the sub-
+sequent use (i.e., function pointer dereference) of the
+freed/OOB memory.
+(4) Passing pointer (either being symbolic or pointing
+to symbolic memory) to free function. To detect invalid
+frees (including double frees), we examine the pointer
+argument of heap free functions such as kfree(). If the
+pointer itself is symbolic, it indicates that an attacker can
+control the memory that will be freed, therefore corre-
+sponding to the invalid free cases. If the pointer itself
+is not symbolic but the memory the pointer points to is,
+it is considered a double free (we group these two cases
+together as invalid frees).
+Implementation
+In this section, we describe details about each component
+in SyzScope. In total, the system has over 10K lines of
+code and is fully automated.
+4.1
+Vulnerable Context Exploration
+There are several things worth describing in more details
+in this component.
+Impact-aware fuzzing. Syzkaller has two major com-
+ponents: (1) the fuzzer itself that runs on a target OS
+where test cases are executed (i.e., syz-fuzzer), and (2)
+a manager that runs outside of the target OS, oversee-
+ing the fuzzing process (i.e., syz-manager). The fuzzer is
+designed to mutate test cases locally and only send test
+cases that contribute to more coverage back to the man-
+ager. However, different for traditional coverage-guided
+fuzzing, our impact-aware fuzzing will mutate a PoC that
+already leads to an impact, which essentially causes a
+crash of the entire target OS. This often leads to a burst
+of crashes, which means the fuzzer will lose the states of
+the mutation because of the crash. By default, the man-
+ager will simply log the test case but no further mutation
+will be performed, because it is likely going to trigger the
+same bug over and over again. In our implementation,
+we enable the manager to remember the impact-inducing
+PoC and send it to the fuzzer for mutation (currently 500
+times), preempting any other mutation of regular seeds.
+If a new impact is discovered, the corresponding PoC
+will then be treated similarly.
+Multiple impacts in a single PoC. As mentioned ear-
+lier in §2.1, Syzkaller by default allows only the ﬁrst
+impact to be reported while ignoring all the rest. This
+means that if a PoC happens to trigger multiple bug im-
+pacts, e.g., one UAF read and another UAF write, the
+later impacts are hidden. This contradicts with our goal
+of recovering more bug impacts.
+Therefore, we turn
+on a KASAN booting option called kasan multi shot
+when booting the kernel, which will present all im-
+pacts instead of only the ﬁrst. However, there are some
+impacts that are not possible to ignore, e.g., a NULL
+pointer dereference which would cause an irrecoverable
+crash. We can bypass some other assertion-related ker-
+nel panics by disabling panic on warn in the kernel
+boot options or some options in the kernel conﬁg like
+CONFIG BUG ON DATA CORRUPTION. Note that these de-
+bugging options are turned on speciﬁcally for fuzzing or
+debugging (as they are useful in catching errors). In prac-
+tice, they are off by default in production settings.
+Conﬁrming the impact belonging to the same bug. As
+described earlier in §3.1, when a bug already has a patch
+available (we assume that these patches are correct), we
+use a heuristic that can use the patch to test whether a
+new PoC and its new impacts (generated from fuzzing)
+are still a result of the same bug. The idea is as follows.
+If a new PoC can still trigger the same impact after the
+patch (as well as all prior commits) is applied, clearly the
+new PoC is triggering a different bug. However, if it no
+longer works, we are not sure if it is because of the patch
+itself that breaks the PoC or one of the earlier commits
+does so. To deal with this ambiguity, instead of applying
+the patch and its prior commits up to that point, we will
+attempt to apply the patch commit itself directly. If it
+can be successfully applied, i.e., git does not reject it and
+kernel compiles/boots normally without breakage, then if
+the new PoC no longer works, we say that the PoC is in-
+deed exploiting the same bug. Otherwise, if it cannot be
+successfully applied, we will instead apply all the com-
+mits up to the patch (but not including the patch itself)
+and retest the PoC. If it can reproduce the impacts, then
+we know that these intermediate commits do not inter-
+fere with the bug triggering. Therefore, we know that the
+new PoC is still triggering the same bug, because earlier
+we have veriﬁed that it does not work against a patched
+kernel (with all prior commits applied also). The one
+last remaining corner case is that the PoC cannot repro-
+duce the impacts when we apply all the commits up to the
+patch (but not including the patch itself). In such cases,
+we will act conservatively and simply give up the new
+PoC because it remains ambiguous.
+4.2
+Hidden Impacts Estimation
+Our static analysis engine is built on top of DR.
+CHECKER [38], which is ﬂow-sensitive, context-sensitive,
+ﬁeld-sensitive, and inter-procedural.
+We made some
+changes to adapt it to our scenario as described below.
+Interfacing with the fuzzer result. Recall that our static
+analysis engine takes a vulnerable object and vulnerabil-
+ity point(s) as input. Since DR. CHECKER is based on
+LLVM IR, the input would also be given at the LLVM
+IR level.
+However, the fuzzing result (KASAN report)
+includes such information at the binary level, thus re-
+quiring a mapping from the binary to IR. Speciﬁcally,
+it includes (1) the call trace that contains vulnerability
+points that trigger the UAF/OOB bug (binary instruction
+addresses). (2) the size of a vulnerable object and the off-
+set at which the vulnerable object is accessed (in either
+UAF or OOB).
+With such information, we will ﬁrst try to locate the
+vulnerable function that triggered the impact in LLVM
+IR. Usually, the vulnerable function is the ﬁrst function
+on the call trace besides KASAN-related ones. However,
+if the vulnerable function is inlined, we then resort to
+its caller (potentially recursively if multiple layers of in-
+lining occur). To simplify the handling of inlined func-
+tions, we choose to compile the kernel using Clang with-
+out any inlining to generate the kernel bitcode. After lo-
+cating the vulnerable function in LLVM IR, we leverage
+the Clang-generated debug information to map each IR
+instruction back to a corresponding source line. Speciﬁ-
+cally, we look for a load IR instruction that maps to the
+same source line number as what is reported in the vul-
+nerable function in the KASAN report. Once we success-
+fully locate such a load instruction that triggers the bug,
+we can retrieve the base pointer (vulnerable object) of the
+load instructions and taint the object.
+Trace recorder: In order to generate the branch guid-
+ance for symbolic execution (described in §3.2), we
+record the detailed taint trace from an initial vulnerability
+point to the high-impact one, including the calling con-
+text and instruction of each taint propagation. This way,
+if the taint propagation occurs in a speciﬁc call sequence
+and speciﬁc branch, we can precisely drive the dynamic
+symbolic execution accordingly.
+4.3
+Validation and Evaluation
+There are two possible symbolic execution engines we
+can potentially use: S2E [22] and angr [15]. S2E is a
+great candidate as it is designed to support dynamic (in-
+vivo) symbolic execution, such that most of the memory
+locations are populated with runtime data. This limits the
+symbolized memory to a much smaller scope, i.e., those
+that are potentially controlled by an adversary. Unfor-
+tunately, S2E supports only a single CPU core in each
+QEMU instance [8]. Therefore, it has a major drawback
+in its ability to reproduce race condition bugs. In our
+preliminary experiments, we ﬁnd that over half of the
+race condition bugs simply cannot be reproduced reliably
+within a reasonable time frame, i.e., an hour. Therefore,
+we decided to ﬁrst reproduce bugs in a vanilla QEMU.
+Once the bug is successfully reproduced (KASAN report
+being triggered). The breakpoint we set in KASAN report
+function will immediately freeze the memory of QEMU,
+and provide the corresponding CPU registers and mem-
+ory address of the vulnerable object (either freed object
+or an object that is out-of-bounds) to angr. Whenever
+angr needs to access a memory location, we will look up
+their actual values on the snapshot on demand.
+Evaluation
+5.1
+Dataset and Setup
+We evaluate SyzScope against the majority of low-risk
+bugs reported on syzbot. At the time of writing, there
+are 3,861 low-risk bug reports in total according to our
+deﬁnition. We exclude the ones detected by KCSAN,
+KMSAN, UBSAN. This is because they are either not
+mature enough yet (KMSAN and UBSAN) and do not
+contain critical information in the bug reports for us to
+continue the analysis (e.g., vulnerable object), or do not
+have any valid reproducer (none of the KCSAN bugs has
+a reproducer). After this step, there are 3,267 remaining
+bug reports.
+Next, we ﬁlter the bug reports that do not target the up-
+stream Linux kernel (which is our main focus) and those
+that do not contain any reproducer (either a Syzkaller
+program or a C program). Then, we divide the dataset
+into “ﬁxed” and “open” sections. For the ﬁxed cases,
+since each bug report comes with a corresponding patch,
+we can deduplicate bug reports based on shared patches
+(unfortunately we are unable to do so for the bugs in the
+open section), e.g., the bug reports may look different but
+their root causes are the same. In our tests, we pick only
+one bug report from the group that share the same patch.
+Speciﬁcally, we use the one with the highest risk impact.
+For example, if a low-risk impact bug report (e.g., UAF
+read) happens to share the same root cause (i.e., same
+patch) with a high-risk one (e.g., UAF write), we elimi-
+nate the entire group of reports because the correspond-
+ing bug should be recognized as high-risk already. If a
+WARNING bug report happens to share the same patch
+with a UAF read report, we will pick the UAF one as
+input to SyzScope, because it already contains critical
+information such as the vulnerable object, allowing us to
+continue the analysis in the pipeline. Otherwise, we sim-
+ply randomly pick a bug report among the available ones
+(WARNING, INFO, BUG, or GPF) as there is no major
+difference. Finally, we obtain 1,170 bug reports (after
+deduplication) and their corresponding reproducers.
+In our current conﬁguration, to be conservative, we do
+not attempt the vulnerable context exploration step on
+bug reports in the open section since we can not ver-
+ify the new impacts still belong to the same bug (as
+discussed in §3.1).
+All experiment are conducted in
+Ubuntu-18.04 with 1TB memory and Intel(R) Xeon(R)
+Gold 6248 20 Core CPU @ 2.50GHz * 2. For each bug
+report and its reproducer, we allocate a single CPU core
+for 3 hours of kernel fuzzing maximum, 1 hour of static
+analysis (it usually ﬁnished within half an hour), and 4
+hours of symbolic execution.
+5.2
+Overall Results
+In total, out of the 1,170 low-risk bugs analyzed by SyzS-
+cope, we report that 183 of them turn out to contain at
+least one high-risk impact. This is more than 15% of all
+the bugs. Furthermore, out of the 183 bugs, 173 have at
+least one write primitive (e.g., UAF/OOB write, arbitrary
+Initial Bug Impact
+Raw bug
+reports
+Valid
+bugs*
+High-risk
+bugs*
+High-risk
+impacts
+High-risk impact breakdown by primitive type
+UOW
+AAW
+CAW
+AVW
+CVW
+FPD
+IF
+Fixed
+GPF and BUG
+215
+323
+124
+29
+8
+WARNING and INFO
+293
+379
+166
+20
+9
+UAF and OOB Read
+202
+2866
+1490
+271
+104
+Open
+GPF and BUG
+83
+6
+0
+0
+0
+WARNING and INFO
+292
+501
+213
+47
+18
+UAF and OOB Read
+85
+768
+381
+43
+40
+Sum
+1170
+4843
+2374
+410
+179
+* Valid bugs and high-risk bugs in the ﬁxed section are all unique ones (after deduplicating based on the bug reports)
+UOW= UAF/OOB write, AAW= Arbitrary address write, CAW= Constrained address write, AVW= Arbitrary value write
+CVW= Constrained value write, FPD= Function pointer dereference, IF= Invalid Free
+Table 2: Overall Results
+address write). 42 of them have at least one func-ptr-
+defer primitive.
+We break the results down, ﬁrst by open vs.
+ﬁxed
+bugs, and then by the initial bug impact type. The re-
+sults are shown in Table 2. In addition, we categorize
+the high-risk impacts into 7 primitives, as deﬁned in §3.3
+and listed in the table.
+First, comparing the results for open and ﬁxed bugs,
+we can see in general there is a higher percentage of low-
+risk bugs turned into high-risk in the ﬁxed section com-
+pared to the ones in the open section (18.4% vs. 11.3%).
+In addition, the average number of primitives for each
+bug in the ﬁxed section is 27.2 versus 24.5 in the open
+section. This is because the open bugs did not go through
+the vulnerable context exploration phase, due to the con-
+cern that newly discovered contexts may belong to dif-
+ferent bugs (as mentioned in §3.1). As another evidence
+demonstrating the utility of fuzzing, we ﬁnd that bugs
+in the ﬁxed section have 1.33 contexts on average com-
+pared to the only 1 context per bug in the open section.
+Since each context has about 22 primitives on average, it
+is clear that fuzzing will allow more primitives to be un-
+covered. Nevertheless, even without the help of fuzzing,
+SyzScope still managed to turn 52 open bugs from low-
+risk into high-risk.
+In addition, it is worth noting that bugs with initial im-
+pacts being UAF/OOB read have a much higher chance
+of turning into high-risk cases. In the ﬁxed section, 99
+out of 202 UAF/OOB read cases can be turned into high-
+risk. Furthermore, the total number of high-risk impacts
+for just the 99 cases is 2866 (on average 29 per case). In
+the open section, 38 out of 85 UAF/read cases (slightly
+smaller fraction) can be turned into high-risk.
+For GPF, BUG, WARNING, and INFO, they usually
+represent a diverse set of root causes which are masked
+by the kernel itself or simply exceptions. In reality, there
+are still a subset of these cases that are really memory
+corruption bugs. Indeed, we are able to discover 46 high-
+risk cases out of 883 in these categories across ﬁxed and
+open sections. In general, GPF and BUG cases typically
+represent more serious bugs in the kernel (compared to
+WARNING and INFO) and some of these impacts can
+lead to exceptions that are difﬁcult to bypass (as men-
+tioned previously, e.g., NULL pointer dereference). As
+a result, we ﬁnd that the number of new impacts discov-
+ered under them is very small in the open section, as we
+did not perform any fuzzing.
+With respect to the impact primitives, We can see that
+the arbitrary address write has by far the highest num-
+ber. This demonstrates the necessity of applying sym-
+bolic execution, as such impacts can only be uncovered
+with such analyses. If one can write to an arbitrary ad-
+dress, it is typically a strong primitive (even if the write
+value is not arbitrary) that is highly exploitable, espe-
+cially when combined with a read primitive [31].
+The second most common types of primitives are ar-
+bitrary value and constrained value write (778 and 410
+cases in total), followed by UAF and OOB wirte (727 in
+total). Writing arbitrary values can be dangerous but its
+exploitability depends highly on where we can write to.
+The UAF and OOB write are generally serious as an at-
+tacker can often choose multiple different objects (e.g.,
+containing a function pointer) to overwrite [20, 49].
+The func-ptr-defer primitives are relatively rare (179
+cases in total) but highly exploitable [48]. We sampled
+a few cases for further analysis and managed to write
+three working PoCs that can successfully hijack the con-
+trol ﬂow of the kernel. One of them will be described
+in the case studies later. Finally, we ﬁnd 128 invalid free
+primitives, which can be turned into adjustable UAF bugs
+as mentioned in §2.2.
+5.3
+Component by Component Analysis
+Now that we have shown the end-to-end results, we break
+them down by components to understand the contribu-
+tion of each. Here we focus on ﬁxed bugs only because
+we applied all the components in SyzScope.
+Initial bug impact
+High-risk bugs
+by fuzzing
+Primitives found by
+fuzzing
+Extra high-risk
+bugs by S&S
+Extra primitives
+found by S&S
+GPF and BUG
+37
+285
+WARNING and INFO
+33
+346
+UAF and OOB Read
+128
+2738
+S&S = Static analysis and symbolic execution
+Table 3: Result breakdown by components on ﬁxed bugs
+Speciﬁcally, we show the intermediate results ob-
+tained from fuzzing alone, and then the additional results
+from performing the static analysis and symbolic execu-
+tion (S&S) on top of fuzzing. As a main result shown
+in Table 3, we can see that 66 bugs are turned from low-
+risk to high-risk by fuzzing alone, and an extra 65 bugs
+are turned after the static analysis and symbolic execu-
+tion (S&S).
+Vulnerable Context Exploration. Even though fuzzing
+is generally effective, due to the lack of systematic path
+exploration as is done by symbolic execution, we see that
+the number of primitives found by fuzzing alone is lim-
+ited (as shown in Table 3). This is because every context
+(i.e., path) provided by fuzzing is concrete and thus only
+a limited number of primitives may be covered. Further-
+more, as mentioned in §3.3, fuzzing relies on KASAN
+which by design is unable to recognize the more indirect
+types of primitives such as arbitrary address write or con-
+trol ﬂow hijacking. This is the reason why we still con-
+tinue with S&S even if the bug is determined to be high-
+risk by fuzzing. For example, we may ﬁnd a UAF write
+primitive through fuzzing, but through S&S we may ﬁnd
+an even more serious control ﬂow hijacking primitive.
+Nevertheless, new contexts can be beneﬁcial for S&S, as
+they can be considered as ”seeds” fed into the S&S to ex-
+plore many more paths and uncover more primitives. As
+we mentioned in §5.2, there are on average 1.33 contexts
+on average per ﬁxed bug from fuzzing.
+On a different note, we veriﬁed the heuristic we pro-
+posed in §4.1 to conﬁrm that the new impacts found
+through fuzzing indeed belong to the same bugs. To do
+so, we manually analyzed 10 sampled new impacts cor-
+responding to 10 different bugs found by SyzScope. We
+are able to conﬁrm they are all caused by the same bug.
+Hidden Impact Estimation. Here, we evaluate the ef-
+fectiveness of using static analysis to guide the symbolic
+execution. In particular, we sampled 53 bugs and eval-
+uated them with and without the guidance using static
+analysis. We observed 16 bugs, with guidance, expe-
+rienced a 12x-190x speedup compared to no guidance,
+which allowed the symbolic execution to ﬁnish in min-
+utes as opposed to hours. In addition, we found 2 bugs
+whose high-risk impacts can be found only with guided
+symbolic execution, and the unguided version simply
+ﬁnds nothing in four hours.
+However, we note that there is a fundamental tradeoff
+between running time and false negatives. This is be-
+cause our static analysis is not sound and can potentially
+miss important primitives. Therefore, as mentioned in
+§3.3, we set a threshold of 40 basic blocks and only prim-
+itives beyond the distance of 40 will trigger the guidance.
+We also evaluate the choice of the threshold by varying
+it as 30, 40, and 50. With a threshold of 30, we observe
+seven more false negative cases compared to the thresh-
+old of 40, due to the fact the static analysis missed those
+primitives that are located in a distance between 30 and
+40. With a threshold of 50, we ﬁnd two primitives in
+a distance between 40 and 50 will take more than four
+hours to ﬁnish (as they become unguided). Note that this
+threshold is considered suitable for our experiment setup
+only. With more resources to expend on symbolic execu-
+tion, the threshold can be further increased.
+Exploration and Validation. As we mentioned earlier,
+on top of the 66 bugs that were turned from low-risk
+to high-risk by fuzzing alone, SyzScope turned an ad-
+ditional 65 bugs (via S&S) from low-risk into high-risk,
+i.e., from zero primitive to at least one. The result shows
+that the different components are complementary to each
+other. Note that even if fuzzing has already found a prim-
+itive, we still applied the static analysis and symbolic ex-
+ecution to ﬁnd even more primitives, to obtain a more
+complete picture of the bug impact. In fact, the major-
+ity of the high-risk primitives are attributed to S&S, as
+shown in Table 3.
+We also considered the scenario where we omit the
+fuzzing phase altogether and apply S&S directly to the
+original context provided by the reproducer.
+Interest-
+ingly, we ﬁnd that it is still capable of turning all but
+two bugs into high-risk (albeit with a a subset of primi-
+tives discovered). This shows that there are many bugs
+that had at least one primitive reachable from the original
+context.
+5.4
+False Positives & False Negatives
+False Positives. By design, SyzScope conﬁrms all the
+high-risk impacts dynamically through either fuzzing or
+dynamic symbolic execution, and therefore should not
+incur any false positive. Nevertheless, in practice, we do
+make implementation-level simpliﬁcations for scalabil-
+ity considerations that can potentially lead to false pos-
+itives. For example, during the dynamic symbolic exe-
+cution, we skip a list of common kernel functions (a to-
+tal of 51) such as printk(), kasan slab free() for
+performance reasons, which can potentially lead to un-
+wanted side effects. Fortunately, we have not observed
+any false positives because of this.
+False Negatives. It is expected that SyzScope will incur
+false negatives as the solution is opportunistic in nature.
+To understand the extent of the problem, we manually
+1
+static
+int
+bfs_create (...){
+...
+ino = find first zero bit(info->si imap, info ->
+si_lasti + 1);
+if (ino > info ->si_lasti) {
+...
+return
+-ENOSPC;
+}
+set bit(ino , info->si imap);
+...
+}
+12
+unsigned
+long
+find_first_zero_bit (const
+unsigned
+long *addr, unsigned
+long
+size)
+{
+unsigned
+long
+idx;
+for (idx = 0; ...) {
+if (addr[idx] != ~0UL)
+return
+min(idx * BITS_PER_LONG + ffz(
+addr[idx]), size);
+}
+20
+return
+size;
+}
+Figure 4: Code snippet of a arbitrary address write
+inspected 83 bugs and noticed that the false negatives
+can come from three different sources. (1) Failing to
+ﬁnd more vulnerable contexts. We observed 4 bugs with
+an incomplete set of primitives because SyzScope fails
+to ﬁnd the appropriate vulnerable contexts. Speciﬁcally,
+race condition is the major reason in such cases. (2) Im-
+precise static analysis. We observed 2 bugs that have
+an incomplete set of primitives because of the imprecise
+result from static analysis. (3) Timeout of symbolic exe-
+cution. We observe 3 bugs that have an incomplete set of
+primitives due to the early termination of symbolic exe-
+cution (currently a 4-hour timeout). We discover these
+cases by increasing the timeout to 16 hours. In sum-
+mary, all of the above false negatives can be potentially
+reduced when given more computational resources, e.g.,
+more fuzzing time and symbolic execution time (with-
+out having to rely on the precision of static analysis). We
+also note these 9 bugs are all turned into high-risk already
+because SyzScope found other primitives.
+5.5
+Case Studies
+In this section, we provide a few case studies to high-
+light the process through SyzScope successfully con-
+verted low-risk bugs into high-risk ones.
+OOB read =⇒Arbitrary address write. Figure 4
+shows a real case on syzbot titled “KASAN: slab-out-
+of-bounds Read in ﬁnd ﬁrst zero bit” [5].
+Starting at
+line 3, info->si imap was already out-of-bounds (we
+omit the code earlier), which is passed as an argument to
+find first zero bit(). Then, there is an OOB read
+impact caught by KASAN at line 16. However, if line 17
+is executed next, which does occur during fuzzing, it will
+static
+void
+tcp_check_sack_reordering (struct
+sock *sk , ...)
+{
+struct
+tcp_sock *tp = tcp_sk(sk);
+...
+fack = tcp highest sack seq(tp);
+if (! before(low_seq , fack))
+return;
+tp->reordering = min_t (... , ...);
+tp->reord seen++;
+...
+}
+13
+static
+inline
+u32
+tcp_highest_sack_seq (struct
+tcp_sock *tp)
+{
+if (!tp->sacked out)
+return tp ->snd_una;
+if (tp->highest sack == NULL)
+return tp ->snd_nxt;
+return
+TCP_SKB_CB (tp -> highest_sack )->seq;
+}
+Figure 5: Code snippet of a constrained value write.
+lead to a write impact in set bit() (invoked at at line
+8). Since we allow the kernel to continue executing de-
+spite a bug impact being caught by KASAN (see §4.1),
+the write impact is reported during the fuzzing process.
+Speciﬁcally, set bit() will take the info->si imap
+as a memory address and set one bit to ino. During
+the symbolic execution (the scope of which is guided by
+static analysis), we can quickly determine the write im-
+pact is feasible and determine that it is an arbitrary write
+primitive because the only constraint on info->si imap
+is addr[idx] !=
+0UL at line 16.
+UAF read =⇒UAF write.
+Figure 5 is a real ex-
+ample from a use-after-free read bug [7] on syzbot,
+tp is a freed object, KASAN catches the UAF read
+at line 15.
+There are two UAF write impacts at line
+8 and 9 afterwards.
+Due to the non-zero value of
+tp->sacked out at line 15 and tp->highest sack at
+line 17, tcp highest sack seq() consistently return
+at line 19, which makes the following condition at line 6
+always true. This prevents the two write impacts from
+being unreachable.
+However, since we know the en-
+tire tp object was freed, we can in principle control
+the value of the object by heap spraying.
+Therefore,
+symbolic execution will determine the right values of
+tp->sacked out and tp->highest sack in order to
+reach the write impacts. Note that according to §3.3,
+these two write impacts are considered “UAF write prim-
+itives” because it writes to the symbolic memory (i.e.,
+freed object tp), as opposed to the above case study
+where the we write to a symbolic address. In order to
+exploit the bug further, we will need to spray an object
+that has a function pointer or data pointer which will be
+overwritten (due to line 8 and 9).
+UAF/OOB read =⇒func-ptr-deref. Figure 1 illus-
+1
+bool
+refcount_dec_and_mutex_lock (refcount_t *
+r, struct
+mutex *lock)
+{
+if ( refcount_dec_not_one (r))
+return
+false;
+...
+return
+true;
+}
+9
+bool
+refcount_dec_not_one (refcount_t *r)
+{
+unsigned
+int new , val = atomic_read (&r->refs);
+13
+do {
+if (unlikely(val ==
+UINT_MAX))
+return
+true;
+if (val == 1)
+return
+false;
+new = val - 1;
+if (new > val) {
+...
+return
+true;
+}
+} while
+(...);
+return
+true;
+}
+Figure 6: Code snippet of refcount dec and mutex lock
+and refcount dec not one
+trates a real case [6] on syzbot initially marked as an
+OOB read. It was described as the motivating exam-
+ple already. To exploit the bug, we need to reach line
+36 to dereference a function pointer from the out-of-
+bounds object or its derived objects, and then we can
+hijack the control ﬂow.
+Again, due to the fact that
+the fuzzing process is blocked at line 14 due to an ex-
+ception, it required symbolic execution to provide a le-
+gitimate value of actions.
+In addition, at line 28,
+there is another condition regarding the return value
+of refcount dec and mutex lock() (invoked at line
+28), which has to turn true. Figure 6 illustrates the in-
+ternals of the function. Here, the parameters r and lock
+are still from out-of-bounds memory, and therefore take
+symoblic values. In order to determine the right values of
+them, we need to follow into refcount dec not one()
+and make sure that it will return false, in order to return
+true at line 6 ultimately, we have determined that val
+should be 1 in order for this to happen. As we can see,
+this example is more convoluted involving more condi-
+tions and more path exploration by symbolic execution.
+As a result, the symbolic execution is guided according
+to the direction at each condition, which eventually ﬁn-
+ishes the exploration in only 18 seconds. Without guid-
+ance from static analysis, symbolic execution is unable
+to ﬁnd this function pointer dereference in 2 hours. We
+have managed to write an actual exploit that does the ac-
+tual heap spraying and show that we can hijack the con-
+trol ﬂow, i.e., execute code at an arbitrary address.
+5.6
+Disclosure
+In this section, we validate the utility of SyzScope in
+terms of helping with timely patch propagation to down-
+stream kernels (for ﬁxed bugs), as well as enabling the
+prioritization of bug ﬁxes in the upstream (for open
+bugs).
+Downstream kernels. We initially attempted to report
+to downstream kernels (e.g., Ubuntu) and have them
+apply patches from upstream after we determine that
+the patches are missing.
+This is unfortunately time-
+consuming as we have to manually analyze the source
+to determine which downstream kernels are actually af-
+fected by the bug. Eventually, we followed the sugges-
+tion from a Ubuntu kernel developer [3] and resort to
+the CVE Numbering Authority.
+Interestingly, we ob-
+serve that the majority of the syzbot bugs do not have
+any CVEs assigned to them. Thus, if we are able to suc-
+cessfully request CVEs for the high-risk bugs, we can
+potentially beneﬁt all the distributions that follow the
+CVE database. We reported all 32 high-risk bugs after
+Linux kernel v4.19. At the time of writing, 8 of them
+have already been assigned CVEs and we have not heard
+back from the remaining 24.
+As an example demon-
+strating the effectiveness of this strategy, the publica-
+tion of CVE-2021-33034 has led to immediate actions
+by Ubuntu [12], Fedora [4], RedHat [9], and Debian [2].
+Upstream kernels. Since the CVE assignment is pred-
+icated on the availability of patches, we had to report
+our ﬁndings directly to upstream kernel developers. This
+process is more tricky than we anticipated. In total, we
+have reported 6 bugs in the open section out of the total
+34 high-risk bugs determined by SyzScope. We reported
+a subset because it turns out that most open bugs already
+have a pending ﬁx (but need time to be conﬁrmed effec-
+tive). At the time of writing, we have seen two patches
+submitted because of our reporting (with email replies
+to the same thread), demonstrating the positive inﬂuence
+on getting important security bugs ﬁxed. During the pro-
+cess of reporting, while we have received appreciation of
+our project and reports, we have also learned that there is
+a serious lack of resources to ﬁx syzbot-generated bugs,
+which is likely the reason why we have not received re-
+sponses for the other 4 bugs. Nevertheless, we do receive
+some positive feedback on our research [10].
+Discussion
+Evaluating bugs that are already high-impact. In this
+project, we take only low-risk bugs as input to SyzScope.
+However, the result shows the number of high-risk im-
+pacts associated with a single bug can be extremely high.
+Speciﬁcally, among the 183 high-risk bug cases, we ﬁnd
+4,843 high-risk impacts. Moreover, not all high-risk im-
+pacts are equal, e.g., func-ptr-deref being the most dan-
+gerous. Therefore, even if a bug already exhibits some
+high-risk impact, e.g., OOB write, we can still feed it to
+SyzScope to uncover even more high-risk impacts. This
+can be beneﬁcial if the goal is to further determine the
+exploitability of a bug.
+Supporting more types of bug impacts. SyzScope cur-
+rently focused on modeling OOB and UAF, starting from
+the hidden impact estimation component, i.e., identifying
+the vulnerable objects and symbolizing the memory that
+the adversary can control. However, there are still other
+bug types such as unitialized use of memory which we
+can support in the future.
+Interfacing with other exploitability testing systems.
+SyzScope is complementary to these projects that aim
+to automatically or semiautomatically evaluate the ex-
+ploitability of kernel bugs. Fuze [49] and KOOBE [20]
+are two representative projects that target UAF and OOB
+bugs respectively. For example, KOOBE [20] can work
+with only bugs that exhibit an OOB write impact already
+and ignore any OOB read bugs by design. According to
+our results, SyzScope is able to turn 32 OOB read bugs
+into OOB write ones, which would allow KOOBE to al-
+most double the number of cases that it has evaluated
+against.
+Pending patches for Syzbot open bugs.
+Syzbot re-
+cently added a new feature called Patch testing requests.
+This feature allows developers and maintainers to upload
+patches for bug testing, if a patch managed to eliminate
+the bug, syzbot will release such patches on the dash-
+board and the patch will be merged into the upstream.
+This feature speeds up the patching process by automat-
+ing the testing of patches. We note that it is possible to
+use those pending patches in the context exploration pro-
+cess when it comes to eliminate unrelated bugs. How-
+ever, we did not choose to do this because such patches
+are not ofﬁcially accepted by Linux and can potentially
+lead to misleading results.
+Related Work
+Kernel fuzzing. There are several prominent general-
+purpose kernel fuzzers that have been developed to dis-
+cover security bugs [29, 35, 34]. More recently, many
+projects have focused on improving various aspects of
+kernel fuzzing [39, 36, 33, 50]. For example, Moon-
+Shine [39] aims to provide highly distilled seeds to
+bootstrap the fuzzing process.
+HFL [36] proposed a
+hybrid fuzzing solution to address a few weaknesses
+encountered in coverage-guided fuzzing, e.g., identify-
+ing explicit dependencies among syscalls. Razzer [33]
+and KRACE [50] improve the fuzzing logic speciﬁ-
+cally against race condition bugs. Unfortunately, these
+general-purpose or custom kernel fuzzers all target at
+uncovering more bugs quickly instead of understanding
+the security impacts of reported bugs (which are often
+manually investigated afterwards). Finally, in addition
+to syzbot, continuous fuzzing against Linux kernels has
+become a common practice in the industry [40].
+Security impact of Linux kernel bugs and crash dedu-
+plication. A recent talk at Linux Security Summit by
+Dmitry Vyukov has shown that some seemingly low-risk
+bugs from syzbot turn out to be of high risks [42]. How-
+ever, no systematic and automated solution has been pro-
+posed to understand this phenomenon on a large scale.
+A closely related work [47] aims to infer the security
+impact of a bug by analyzing its patches (as opposed
+to a bug reproducer and sanitizer-generated bug report).
+Unfortunately, due to the limited information provided
+by a patch, they were able to identify only 227 patches
+that are ﬁxing security bugs (with only 243 security im-
+pacts identiﬁed) after scanning 54,000 commits. This is
+in contrast with the 4,843 security impacts that we dis-
+cover from only 183 low-risk bugs. We believe the in-
+complete result is partly due to the lack of runtime in-
+formation which forces the analysis to be constrained at
+a local scale. Furthermore, there is no differentiation of
+high-risk and low-risk impacts, which is a key goal of
+SyzScope. Finally, there have been many studies on de-
+termining the security impact of bugs based on text anal-
+ysis (e.g., bug report descriptions) using data mining and
+machine learning [46, 19, 30, 41, 45].
+Exploitability testing. Recent work has attempted to
+turn different types of Linux kernel security bugs into
+actual exploits in an automated or semi-automated fash-
+ion.
+Fuze [49] and KOOBE [20] are two representa-
+tive projects that target use-after-free (UAF) and out-of-
+bound (OOB) bugs respectively. They take in a proof-of-
+concept (PoC) that can trigger a bug (often only crashing
+the kernel) as input, and then conduct various analyses
+to convert the PoC into an exploit. In addition, there are
+also related work on exploiting other types of security
+bugs such as uninitialized uses of stack variables [37],
+which we did not support in our current implementation,
+due to the fact the corresponding KMSAN sanitizer cur-
+rently does not provide sufﬁcient details in the bug re-
+port. Finally, there are also related work that aim to assist
+the process of generating an exploit [21, 48]. All of these
+related work are complementary to SyzScope, where our
+system can be considered a frontend that can interface
+with these systems as backends. In addition to kernel
+exploits, there are also other related work on userspace
+analyzing the exploitability of heap bugs [24, 51].
+8
+Conclusion
+In this paper, we perform a systematic investigation on
+fuzzer-exposed bugs on the syzbot platform. In order
+to conduct such an analysis, we develop an automated
+pipeline that combines fuzzing, static analysis, and sym-
+bolic execution together to reveal high-risk security im-
+pacts of seemingly low-risk bugs. The system can be
+easily integrated into the syzbot platform that continu-
+ously evaluates newly discovered bugs. After analyz-
+ing over one thousand such bugs, we demonstrate that
+183 of them can be turned into high-risk bugs. The re-
+sults have important implications on patch prioritization
+and propagation moving forward. To facilitate reproduc-
+tion and future research, we open source SyzScope at
+https://github.com/seclab-ucr/SyzScope.

@@ -1,0 +1,450 @@
+arXiv:2506.09580v1  [cs.CR]  11 Jun 2025
+The Everyday Security of Living with Conflict
+Jessica McClearn
+Royal Holloway, University of London
+jessica.mcclearn.2021@live.rhul.ac.uk
+Reem Talhouk
+Northumbria University
+reem.talhouk@northumbria.ac.uk
+Rikke Bjerg Jensen
+Royal Holloway, University of London
+rikke.jensen@rhul.ac.uk
+Abstract—When ‘cyber’ is used as a prefix, attention is
+typically drawn to the technological and spectacular aspects
+of war and conflict – and, by extension, security. We offer a
+different approach to engaging with and understanding security
+in such contexts, by foregrounding the everyday – mundane
+– experiences of security within communities living with and
+fleeing from war. We do so through three vignettes from our field
+research in Colombia, Lebanon and Sweden, respectively, and by
+highlighting the significance of ethnography for security research
+with communities living in regions afflicted by war. We conclude
+by setting out a call to action for security researchers and
+practitioners to consider such lived experiences in the design of
+security technology that aims to cater to the needs of communities
+in ‘global conflict and disaster regions’.
+I. MUNDANITY IN THE SPECTACULAR
+Images of the destruction and suffering caused by wars waged,
+often at a distance, make their way to our screens through
+different news platforms. We witness smoke billowing from
+dropped bombs and people searching for missing family
+members under the rubble, alongside stories of the scattering
+of people as they are displaced. We are presented with reports
+on how advanced technologies enable ‘targeted operations’
+and ‘precision bombing’; yet, little reflection is offered on
+how such mechanisms of (modern) warfare impact commu-
+nities that experience conflict at close proximity. This is not
+surprising, however, with much security-driven research con-
+centrating on technological advances and policy interventions
+(e.g. international law) in the context of conflict. With the
+foregrounding of spectacular and technological depictions of
+war, security considerations are often reduced to questions
+related to its cyber capabilities. Typically, this means that
+the security concerns for those living in conflict and disaster
+regions are overlooked; their security is generally not reliant
+on the security of the technology itself, i.e. cyber security,
+but on the security that the technology may afford them
+to establish a sense of continuity and control in an every-
+day shattered by conflict and fears. In other words, while
+technology might serve a security purpose for communities
+living through conflict, this purpose often lies in its social and
+relational faculties more than the security of the technology
+itself. It is in this mundane that we can also observe what
+security looks and feels like for those impacted by war. To
+do so, we argue, requires a broad conception of security; a
+conception that brings computer security into conversation
+with socially grounded and immersive research approaches,
+such as ethnography, enabling insights and interpretations of
+how security and technology are interwoven.
+Building on our previous field research we show how, in
+contexts of conflict, it is often the mundane daily routines
+and practices that shape people’s understanding of security
+and how technology shapes it. We thus call for research and
+practice that broadens understandings of security in conflict
+settings by grounding security in how people go about their
+daily lives. We ask: How do people living through conflict
+navigate daily experiences of insecurity, and what are the
+security needs of those displaced by conflict? Many of the
+answers to such questions can be found by observing how
+people practice security in their everyday. In the words of
+Crawford and Hutchinson:
+...[T]he ‘everyday’ acts as an important counter to
+a prevailing emphasis upon the ‘spectacular’ and
+the ‘exceptional’, which cast a long shadow over
+security research [1, p.5].
+Drawing upon everyday security [1], [2] we demonstrate,
+through three vignettes from our field research in Colombia
+(2024), Lebanon (2022) and Sweden (2018), how security
+for people in specific conflict contexts is rooted in their
+everyday social and relational ties. We therefore also insist on
+understanding the security concerns of people living through
+conflict by engaging with the mundane, rather than through
+sensationalist narratives or by foregrounding technological
+advances as are often captured in the prefix cyber. This also
+means that throughout this article we consider what security
+means – and what it is – to the participants in our vignettes.
+Thus, we do not approach security from the understanding that
+it can be neatly separated into either ‘social’ or ‘technologi-
+cal’, but argue for a conception where it can be – and often
+is – both. Our project is founded in a call to action; a call for
+security researchers, practitioners and designers to step into the
+social realities and lived security experiences of those living
+through, and displaced by, conflict. As noted by the authors
+of [3], this is in contrast to the prevailing practice within
+computer security, where “in the absence of far away users
+under threat, designers can invoke them at will and imagine
+their needs”. To do so requires a methodological approach
+that enables immersion in the contexts and communities under
+study: ethnography.
+II. EVERYDAY SECURITY IN CONFLICT
+The very nature of war is of course catastrophic; yet, the
+sensationalising of war disguises the lived reality and day-to-
+day experiences of communities living through it. Similarly,
+when cyber security is invoked in the context of war, attention
+is typically given to narratives of cyber policy, cyber warfare
+and nation state cyber capabilities. Similarly, Hutchings [4]
+argues how the language of war has captured narratives of
+cyber crime, which has led to sensationalist depictions that do
+not reflect the “lived reality” of those impacted by it. Further,
+the authors of [5] in their work on the nature and frequency of
+recent DDoS attacks between Russia and Ukraine, highlight
+how the spectre of cyber war masks the actual technical
+reality of such attacks. Such narratives risk obfuscating the
+more mundane experiences of communities living through war,
+where security is often rooted in daily routine activities and
+practices that provide a sense of stability and predictability –
+and, by extension, security.
+We position our contribution within our own prior co-
+authored work – and the work of others – that recognises
+the significance of the everyday in security research. For
+example, in [6]–[8] we used the framing of ‘the everyday’
+to analyse how social aspects shaped digital security for
+refugees resettling in a new land. In [9] we highlighted
+the everyday insecurities experienced by Syrian refugees in
+Lebanon navigating food aid technologies, while we in [10],
+[11] showed the everyday experiences of insecurity in Lebanon
+among marginalised groups and how they tried to overcome
+infrastructural failures. Individually – and collectively – these
+works highlight how the technological needs of communi-
+ties living through or displaced by conflict are rooted in
+mundane practices of security, such as the sourcing of food,
+navigating broken infrastructures, learning how to take a bus,
+comprehending new cultural contexts, and searching for a
+job and housing. Therefore, although the participants in these
+studies relied on technology to navigate their everyday security
+concerns, these concerns were not technological.
+Using our individual voices and experiences of conducting
+security research in different contexts, we provide vignettes
+from our fieldwork in Lebanon, Colombia and Sweden. We
+do so to illustrate how (in)security was woven into the fabric
+of everyday life (and survival) for the people we encountered
+in these three settings, showing how and for what purpose the
+people we encountered relied on technology for their security
+and, in particular, the security of others. Thus, staying with our
+call to action, our vignettes suggest that designing for those
+living through or displaced by conflict requires understanding
+not simply their use of technology but the mundane contexts
+within which they use technology and the reasons they give.
+III. VIGNETTE: EMPTY HOUSES, LEBANON
+The ongoing conflict in Lebanon has led to an economic
+crisis which is evidenced in the movement of populations,
+the breaking down of physical infrastructures and everyday
+security practices. This economic crisis has been referred to
+by the World Bank as a ‘ponzi scheme’ [12], forcing many
+people to leave the country temporarily and seek economic
+security elsewhere.
+One participant,1 who had spent some time outside of
+Lebanon and since returned to the country, emphasised that
+Lebanese people “are not static”. The participant noted how
+the state of flux was also visible in the built environment:
+“If you go to certain areas of Lebanon you will just find
+empty houses, empty villas that people build with the money
+they made abroad to show that they belong. Then for example
+people pass away or they never come back and the property is
+just empty.” The traces of people having moved, such as empty
+houses, created a sense of having been left behind, of being
+stuck, while pointing to the displacement of many Lebanese
+people.
+Those who had decided to remain in Lebanon were living
+with the daily consequences of the conflict. For example,
+because of the economic instability of the country, many
+people lacked access to their personal finances as restrictions
+had been placed on ATM cash withdrawals. This meant that
+people in Lebanon would often rely on money transfers from
+the Lebanese diaspora. This paired with limited stable internet
+access led to a daily struggle to secure personal finances
+and, ultimately, to survive. These challenges of access over-
+shadowed any concerns related to technological security or,
+more significantly, privacy in the context of sharing sensitive
+and personal details with those whose help could ensure
+one’s survival – through money transfers from abroad. One
+participant shared:
+Relatives are sending money which is the lifeline
+right now [...] We are at a point where talking about
+[digital] rights becomes a conversation which a lot
+of the public is out of the loop of, if they are worried
+about their immediate survival.
+The transient nature of life in Lebanon had deep-rooted
+implications for people’s everyday security; deserted buildings
+served as reminders of the uncertainty that continued to shape
+life in Lebanon. The impact of movement and temporality in
+the context of conflict – being displaced for shorter or longer
+periods of time – is an area of burgeoning security research
+which deserves further attention. How (in)security presents
+itself for transient communities and their reliance on specific
+technological functionalities, such as the wiring of money from
+afar, requires an understanding of the entanglement of identity
+and security in this setting. Combined with the ‘emptiness’
+caused by the conflict, the struggle to survive, as shown in this
+vignette, left those living in Lebanon at the mercy of both the
+functionalities enabled by money transfer technologies and the
+Lebanese diaspora whose empty houses remained as physical
+reminders of their displacement. Here, security concerns, while
+not technological, were partly mitigated by practices enabled
+through technology.
+1We anonymise all participants to ensure their protection.
+IV. VIGNETTE: BEING HEARD, COLOMBIA
+Gender, land and security are intimately interwoven in the
+department of Cauca in Colombia. Many groups in Colombia
+live in rural zones, heavily controlled by paramilitary organ-
+isations. The deep-rooted gendered expectations of women
+to look after the home, and the scarcity of technology in
+such areas, left many women feeling abandoned. This was
+exemplified by one participant, from rural Cauca, who worked
+for an international non-governmental organisation (NGO)
+as she discussed the gendered nature of the already limited
+technological infrastructures in the rural zones, and how this
+impacted the lives of women:
+In the end, who is going to have it [a mobile phone]?
+The man who goes out more, and the woman who
+is often relegated to those private roles in the home,
+she does not have access to technology.
+Limited technological infrastructures paired with gender di-
+vides meant that women were often confined to the home.
+Labour related to the home was also extended to the surround-
+ing land and natural resources. Illegal mining and extractive
+practices had contaminated many rivers, leading to health
+concerns which unequally impacted women. One participant
+stressed the significance of this: “The river is the only source
+for their [the women] life, for food, for fishing, for washing
+clothes.” As a form of resistance, many women often became
+social leaders and land defenders. While this mobilisation of
+women meant that they had become more visible in their
+communities, it also led to an increase in the number of
+enforced disappearances of women activists. As a result, many
+women decided to stay silent. Another participant, a conflict
+victim and social leader, explained this during the fieldwork:
+Many have decided to remain silent and keep quiet,
+that is why our body gets sick and screams, what the
+mouth is silent about and what the body feels. So
+then we get sick from many things and it is because
+of the lack of listening.
+For these women, the tensions between everyday security, on
+the one hand, and their increased visibility, on the other, were
+intimately tied to the continued conflict in Cauca. To translate
+the significance of such mundane normalities for security
+research and practice, this vignette demonstrates how, for these
+women, security was observed through their experienced lack
+of technological infrastructures and the prevalence of gendered
+risks as well as discriminatory practices. In many ways, the
+absence of technology in their daily struggle for survival
+was seen as a security risk that left many women isolated
+in rural settings. The vignettes thus demonstrates how there
+is a concrete need for security technologies that both permit
+and enable communities in at-risk contexts to be heard, while
+taking into consideration, factors such as gender, language,
+limited infrastructures and economic deprivation. While ten-
+sions between security and visibility in at-risk contexts are not
+new, here such tensions materialise through everyday forms of
+resistance.
+V. VIGNETTE: ON A BUS, SWEDEN
+Okay, so maybe sometimes the phone is not good,
+but right now, for me, the phone is my right hand.
+This is a quote from a Syrian refugee in Sweden during
+fieldwork in 2018. She had been forced to leave behind her
+parents and husband in conflict-ridden Syria two years earlier.
+When she arrived in Sweden she had been granted the ‘right
+to remain’. Yet, like so many others in her situation, she was
+still waiting to receive a decision on her application for asylum
+in Sweden. Although not unique to her, her story is one of
+uncertainty and of being suspended between the life (and the
+people) she had left behind in Syria and the life she was trying
+to establish in Sweden – still with the hope that her family
+would be able to join her soon.
+The quote relates to her experience of sitting on a bus
+in Malm¨o, Sweden, as she was going from her temporary
+accommodation to her daily language classes. She never left
+her house without her mobile phone, ensuring that it was fully
+charged but still carrying the charger – in case she would need
+it throughout the day, which she usually did. While displaced
+from her family, this daily routine gave her a sense of security;
+knowing that she would always be reachable should anyone
+in Syria need her.
+Sitting on this bus, on this day, she had received a call from
+her husband: “My husband and my parents were on their way
+to the Swedish visa application centre in Beirut from Syria,
+when they needed my ‘right to remain’ in Sweden in order to
+be able to enter Lebanon as they were told they would not be
+allowed to enter without it.” This is a document that she would
+always carry with her. Still on the bus, she took a picture of
+it and quickly shared with her husband; enabling her family
+to enter Lebanon and take the next steps in their own asylum-
+seeking processes. For her, everyday security was captured in
+that moment. While physically displaced by the conflict, she
+was closely connected to it, both through the experiences of
+others and her own memories from a life of navigating an
+everyday existence during political and social upheaval. Her
+mobile phone had become an extension of herself (“my right
+hand”), through which she lived the security (and insecurity)
+of others. Thus, computer security mechanisms such as access
+control, privacy settings and encrypted messaging played no
+role in her everyday security. Security for her was to be able
+to quickly share and receive information – not whether such
+information was protected.
+VI. A CALL TO ACTION
+It is in the mundane that we can observe and question the
+tensions between security and insecurity that shape people’s
+lived experiences in times of conflict. As our vignettes exem-
+plify, however, mundanity is neither monolithic nor static; it is
+contextual and dynamic. We therefore caution against drawing
+distinct conclusions from our vignettes. Rather, our aim is that
+these vignettes shine a light on the often intricate, subtle and
+diverse ways in which security is experienced – also during
+conflict and war. Our call to action is threefold,
+For researchers to understand the security practices and
+needs of people living with and through conflict necessitates
+adopting methodologies that are designed to engage with the
+everyday and the subtleties that a sensationalist perspective –
+often by invoking a cyber framing – fails to capture. This also
+requires a broad conception of security, where the (academic)
+distinction between safety and security is less significant, as
+exemplified through our vignettes. For the participants in these
+vignettes, the separation between social and technological
+foundations of security would be equally artificial. We follow
+in the footsteps of others (e.g. [13], [14]) who have called
+for a diversification of methodologies within security-driven
+research. Specifically, we call for immersion in ‘the everyday’
+of those living in global conflict and disaster regions, to
+understand what security means to them and how they reason
+about it – before considering the potential role of (security)
+technology in such settings.
+For developers to consider what designing for displaced
+populations actually means there is a pressing need to engage
+with the communities being designed for. Further, for (secu-
+rity) technologies to serve communities impacted by conflict,
+the design of such technologies must be grounded in the
+mundane experiences and social reality of such communities.
+Thus, through practices of co-design and participatory meth-
+ods, we call on developers to collaborate with community-
+facing security researchers who use diverse methodologies,
+including ethnographic methods, to study the needs of distinct
+communities in situ. This, we posit, has the possibility of
+affording technologists a deeper understanding of the lived,
+social realities and material conditions of communities dis-
+placed by war, rather than imagining their needs at will
+– acknowledging, as our vignettes show, how contexts and
+conditions are dynamic.
+For practitioners such as policy designers to engage with
+the mundane, we call for computer security to be situated in
+broader conceptions of security. Despite increasing traction
+around human-centered security research, security, when con-
+sidered in computer security venues, is typically understood as
+a technological question. We argue that this focus overlooks
+the lived, mundane experiences of conflict and displacement.
+We thus challenge (as others have done) the use of the prefix:
+cyber – as it, often unhelpfully, focuses attention on the
+distinctly non-human aspects of war and security. It further
+casts a shadow over and distorts the lived experiences of
+people during conflict, where security is embedded in how
+people go about their daily lives – in the mundane.
+VII. ACKNOWLEDGMENTS
+This work would not exist without the many contributions
+from people, both in and outside of Lebanon, Colombia and
+Sweden, who generously gave their time to speak to us and
+trusted us with their knowledge. The research of Jessica
+McClearn was supported by the EPSRC as part of the Centre
+for Doctoral Training in Cyber Security for the Everyday at
+Royal Holloway, University of London (EP/S021817/1).
+REFERENCES
+[1] A. Crawford and S. Hutchinson, “Mapping the contours of ‘everyday
+security’: Time, space and emotion,” British Journal of Criminology,
+vol. 56, no. 6, pp. 1184–1202, 2016.
+[2] J. Nyman, “The everyday life of security: Capturing space, practice, and
+affect,” International Political Sociology, vol. 15, no. 3, pp. 313–337,
+2021.
+[3] M. Aouragh, S. G¨urses, J. Rocha, and F. Snelting, “Fcj-196 let’s first
+get things done! on division of labour and techno-political practices of
+delegation in times of crisis,” The Fibreculture Journal, no. 26 2015:
+Entanglements–Activism and Technology, 2015.
+[4] A. Hutchings, “The amplification of online deviancy through the lan-
+guage of violent crime, war, and aggression,” IEEE Security & Privacy,
+vol. 22, no. 2, pp. 81–84, 2024.
+[5] A. V. Vu, D. R. Thomas, B. Collier, A. Hutchings, R. Clayton, and
+R. Anderson, “Getting bored of cyberwar: exploring the role of low-
+level cybercrime actors in the russia-ukraine conflict,” in Proceedings of
+the ACM on Web Conference 2024, 2024, pp. 1596–1607.
+[6] L. Coles-Kemp and R. B. Jensen, “Accessing a new land: Designing for
+a social conceptualisation of access,” in Proceedings of the 2019 CHI
+Conference on Human Factors in Computing Systems, 2019, pp. 1–12.
+[7] L. Coles-Kemp, R. B. Jensen, and R. Talhouk, “In a new land: mobile
+phones, amplified pressures and reduced capabilities,” in Proceedings of
+the 2018 chi conference on human factors in computing systems, 2018,
+pp. 1–13.
+[8] R. B. Jensen, L. Coles-Kemp, and R. Talhouk, “When the civic turn turns
+digital: Designing safe and secure refugee resettlement,” in Proceedings
+of the 2020 CHI Conference on Human Factors in Computing Systems,
+2020, pp. 1–14.
+[9] R. Talhouk, L. Coles-Kemp, R. B. Jensen, M. Balaam, A. Garbett,
+H. Ghattas, V. Araujo-Soares, B. Ahmad, and K. Montague, “Food aid
+technology: the experience of a syrian refugee community in coping
+with food insecurity,” Proceedings of the ACM on Human-Computer
+Interaction, vol. 4, no. CSCW2, pp. 1–25, 2020.
+[10] J. McClearn, R. B. Jensen, and R. Talhouk, “Othered, silenced and
+scapegoated: Understanding the situated security of marginalised pop-
+ulations in lebanon,” in 32nd USENIX Security Symposium (USENIX
+Security 23), 2023, pp. 4625–4642.
+[11] J. Mcclearn, R. B. Jensen, and R. Talhouk, “Security patchworking in
+lebanon: Infrastructuring across failing infrastructures,” Proceedings of
+the ACM on Human-Computer Interaction, vol. 8, no. CSCW1, pp. 1–
+26, 2024.
+[12] W.
+Bank,
+“Lebanon
+public
+finance
+review:
+Ponzi
+finance?”
+https://openknowledge.worldbank.org/handle/10986/37824/, 2022.
+[13] J. Slupska, S. Cho, M. Begonia, R. Abu-Salma, N. Prakash, and
+M. Balakrishnan, ““They Look at Vulnerability and Use That to Abuse
+You”:Participatory Threat Modelling with Migrant Domestic Workers,”
+in 31st USENIX Security Symposium (USENIX Security 22), 2022, pp.
+323–340.
+[14] M. R. Albrecht, J. Blasco, R. B. Jensen, and L. Marekov´a, “Collective
+Information Security in Large-Scale Urban Protests: the Case of Hong
+Kong,” in 30th USENIX Security Symposium.
+USENIX ’21, 2021, pp.
+3363–3380.
+VIII. AUTHORS
+• Jessica McClearn is a PhD candidate at Royal Hol-
+loway, University of London in the Centre for Doc-
+toral Training in Cyber Security for the Everyday.
+She uses ethnographic methods to explore the inter-
+section of digital and ontological security within po-
+litical and interpersonal conflicts. Contact her at jes-
+sica.mcclearn.2021@live.rhul.ac.uk
+• Reem Talhouk is an associate professor in Design and
+Global Development at Northumbria University. She has
+conducted research with refugees, activists and humani-
+tarians, with a focus on the interplay between sociotechni-
+cal systems and mechanisms of oppression and resistance.
+Contact her at reem.talhouk@northumbria.ac.uk.
+• Rikke Bjerg Jensen
+is a professor in the Informa-
+tion Security Group at Royal Holloway, University of
+London. She is a social scientists, an ethnographer,
+and focuses on the information security experiences,
+needs, practices and perspectives of groups of people in
+higher-risk and/or marginalised settings. Contact her at
+rikke.jensen@rhul.ac.uk.

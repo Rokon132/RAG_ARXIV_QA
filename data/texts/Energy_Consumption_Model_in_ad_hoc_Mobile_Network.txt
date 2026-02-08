@@ -1,0 +1,945 @@
+ENERGY CONSUMPTION MODEL IN AD HOC 
+MOBILE NETWORK 
+ 
+Maher HENI1, Ammar BOUALLEGUE2 and Ridha BOUALLEGUE3 
+ 
+1,3Innov’Com Laboratory, Sup’Com, University of Carthage, Tunis, Tunisia 
+henimaher@gmail.com 
+ ridha.bouallegue@gmail.com 
+1,2National School of Engineers of Tunis, University of Tunis El-Manar, Tunisia 
+ammar.bouallegue@enit.rnu.tn 
+ 
+ 
+ 
+ABSTRACT 
+The aim 
+of 
+this 
+work is 
+to 
+model the nodes 
+battery 
+discharge 
+in wireless 
+ad 
+hoc 
+networks. Many work focus on the energy consumption in such networks. Even, the research in the 
+highest layers of the ISO model, takes into account the energy consumption and efficiency. Indeed, the 
+nodes that form such network are mobiles, so no instant recharge of battery. Also with special type of ad 
+hoc networks are wireless sensors networks using non-rechargeable batteries. All nodes with an 
+exhausted battery are considered death and left the network. To consider the energy consumption, in this 
+work we model using a  Markov chain, the discharge of the battery considering  of instant activation and 
+deactivation distribution function of these nodes. 
+Keywords 
+ Wireless Ad-hoc network, energy consumption, Markov chain, distribution function, 
+performances evolution  
+ 
+1. INTRODUCTION 
+Wireless ad hoc networks open various research perspectives since the posed constraints. 
+Various proposed protocols in these complex networks that aim to reduce energy consumption 
+or achieve self-configuration and self-organization. In addition messages sent must reach in real 
+time accordingly to the applications nature of these networks. 
+Nodes are generally composed by embedded devices, with limited resources, autonomous, able 
+to process information and transmit using radio waves, to another entity (sensors, processing 
+unit, PDA...) over a limited distance. Ad hoc networks are generally composed by a large 
+number of mobiles nodes, forming a large network without an established infrastructure. 
+Therefore, the nodes act as transmitter, receiver, and data router at the same time. 
+Communications networks are used for various applications. Designing a network, it is 
+necessary to evaluate its performances in order to correctly dimension its operations and 
+capacity. Indeed, the evolution of these performances compares different network topologies 
+according to their uses. It also allows the estimation of network behaviour in many situations, 
+and in particular to estimate the operational problems and solve them before implementation. To 
+evaluate the performances, then, we can use an analogy with a similar already existing network, 
+use a network simulator or through analytical methods of verification. The networks simulators 
+represent the advantage of uselessness of having existing networks. Another method of 
+performances evolution of communications networks is the analytical analyses and formal 
+verification. There are several evaluations methods using mathematical tools such as Petri nets 
+[1], [2], [3], [4] or Markov chains [5], [6], [7]. The two methods present many limits with the 
+modern complex system. Currently we would perform a model combining probabilistic and 
+temporal aspect, to model a probabilistic systems variable in time. These two models (Petri and 
+Markov chains) cannot provide a modelling formalism that satisfies these automata. To resolve 
+these problems the researcher, analyses this complex system with model checking [8], [9]. This 
+is a group of techniques for automatic verification [10] of dynamic system, since the varying of 
+the system behaviour in time. Then it is important to express the timing and the probability in 
+the same time. 
+To prefer the energy efficiency in mobile ad hoc networks, it is necessary to model the node 
+energy consumption. In this work, our aim is to model the batteries power discharge, in ad hoc 
+wireless networks. Our proposition is to use the IPP based ON /OFF model (Interrupted Poisson 
+Process).This model is much used in various types of network to traffic modelling [11-18], even 
+the use of such model in IEEE802.11 [19], have the aim to express the traffic control and not 
+the energetic behaviour. 
+This paper is organized as follows:  In Section 2, we present our motivation. We discuss the 
+related work in section 3. The section 4 presents the stochastic modeling technics. In section 5 
+we present our proposition to model battery with ON/OFF model, and then we calculate the 
+distribution probability function and the battery charge average.  We conclude this paper and 
+present the future work in section 6. 
+2. MOTIVATION: 
+A Mobile Ad-hoc Network (MANETs) [1] is a collection of nodes or terminals that 
+communicate together by forming a multi-hop radio network. The nodes can move and their 
+network topology may be dynamic.  
+In such network, there is no centralized administration. Each node can join the network or it 
+leave at any time. Generally to ensure the mobility of nodes, we cannot recharge the battery.  A 
+node with an exhausted battery is considered dead and not usable. 
+In recent work [20] we presented an efficient routing method using energy efficiency 
+parameters. With the exchange of considerable number of control messages to establishment of 
+routes, or a data messages, this exhaust resources and aggravates performances. One of major 
+causes of exchange of these message is the lost of paths, result of the exhausting of a node 
+battery. To overcome this problem, we suppose that all nodes composed the networks have 
+information about the energy stored in the batteries of its neighborhood. It avoid the routing 
+using a node that it battery will be exhausted. 
+ Precisely, a node uses at the same time the shortest selected path using Dijekstra [21] and also 
+the residual battery energy in message routing. We therefore, proposed a new mechanism to 
+send HELLO message with a reactive routing protocol (Ad hoc On-demand Distance Vector 
+AODV [22], [23]) in calculated instant proportionally to the battery residual energy.  Our 
+proposition does not change the message fields, just with the sending instant we can extract the 
+energy information. Reached the destination, calling the inverse function, it updates the 
+neighbourhood energy base.  
+Through this information, a routing protocol avoids the use of a shortest path that is composed 
+by a node with an exhausted battery.  
+ 
+ 
+3. RELATED WORK: 
+Given the growing importance of energy consumption in wireless networks, over the last few 
+years, a number of works have proposed ways to improve energy efficiency and have modelled 
+the terminals batteries in a wireless and wired network. So, in this context we present an 
+overview on the batteries modelling, on the first hand, and the probabilistic model applied in 
+wireless and wired networks. 
+In [35] the authors present the battery lifetime modelling using three different methods, the 
+three models are used to predict the acid battery lifetime and look for means to extend it using 
+numerical results.  
+In [24] and in their thesis report [25] M. R. Jongerden and B.R. Haverkort studied the mobile 
+devices battery. Starting with a presentation of the chemical and electronic design, the authors 
+express values of the charge and discharge procedures. Through an analytical study, they 
+present in a second part the lifetime prediction of a battery using the Rakhmatov Vrudhila 
+model [26]. This latter presents the diffusion process of the active material in the battery. In the 
+third part of the former, the authors present the Kinetic Battery Model [27], [28], [29] it called 
+such name because it uses a chemical kinetics process as its basis. The final part of [24] present 
+the stochastic model using the Chiasserini and Rao [30], [31], [32], [33], that use the discrete 
+time Markov chain to model battery. The different states used in this model represent the 
+numbers of charge units. In the last section, authors use the stochastic modified KiBaM [34] 
+using discrete time transient Markov process. 
+Our work is similar to this model. The difference is that our model does not present the N states 
+as charge unit, but we use the two states of the node ON/OFF. 
+4. STOCHASTIC MODELLING: 
+The Markov chains [5], [6], [7] form a mathematical formalism to analyze a stochastic 
+phenomenon. A model is based on states and transitions (transition rates or transition 
+probability). Its simple structure allows modelling of a large class of systems. The Markov 
+chains are well known tools which allow many theoretical results finely analyze the behaviour 
+of the modelled system. The Markov chains are one of the most important tools for analysis of 
+random processes in the area. As part of a modelling and performance evaluation, Markov 
+chains have a simplicity and efficiency essential. 
+There are two major types of stochastic Markov chains with discrete time, in which time is 
+considered discrete, consisting of a finite number of independent state, and continuous-time 
+chain, formed by infinite state dependent and related. The states are the representation of 
+random processes in time. Assume that the system transits from state i to state j with probability 
+Pij that depends only on states i and j. Such a system is called without memory or Markovian, 
+which means that the probability Pij does not depend on previous states i in which the system is 
+passed over in its history. 
+To adapt a wide range of systems, we can use a Poisson process modulated by a Markov chain. 
+The states are based on the intensity (λ) of a Markov chain. These processes are grouped under 
+the acronym MMPP (Markov Modulated Poisson Process) [36]. An M-MMPP is an MMPP 
+with M states. 
+The marginal distribution of MMPP is a combination of Poisson distributions. And its 
+covariance is a weighted sum of exponentials. The model parameters are more important since 
+we use with the transition matrix of the Markov chain, a new diagonal matrix denoted by Ʌ, 
+containing the intensities associated with different states is necessary. 
+ 
+ 
+ 
+Figure 1.ON/OFF model: Markov chain with two states 
+ON-OFF model is a special case of MMPP and IPP (Interrupted Poisson Process). The Markov 
+chain modulating the Poisson process has two states: ON and OFF, which correspond to two 
+values of the intensity of a Poisson process (known as ON-OFF model because often in the off 
+state intensity is zero). In addition to the 2x2 matrix of transition, this model requires two new 
+parameters: 
+λon and λoff, which correspond to the respective intensities of the Poisson process in the ON 
+and OFF states (see Figure.1). This model thus has four parameters (λon = (1-λ), λoff = (1-µ), λ, 
+µ where λ and µ present respectively the transition probability from ON to OFF and from OFF 
+to ON). 
+ON-OFF models are used to model the alternation of two phases or modes of communication 
+with different characteristics. This allows reproducing some intermittency, which is a very 
+important characteristic of traffic because it has a significant impact on performance. 
+In our modelling we will use this model to modulate the alternation between active and inactive 
+state of a network nodes. 
+5. BATTERY ON/OFF MODELLING  
+5.1. Discharge Function  
+As mentioned in Section 2, we used the prediction of the battery usage of nodes that compose 
+ad hoc networks in order to calculate optimal routes using as metrics energy and hop count. The 
+model is well detailed in a previous work [20].  
+To complete the model we started from continuous distribution of battery power level presented 
+in figure .2 According to [35]. 
+ 
+ 
+ 
+ 
+Figure 2.SOD: State of discharge 
+ 
+ 
+The figure .2 shows the state of discharge SOD presented by equation (1) that the 
+demonstration found in [35]: 
+τ
+d
+C
+I
+F
+F
+t
+t
+N
+SOD
+init
+∫
+=
++
+=
+ (1) 
+GAS
+SOD
+I
+I
+I
+−
+=
+(1) 
+)
+*
+*
+exp(
+N
+U
+N
+U
+GAS
+T
+C
+V
+C
+K
+I
++
+=
+ 
+ 
+Where:  
+F : the state of discharge equation SOD. 
+ISOD: discharge current 
+I: the charge and discharge battery current 
+IGAS: the gassing current 
+K: constant depends on the battery parameters 
+CU: voltage coefficient; 
+VN: nominal battery voltage  
+TN: nominal battery temperature 
+The both of calculation presented in [35], using the simplification, we choose a simple 
+presentation of SOD equation: 
+ 
+)
+exp(
+*
+τ
+t
+K
+ISOD
+−
+=
+ (2) 
+ 
+ 
+ 
+5.2. Analytical model and Numerical results 
+In the real case, the curve shown in figure .1 is more accurate, since, there are times 
+when the battery is inactive. By modeling the battery using the ON-OFF model, we will 
+have a moment that no charge and no discharge of the battery as shown in figure .3. 
+ 
+ 
+ 
+ Figure 3.Battery discharge modulated ON/OFF  
+ 
+Our goal is to find the probability distribution function of time ti of battery operation. 
+Let 
+ii
+a
+Te
+T
+t
+t
+P
+*
+)
+,
+(
+=
++
+ the transition probability of the system from state i to state j ≠ i, 
+knowing that it passed a period T in the initial state. 
+Using the stationarity assumption “state transition probabilities are independent of the 
+actual time at which transitions take place” [37, 38], P (t, t+T) is independent of t and 
+P(x1, x2) = P(0,x2-x1), then  
+ii
+a
+Te
+T
+P
+T
+t
+t
+P
+*
+)
+,0
+(
+)
+,
+(
+=
+=
++
+ (3) 
+Using the ON/OFF model with the same parameters presented by figure .1, and we 
+assume the system remains in the state ON during Ti (∀ i ∈{1,2,3…n})and changes to 
+the state off at time ti ( as shown in figure .3). 
+Let knowing that  
+P0  
+the ON state probability  
+P1  
+the OFF state probability 
+T=T1+T2+T3+…Tn∈[0,t] 
+The transition probability is calculated as:  
+e
+e
+T
+T
+t
+µ
+n
+n
+n
+T
+t
+t
+µ
+Tn
+T
+t
+t
+µ
+T
+µt
+n
+n
+n
+n
+n
+n
+n
+n
+n
+n
+n
+T
+T
+T
+T
+T
+t
+t
+T
+t
+t
+T
+t
+t
+t
+µ
+e
+e
+e
+e
+e
+T
+t
+t
+f
+T
+f
+T
+t
+t
+f
+T
+f
+t
+f
+T
+t
+t
+P
+T
+P
+T
+t
+t
+P
+T
+P
+t
+P
+t
+T
+t
+P
+T
+t
+t
+P
+t
+T
+t
+P
+T
+t
+t
+P
+t
+P
+P
+n
+n
+λ
+λ
+λ
+λ
+−
+−
+−
+−
+−
+−
+−
+−
+−
+−
+−
+−
+=
++
++
++
++
+−
+−
+−
++
++
+−
+−
++
+−
+−
++
+−
+≅
+=
+−
+−
+−
+−
+=
+−
+−
+−
+−
+=
++
++
++
++
+=
+*
+]
+...
+(
+*
+exp[
+*
+]
+...
+(
+*
+exp[
+*
+*
+.....
+*
+*
+*
+)
+,0
+(
+*
+)
+(
+*
+.....
+*
+)
+(
+*
+)
+(
+*
+)
+(
+)
+,0
+(
+*
+)
+,0
+(
+*
+.....
+*
+)
+,0
+(
+*
+)
+,0
+(
+*
+)
+,0
+(
+)
+,
+(
+*
+)
+,
+(
+*
+.....
+*
+)
+,
+(
+*
+)
+,
+(
+*
+)
+,0
+(
+)
+(
+2
+2
+3
+1
+1
+)
+(
+)
+(
+1
+1
+0
+1
+0
+1
+1
+0
+1
+0
+1
+1
+0
+1
+1
+0
+1
+1
+ 
+ 
+Then, using C as nearest constant we can proof equation (4) 
+e
+e
+C
+µ
+µt
+t
+T
+P
+θ
+λ
+θ
+)
+(
+*
+*
+)
+(
+−
+−
+−
+=
+<
+=
+ (4) 
+ 
+To determinate C, we have integrated the probability on the entire interval 
+)
+(
+)
+(
+e
+e
+µt
+t
+t
+µ
+C
+t
+T
+P
+−
+−
+−
+−
+=
+⇔
+=
+<
+=
+∫
+λ
+λ
+θ
+    
+ 
+Then the resulting probability is: 
+)
+(
+)
+(
+)
+(
+)
+(
+−
+−
+=
+<
+=
+−
+−
+e
+e
+t
+µ
+µ
+µ
+t
+T
+P
+λ
+θ
+λ
+λ
+θ
+ 
+ 
+ 
+Figure 4.resultant probability  
+ 
+ 
+Figure .4 shows the different values of P, for x between 0.4 and 1, given that
+λ
+µ −
+=
+x
+. 
+For x = 1, the probability tends to 1 when T tends towards t. What it means, that the 
+charge will run out if T = t, and if the battery pass the duration in the activate position. 
+ 
+The charge average at time T between 0 and t is presented by: 
+)
+(
+)
+(
+)
+(
+]
+[
+)
+(
+*
+]
+[
+)
+(
+)
+(
+)
+(
+−
++
+−
++
+−
+=
+−
+−
+=
+−
+−
+−
+∫
+e
+e
+e
+µ
+t
+t
+t
+µ
+µ
+t
+µ
+t
+µ
+T
+E
+d
+µ
+T
+E
+λ
+λ
+θ
+λ
+λ
+λ
+θ
+λ
+θ
+ 
+In figure .5 we plot the simulated average battery charge delay (presented by eq.6) for 
+ON-OFF model. The bottom axis shows the transition rate between the two statesON 
+and OFF(the 
+)
+(
+λ
+−
+µ
+ parameter). 
+ 
+ 
+ 
+Figure 5.average of battery charge in t=T. 
+ 
+ 
+ 
+For the sake of simplicity, and without going far of reality, if we consider a battery with 
+a standard activation duration D, in a normal conditions, the terminal using this battery 
+will shut down after a duration D. However, if we alternate between start and shutdown of 
+components, the nominal duration of battery will decrease. This can be translating by 
+the both figure 4. and figure 5. The probability of operating of battery will increase if 
+we decrease the number of alternation between activation and inactivation 
+(
+λ
+µ −
+=
+x
+=1).  Indeed, if this term decreases, T (the sum of activation periods) 
+increase, and the battery duration will be near of D. 
+ 
+3. CONCLUSIONS 
+The power consumption of mobiles devices presents an important challenge in academic and 
+industrial research. Much research has been done on decreasing the average power consumption 
+of these devices.  In this approach, the aim is to reduce the energy consumption by selective 
+start or shutdown of components. However, in most of the research the battery is only 
+considered as a limited-power source. Alteration between the active and inactive, and increased 
+consumption due to state change are not taken into consideration. 
+In a routing algorithm, we proposed a routing of messages according to the level of the nodes 
+batteries forming the path. The shortest and safest path according to battery charge nodes that 
+form will be elected. To know the battery level of different nodes, the algorithm is to send 
+HELLO messages in times depending on the level of the battery. The aim is to seek the function 
+that reduces the maximum probability to have collision. The aim of this paper was to study the 
+behavior of a nodes battery over a period T. Then, we chose as stochastic model Interrupt 
+Poisson Processes IPP and especially the ON / OFF model. The calculation allows us to find a 
+modeling of batteries. The variation and the calculation of averages favor the safety and 
+correctness of our model. As future work, we will calculate the combined instant of sending 
+messages and probability distributed function in order to find the right parameter and the 
+optimal function that allows us to extract the battery level of a neighboring node, avoiding the 
+collision. 
+REFERENCES 
+[1] 
+T. Murata,(1989), “Petri nets properties analysis and applications”, proceeding of ieee vol 77. 
+[2] 
+G. Ciardo, R. German and C. Lindemann,( 1994), “A characterization of the stochastic process 
+underlying a stochastic Petri net”, IEEE Transactions on Software Engineering, Volume: 20 
+, Issue: 7 , Page(s): 506 - 515 .  
+[3] 
+R. Amchandani,( 1974), “Analysis of asynchronous concurrent systems by timed Petri nets”, 
+PhD thesis, Massachusetts Institute of Technology, Cambridge.  
+[4] 
+G.Conte, S.Donatelli, G.Franceschinis, M.A.Marsan and G.Balbo,( 1995), “Modeling with 
+Generalized Stochastic Peti Nets”, Wiley.  
+[5] 
+J. Norris,( 1997), “Markov Chains”, Cambrigde University Press.  
+[6] 
+C. Baier, J.-P. Katoen, H. Hermanns and B. Haverkort , (2002), “Simulation for continous-time 
+markov chains”, COnCUR , Lecture Notes in Computer Science, Volume 2421/2002. 
+[7] 
+H.C. Yang and M.S. Alouini, (2004), “Markov chains and performance comparison of switched 
+diversity systems”, IEEE Transactions onCommunications, Volume: 52 , Issue: 7, Page(s): 1113 
+– 1125.  
+[8] 
+M. Kwiatkowska, Gethin Norman, and D. Parker,( 2000), “Stochastic Model Checking”, School 
+of Computer Science, University of Birmingham Edgbaston, Birmingham B15, United 
+Kingdom.  
+[9] 
+J. Rutten, M. Kwiatkowska, Gethin Norman, and D. Parker,( 2004), “Mathematical Techniques 
+for Analyzing Concurrent and Probabilistic Systems”, American Mathematical Society.  
+[10] 
+ A. Lur et F. Henzingar,( 1999), “Event-Clock Automata: A Determinizable Class of Timed 
+Automata”, TCS: Theoretical Computer Science.  
+[11] 
+D. Moltchanov, (2007),“On-line state detection in time-varying traffic patterns,” in Proc. of the 
+7th International Conference on Next Generation Teletraffic and Wire/Wireless Advanced 
+Networking, pp. 49–60. 
+[12] 
+B. Mah, (1997),“An empirical model of HTTP network traffic,” in Proc. of the 16th Annual Joint 
+Conference of the IEEE Computer and Communications Societies, vol. 2, pp. 592–600. 
+[13] 
+R. Bolla and M. Repetto, (2003),“A new model for traffic forecast in wireless networks with fast 
+mobile users,” in Proc. of the International Symposium on Performance Evaluation of Computer 
+and Telecommunication System, vol. 35, pp. 153–158. 
+[14] 
+M. Pustisek, I. Humar, and J. Bester,( 2008), “Empirical analysis and modeling of peer-to-peer 
+traffic flows,” in Proc. of the 14th IEEE Mediterranean Electrotechnical Conference, pp. 169–
+175. 
+[15] 
+C. Baugh and J. Huang,( 2001), “Traffic model for 802.16 TG3 MAC/PHY simulations”, IEEE 
+802.16 Contribution 802.16.3c-01/30r1. 
+[16] 
+C. Baugh,(2000), “IPP Traffic Model for IEEE 802.16.3”, IEEE 802.16 Contribution 802.16.3c-
+00/51, October 2000. 
+[17] 
+Y.G. Jan, Y.H. Lee, M.H. Chuang, H.W. Tseng, J.Y. Lin, and C.W. Su, ( 2007), “Mean Traffic 
+Bit Rate with ON-SID Modeling of VoIP Traffic”, IEEE 802.16 Contribution C802.16m-07/123. 
+[18] 
+K. D. Turck, S. Andreev, S. D. Vuyst, D. Fiems, S. Wittevrongel, and H. Bruneel, 
+(2009),“Performance of the IEEE 802.16e sleep mode mechanism in the presence of 
+bidirectional traffic,” in Proc. of the International Workshop on Green Communications. 
+[19] 
+I. Papapanagiotou, J. Vardakas, G. Paschos, M. Logothetis, and S. Kotsopoulos, 
+(2007),“Performance evaluation of IEEE 802.11e based on ON-OFF traffic model,” in Proc. of 
+the 3rd International Conference on Mobile Multimedia Communications. 
+[20] 
+M.Heni, R. Bouallegue, (2012),“Power Control in reactive routing protocol for mobile ad hoc 
+network”, International Journal of Wireless & Mobile Networks (IJWMN). 
+[21] 
+E.W.Dijekstra,  (1959),“A note on two problems in connection with graphs”, Numeric  Math. 
+[22] 
+C. Perkins, E. Belding-Royer, (1999),“Ad hoc On Demand Distance Vector Routing”, the 2nd 
+IEEE Workshop on Mobile Computing Systems and Applications (WMCSA'99), New Orleans, 
+Louisiana, USA , pp 25-26. 
+[23] 
+C. E. Perkins, E. M. Belding-Royer, S. R. Das,(2003), “Ad hoc On-Demand Distance Vector 
+(AODV) Routing”, Draft IETF,http://tools.ietf.org/html/draft-ietf-manet-aodv-13. 
+[24] 
+M.R. Jongerden and B.R. Haverkort, (2008),“Battery Modeling”, Technical Report TR-CTIT-
+08-01, Centre for Telematics and Information Technology, University of Twente. 
+[25] 
+M.R. Jongerden, (2010), “Model-based energy analysis of battery powered systems”, Ph.D.-
+thesis report, CTIT, Centre for Telematics and Information Technology University of Twente, 
+ISSN 1381-3617. 
+[26] 
+D. Rakhmatov and S. Vrudhula, (2001),“An analytical high-level battery model for use in energy 
+management of portable electronic systems”, Proceedings of the International Conference on 
+Computer Aided Design (ICCAD’01),  pp. 488–493. 
+[27] 
+J. Manwell and J. McGowan,(1993), “Lead acid battery storage model for hybrid energy 
+systems”, Solar Energy, vol. 50, pp. 399–405. 
+[28] 
+J. Manwell and J. McGowan,(1994), “Extension of the kinetic battery model for wind/hybrid 
+power systems”, in Proceedings of the 5th European Wind Energy Association Conference 
+(EWEC ’94), pp. 284–289. 
+[29] 
+ J. Manwell, J. M. Gowan and L. A., (1994), “Evaluation of battery models for wind/hybrid 
+power system simulation”, in Proceedings of the 5th European Wind Energy Association 
+Conference (EWEC ’94), pp. 1182–1187. 
+[30] 
+C. Chiasserini and R. Rao, (1999), “Pulsed battery discharge in communication devices”, 
+Proceedings of the 5th International Conference on Mobile Computing and Networking, pp. 88 – 
+95. 
+[31] 
+C. Chiasserini and R. Rao, (1999), “A model for battery pulsed discharge with recovery effect”, 
+Wireless Communications and Networking Conference, pp. 636 – 639. 
+[32] 
+ C. Chiasserini and R. Rao,(2001), “Improving battery performance by using traffic shaping 
+techniques”, IEEE Journal on Selected Areas in Communications, vol. 19, no. 7, pp. 1385 – 
+1394. 
+[33] 
+C. Chiasserini and R. Rao, (2001),“Energy efficient battery management”, IEEE Journal on 
+Selected Areas in Communications, vol. 19, no. 7, pp. 1235 – 1245. 
+[34] 
+V. Rao, G. Singhal, A. Kumar, and N. Navet, (2005),“Battery model for embedded systems”, 
+Proceedings of the 18th International Conference on VLSI Design held jointly with 4th 
+International Conference on Embedded Systems Design (VLSID’05). Washington, DC, USA, 
+IEEE Computer Society, pp. 105–110. 
+[35] 
+T.Cronin, P. Lundsager, J. F. Manwell, U. Abdulwahid and  I. Baring-Gould,(2005), “Lifetime 
+Modelling of Lead Acid Batteries”, Risø National Laboratory Roskilde Denmark. 
+[36] 
+W. Fischer and Kathleen Meier-Hellstern,( 1993), “The markov-modulated poisson process 
+(mmpp)”, cookbook. Perform. Eval., 18(2) :149–171,. 
+ 
+Authors 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+PhD. Maher HENI was born in 1984 in KEF, Tunisia. He received the 
+national engineering diploma in telecommunication from the National 
+Engineering School of Tunis (ENIT) and the master diploma in 
+Telecommunications from ENIT with collaboration of IEF institute in paris-
+sud university. Since 2010, he is a Ph.D. student in INNOV’COM (Innovation 
+of COMmunicant and COoperative Mobiles Laboratory) in the Higher School 
+of Communication (Sup’COM). His research interests are ad hoc networks and 
+mobile communication systems.  
+ 
+Pr. Ridha BOUALLEGUE was born in Tunis, Tunisia. He received the 
+M.S degree in Telecommunications in 1990, the Ph.D. degree in 
+telecommunications in 1994, and the HDR degree in Telecommunications in 
+2003, all from National School of engineering of Tunis (ENIT), Tunisia. 
+Director and founder of National Engineering School of Sousse in 2005. 
+Director of the School of Technology and Computer Science in 2010. 
+Currently, Prof. Ridha Bouallegue is the director of Innovation of 
+COMmunicant 
+and 
+COoperative 
+Mobiles 
+Laboratory, 
+INNOV’COM 
+Sup’COM, Higher School of Communication. His current research interests 
+include mobile and cooperative communications, Access technique, intelligent 
+signal processing, CDMA, MIMO, OFDM and UWB systems. 
+Pr. Ammar BOUALLEGUE was born in Kef, Tunisia, in 1945. He 
+received the electrical engineering and engineer doctor degrees from ENSERG 
+of Grenoble, France, in 1971 and 1976, respectively, and the Ph.D. degree 
+from ENSEEIHT, INP of Toulouse, France, in 1984. In 1976, he joined the 
+engineering school of Tunis (ENIT), Tunisia. From 1984 to 1992, he was the 
+head of the Electrical Department, ENIT, and from 1993 to 1995, he was 
+Director of Telecommunication for the High School of Tunis, Tunisia. He is 
+the head of the Communication Systems (SysCom) Laboratory at the National 
+Engineering School of Tunis. His research interests include passive and active 
+microwave structures, signal coding theory, and digital communications.

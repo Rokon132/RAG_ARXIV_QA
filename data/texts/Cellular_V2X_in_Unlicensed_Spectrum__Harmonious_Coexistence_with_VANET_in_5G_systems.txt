@@ -1,0 +1,1210 @@
+1
+Cellular V2X in Unlicensed Spectrum: Harmonious
+Coexistence with VANET in 5G systems
+Pengfei Wang, Boya Di, Hongliang Zhang, Kaigui Bian, and Lingyang Song
+Abstract
+With the increasing demand for vehicular data transmission, limited dedicated cellular spectrum
+becomes a bottleneck to satisfy the requirements of all cellular vehicle-to-everything (V2X) users. To
+address this issue, unlicensed spectrum is considered to serve as the complement to support cellular
+V2X users. In this paper, we study the coexistence problem of cellular V2X users and vehicular ad-hoc
+network (VANET) users over the unlicensed spectrum. To facilitate the coexistence, we design an energy
+sensing based spectrum sharing scheme, where cellular V2X users are able to access the unlicensed
+channels fairly while reducing the data transmission collisions between cellular V2X and VANET users.
+In order to maximize the number of active cellular V2X users, we formulate the scheduling and resource
+allocation problem as a two-sided many-to-many matching with peer effects. We then propose a dynamic
+vehicle-resource matching algorithm (DV-RMA) and present the analytical results on the convergence
+time and computational complexity. Simulation results show that the proposed algorithm outperforms
+existing approaches in terms of the performance of cellular V2X system when the unlicensed spectrum
+is utilized.
+Index Terms
+Cellular V2X, VANET, Semi-persistent scheduling, Resource allocation, Matching theory
+The authors are with School of Electronics Engineering and Computer Science, Peking University, Beijing, China (email:
+{wangpengfei13,diboya,hongliang.zhang,bkg,lingyang.song}@pku.edu.cn).
+arXiv:1712.04639v2  [eess.SP]  17 Dec 2017
+I. INTRODUCTION
+Intelligent transport systems (ITS) have been developed for decades to support a wide variety
+of safety-critical and trafﬁc-efﬁcient applications. Recently, the solution concept of vehicle-to-
+everything (V2X) communication has drawn great attention in both industrial and academic
+ﬁelds, including vehicle-to-vehicle (V2V) communication, vehicle-to-infrastructure (V2I) com-
+munication, and so on [1]. Based on the long term evolution (LTE) technology, the cellular
+V2X communication supports massive data transmission in large coverage with controllable
+latency [1]–[4]. However, due to the high user density of the vehicular network, especially in
+the dense urban scenario, the dedicated spectrum for cellular V2X communication may not fully
+satisfy the demands of massive data transmission. In addition, requirements of reliable data
+transmission with low latency is hard to be satisﬁed, especially in safety-critical applications.
+To improve the performance of vehicular communication and satisfy the aforementioned
+demands, several technologies have been discussed in V2X systems. Multicast-broadcast single-
+frequency network (MBSFN) is investigated to increase the reliability of the data transmission,
+especially for vehicles at the cell edge [5]. In addition, device-to-device (D2D) technology can
+be utilized for the direct V2V communication between multiple vehicles in proximity [2], [6].
+Moreover, non-orthogonal multiple access (NOMA) schemes are considered in V2X systems
+to support more vehicles over limited spectrum resources as well as improving the spectrum
+efﬁciency [7], [8].
+Different from aforementioned schemes, we aim to support more cellular V2X users by
+leveraging the unlicensed spectrum. Over the unlicensed spectrum, direct and distributed data
+transmission between nearby vehicles can be supported, forming the vehicular ad-hoc net-
+work (VANET)1. It worth noting that both cellular V2X and VANET can be used for safety-
+oriented applications. The differences between cellular V2V users and VANET users over the
+unlicensed spectrum are the modes of resource allocation and data structure. 1) The resources
+utilized by cellular V2V users are allocated by the BS in a centralized way [10], [11], while
+VANET users access the channel in a distributed way over the unlicensed spectrum using the
+energy detection, i.e., each vehicle detects the power level of the channel and waits to access
+1For example, IEEE 802.11 standards, including IEEE 802.11p and IEEE 802.11n, can be utilized for the data transmission
+over unlicensed spectrum [6], [9].
+the channel until the detected power is lower than a threshold. 2) The data transmission of
+cellular V2V users follows the LTE standards, where the length of each data frame is constant
+and the transmission is terminated with the end of the frame. However, the data transmission of
+VANET users follows the 802.11 standards, i.e., the package size of each VANET user varies
+with the transmission demand of the VANET user. Moreover, the VANET user does not release
+the channel until the package has been transmitted completely, and thus, the transmission time of
+the package is uncertain. Hence, when the cellular V2X communication expands to unlicensed
+spectrum, it is necessary to consider the coexistence of cellular V2X users and VANET users
+in order to increase the number of active cellular V2X users as well as the reliability of data
+transmission.
+However, new challenges will be brought by the coexistence system of cellular V2X and
+VANET: (1) A suitable coexistence mechanism is needed over the unlicensed spectrum for
+cellular V2X users to ofﬂoad the transmission demand. Integrated allocation of dedicated cellular
+and unlicensed spectrum needs to be mitigated to take full advantage of the global control of
+cellular system. Meanwhile, the interference to VANET users caused by cellular V2X users needs
+to be considered. (2) Due to the large amount of data transmitted by numerous vehicles, dynamic
+resource scheduling in each time slot results in inevitable control overhead. (3) The mobility of
+vehicles brings about the frequent change of the topological structure of vehicles, which further
+inﬂuences the channel conditions between vehicles. The change of channel conditions is likely
+to cause the failure of data transmission.
+To tackle the above challenges, we propose an energy sensing based coexistence scheme
+over the unlicensed spectrum for both cellular V2X users and VANET users, in which cellular
+V2X users can share the open spectrum fairly with VANET users according to the sensed
+channel conditions. To decrease the overhead, the semi-persistent scheduling (SPS) [12] method
+is considered for the resource allocation. Moreover, We take the velocity of vehicles into the
+consideration to measure the change of channel conditions. Furthermore, we formulate the time-
+frequency resource allocation problem. We allocate the dedicated cellular and shared subchannels,
+and schedule the time slots during the scheduling cycle, aiming to maximize the number of active
+cellular V2X users as well as reducing the interference to VANET users. Since the allocation of
+subchannels to cellular V2X users in different time slots can be considered as a matching between
+vehicles and time-frequency resources, we reformulate the problem as a two-sided many-to-many
+matching problem with peer effects [13]–[17], which can be addressed by the proposed dynamic
+vehicle-resource matching algorithm (DV-RMA).
+In literature, several existing works also considered the coexistence mechanisms for the
+heterogeneous system. In [18], a cluster based heterogeneous systems was proposed for vehicular
+intersection collision avoidance service, which reduced the trafﬁc amount between vehicles and
+BS as well as mitigating the overload in high density conditions. In [19], a hybrid overlay protocol
+was proposed to help vehicles to adaptively select the optimal communication mode, i.e. , ad-hoc
+communication or cellular communication, according to the transmission demand and network
+conditions. In [20], [21], the coordination of LTE and Wi-Fi system was investigated for the
+cellular data ofﬂoading on the unlicensed spectrum. However, the resource allocation mechanism
+of all cellular V2X users over the unlicensed spectrum has not been considered. Moreover, the
+tradeoff between massive connectivity and user fairness has not been fully discussed.
+The main contributions of our work in this paper are listed as follows.
+• We propose an energy sensing based spectrum sharing scheme for cellular V2X users to
+share the unlicensed spectrum fairly with VANET users. The number of active cellular V2X
+users is maximized while the interference to VANET users is considered.
+• We quantify the interference to VANET users caused by cellular V2X users for utiliz-
+ing the unlicensed spectrum by constructing the vehicle interference model, in which the
+interference is approximated as the interference area brought by the cellular V2X user.
+• We investigate the time-frequency resource allocation problem using matching theory. The
+DV-RMA algorithm in consideration of the peer effects is then designed. Besides, its
+stability, convergence and complexity are analyzed.
+The rest of the paper is organized as follows. In Section II, the system model of spectrum
+sharing cellular V2X system is described. In Section III, we design the energy sensing based
+scheme for cellular V2X users to share the common spectrum with VANET users fairly. We
+formulate the subchannel allocation and time scheduling problem, and reformulate the problem
+as a two-sided many-to-many matching problem in Section IV. In Section V, we propose the
+DV-RMA to solve the problem. The stability, convergence and complexity of DV-RMA as well
+as the interference to VANET users are analyzed in Section VI. Simulation results are presented
+in Section VII and conclusions are drawn in Section VIII.
+II. SYSTEM MODEL
+In this section, we consider the scenario where cellular V2X users coexist with VANET users
+over the unlicensed spectrum. The scenario is described ﬁrst, and then the interference of cellular
+V2X users is analyzed.
+Uplink
+Sidelink
+Interference
+V2X  BS
+ VANET user
+V2I user
+V2V user
+Fig. 1.
+System model of the coexistence system of cellular V2X and VANET.
+A. Scenario Description and Channel Model
+As shown in Fig. 1, we consider a vehicular network which consists of N V2I users, M V2V
+users and VANET users. We denote the V2I transmitters by n, n ∈N = {1, . . . , N}, and V2V
+users by m, m ∈M = {N + 1, . . . , N + M}, in which mt represents the transmitter and mr
+represents the receiver of V2V user m, respectively..
+We assume that cellular V2X users access the dedicated cellular spectrum by orthogonally
+frequency domain multiplexing (OFDM). The bandwidth of the dedicated cellular spectrum is
+divided into K subchannels, denoted by K = {1, 2, . . . , K}. Since the data transmission of
+cellular V2X users needs to follow the LTE standard in the unlicensed spectrum, the unlicensed
+spectrum can be divided into Ku subchannels by the BS, denoted by Ku = {K + 1, K +
+2, . . . , K + Ku}, to support multiple cellular V2X users simultaneously.
+The timeline is divided into multiple subframes for cellular data transmission, each of which
+has the length of Ts. A scheduling frame consists of T subframes, denoted by T = {1, . . . , T}.
+Particularly, vehicles are allocated dedicated cellular band in each subframe for control signal
+transmission to guarantee the reliability.
+We assume that cellular V2X users transmit data with ﬁxed power, denoted by P v, on a
+dedicated cellular or unlicensed subchannel. In addition, let the minimum required received
+power be P r. The signal received by cellular V2X user j from user i can be expressed as
+yj = hi,jxi + nj,
+(1)
+where xi is the signal sent by the cellular V2X i and the noise nj follows independent Gaussian
+distribution with zero mean and the variance σ2.
+We adopt the free space propagation path-loss model with Rayleigh fading [22] to model the
+channel gain between cellular V2X users, i.e., P = P0·(d/d0)−α·|h0|2, where P0 and P represent
+signal power measured at d0 and d away from the transmitter respectively, α is the path-loss
+exponent, and h0 ∼CN(0, 1) is a complex Gaussian variable representing the Rayleigh fading.
+Moreover, we simplify the received power P0 at d0 = 1 equals the transmit power P v. Since the
+mobility2 of vehicles can severely affect the distance between them, the velocity information is
+utilized to estimate the distance between cellular V2X users i and j. The received signal power
+of the user j on one subchannel can be given by
+p(r)
+i,j = P v · |hi,j|2,
+(2)
+and the channel gain hi,j from the user i to user j can be expressed as
+|hi,j|2 = G · |di,j + vi,j · tw|−α · |h0|2,
+(3)
+where G is the constant power gain factor introduced by ampliﬁer and antenna, di,j is the distance
+vector from cellular V2X user i to user j, vi,j is the relative velocity of cellular V2X user i to
+user j, and tw is the waiting interval between the time point when the data to transmit is ready
+and the time point when the actual data transmission starts.
+B. Interference Analysis
+We analyze the interference of cellular V2X users to VANET users and other cellular V2X
+users in this subsection. The VANET users and cellular V2X users occupy the channel in different
+2 The mobility of vehicles also brings about the problem of Doppler-shift. In our scenario, we focus on the urban environment
+with low velocities of 15 ∼60km/h [26], hence, the maximum Doppler-shift over the unlicensed spectrum (2.4GHz) is less
+than 0.27kHz.
+Fig. 2.
+Interference of the cellular V2X user to the VANET.
+ways, i.e., the VANET user occupies the whole channel, while cellular V2X users share the
+channel by dividing it into multiple subchannels.
+1) Interference to VANET : When the unlicensed channel is occupied by cellular V2X users,
+the performance of VANET users is affected. To measure the degradation of the performance of
+VANET users, we deﬁne the interference range of cellular V2X users to VANET users as the
+area where the received power from the cellular V2X users exceeds the predeﬁned threshold P r.
+According to the free path-loss model, the interference range is a circle with the cellular V2X
+user at the center. The radius of interference range of the cellular V2X user i, denoted by Li,
+is determined by the channel fading and the minimum required receiving power P r, as shown
+below:
+Li = logα(P vG|h0|2
+P r
+).
+(4)
+When a new cellular V2X user i accesses the unlicensed spectrum, the total interference range
+is likely to increase. Only the additional interference range of the user i is considered, which is
+calculated as the area of the user i’s interference circle excluding the overlapping part, i.e., the
+shaded part in Fig. 2.
+Let di,j be the distance between cellular V2X users i and j, and V be the set of cellular
+V2X users which occupy unlicensed subchannels. To better depict the size of the additional
+interference area brought by cellular V2X user i given the existence of cellular V2X user j, we
+express the overlapping part in the following proposition.
+Proposition 1. Without loss of generality, we assume that Li < Lj, then the area of the
+overlapping part between the interference area of cellular V2X users i and j is
+Oi,j =
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+L2
+i arccos(
+d2
+i,j+L2
+i −L2
+j
+2Lidi,j
+) + L2
+j arccos(
+d2
+i,j−L2
+i +L2
+j
+2Ljdi,j
+)−
+2
+q
+2L2
+j(L2
+i + d2
+i,j) −(L2
+i −d2
+i,j)2 −L4
+j,
+if
+di,j <
+q
+L2
+j −L2
+i ,
+πL2
+i −L2
+i arccos(
+L2
+j−d2
+i,j−L2
+i
+2Lidi,j
+) + L2
+j arccos(
+d2
+i,j−L2
+i +L2
+j
+2Ljdi,j
+)−
+2
+q
+2L2
+j(L2
+i + d2
+i,j) −(L2
+i −d2
+i,j)2 −L4
+j,
+if
+di,j ≥
+q
+L2
+j −L2
+i .
+(5)
+Proof: See Appendix A.
+Assuming that the additional interference area brought by cellular V2X user i to user j,
+denoted by fi,j, is the difference between the interference area of user i and the overlapping
+interference area of users i and j. Hence, the additional interference area is shown as below:
+fi,j =
+
+
+
+πL2
+i −Oi,j,
+if
+di,j < Li + Lj,
+πL2
+i ,
+if
+di,j ≥Li + Lj.
+(6)
+Given cellular V2X user j whose interference range has been considered, the additional inter-
+ference area fi,j of cellular V2X user i varies with user j, determined by the the interference
+radius Lj and the distance between cellular V2X users i and j. Considering only the strongest
+interference, the additional interference of cellular V2X user i, denoted by fi, is deﬁned as
+shown bellow:
+fi = min
+j∈V fi,j.
+(7)
+2) Interference Analysis of Cellular V2X System: We ﬁrst deﬁne an indicator θ(t)
+i,k to describe
+subchannel utilization, where
+θ(t)
+i,k =
+
+
+
+1,
+if subchannel k is allocated to cellular V2X user i in subframe t,
+0,
+otherwise.
+(8)
+We assume that in a subframe one subchannel can be allocated to at most one V2I user, and
+multiple V2V users can share the same subchannel. Moreover, since cellular V2X users and
+VANET users do not utilize the same channel simultaneously, the interference from VANET
+users to cellular V2X users does not need to be considered. Therefore, the SINR at the receiver
+of BS from V2I user n over subchannel k in subframe t can be expressed as
+γ(t)
+n,k =
+θ(t)
+n,kP v|hn,0|2
+σ2 +
+N+M
+X
+i=N+1
+θ(t)
+i,kP v|hi,0|2
+,
+(9)
+where hi,0 represents the channel gain from cellular V2X user i to BS.
+The SINR at the receiver mr from V2V transmitter mt over subchannel k in subframe t is
+denoted by
+γ(t)
+m,k =
+θ(t)
+m,kP v|hm,m|2
+σ2 +
+N+M
+X
+i=1,i̸=m
+θ(t)
+i,kP v|hi,m|2
+.
+(10)
+The data rate of V2I user n and V2V user m over subchannel k in subframe t is respectively
+expressed as
+R(t)
+n,k = log2(1 + γ(t)
+n,k),
+(11)
+and
+R(t)
+m,k = log2(1 + γ(t)
+m,k).
+(12)
+III. ENERGY SENSING BASED SPECTRUM SHARING SCHEME
+In this section, we propose the energy sensing based spectrum sharing (ESSS) scheme for
+cellular V2X users to share the unlicensed spectrum fairly with VANET users. Different from
+the users in a centralized downlink system, VANET users need to sense the channel conditions
+individually for their own data transmission, requiring a speciﬁc mechanism to reduce the
+collision of data transmission. In addition, many safety-critical applications have raised stringent
+latency requirements on the vehicular network, and thus, the sensing duration needs to be limited
+to a tolerable level. Moreover, compared with the traditional ad-hoc vehicular network, new
+challenges have been posed due to the existence of V2I communications.
+In this scheme, the adaptive duty cycle [23], [24] is adopted, which represents a constant
+period of data transmission for cellular V2X users and VANET users. As shown in Fig. 3, each
+duty cycle is divided into the sensing period and adaptive transmission period.
+Fig. 3.
+Structure of the duty cycle in the ESSS scheme.
+A. Channel Sensing
+In the sensing period, cellular V2X users sense the channels to select one of the unlicensed
+channels and occupy it. The cellular V2X users ﬁrst perform sensing to select the most suitable
+unlicensed channel for transmission. They measure the interference level over each unlicensed
+channel by energy detection. The channel is considered to be idle if the interference level is lower
+than the sensing threshold. If there is an idle channel, the cellular V2X users will occupy this
+unlicensed channel, otherwise, they need to share the channel of the least interference level with
+VANET users. When the channel is shared, in order to reduce the collision of data transmission
+between cellular V2X users and VANET users, cellular V2X users will keep sensing until the
+selected channel is idle and then occupy it immediately.
+The channel selection mechanism monitors the operating channel status and keeps tracking
+the most suitable channel, i.e., once the interference level of the operating channel is beyond the
+threshold and there exists another channel over which the interference level is detected lower
+than that of the operating channel, the cellular V2X users will switch to the less interfered
+channel for data transmission.
+B. Sensing Based Adaptive Transmission
+The length of cellular V2X transmission is set based on the sensing results. When the
+unlicensed channel is sensed idle, the cellular V2X transmission period works throughout the
+duty cycle. Otherwise, the same duration as that of the cellular V2X transmission period is kept
+for the VANET transmission.
+In the cellular V2X transmission period, SPS method is utilized to reduce the overhead and
+resource waste. Dedicated cellular and unlicensed subchannels are allocated to the users peri-
+odically and temporarily occupied during the SPS cycle. The cellular V2X transmission period
+includes several SPS cycles, denoted by T sc, and one SPS cycle includes T data transmission
+subframes, i.e., T sc = T · Ts. At the beginning of each SPS cycle, the transmission demand of
+each user within this cycle is collected by the BS for scheduling. The BS takes the demands of
+all cellular V2X users into the comprehensive consideration and allocates the time and frequency
+resources accordingly in a centralized way, representing the results that serve as the bound of
+the performance to be achieved by a distributed online scheme in such scenarios. Moreover, the
+position and velocity information of the vehicles is broadcasted periodically by themselves, and
+updated during the scheduling interval. The data transmission of cellular V2X users follows the
+LTE standards and VANET users, however, cannot access the channel during these subframes.
+In the VANET transmission period, VANET users can utilize the unlicensed spectrum freely
+following the IEEE 802.11 standards, while cellular V2X users can only transmit over the
+dedicated cellular spectrum. The next duty cycle will start once the VANET transmission period
+terminates.
+IV. PROBLEM FORMULATION
+In this section, we focus on the dedicated cellular and unlicensed subchannel allocation as well
+as time scheduling during the SPS cycle, which can be formulated as the subchannel allocation
+and time scheduling problem. We then reformulate this problem as a two-sided many-to-many
+matching problem between vehicles and time-frequency resources.
+A. Subchannel Allocation and Time Scheduling Problem
+Deﬁne a binary transmission matrix β to indicate whether cellular V2X user i can perform a
+successful transmission. The indicator element over subchannel k in subframe t can be expressed
+as
+β(t)
+i,k =
+
+
+
+1,
+if γ(t)
+i,k ≥γth,
+0,
+if γ(t)
+i,k < γth,
+(13)
+where γth is the SINR threshold for successful detecting.
+According to the interference measurement model, the total interference range to VANET
+users in subframe t is the sum of interference range of each cellular V2X user that occupies
+unlicensed subchannels. We then introduce the penalty term to reﬂect the total interference to
+VANET users caused by cellular V2X users in subframe t:
+C(t)
+i
+= fi · sgn(
+X
+k∈Ku
+θ(t)
+i,k),
+(14)
+in which fi is the additional interference of cellular V2X user i presented in (6).
+To satisfy the reliability requirements of multiple cellular V2X users, we aim to maximize
+the number of active cellular V2X users including V2I and V2V users, while constraining the
+interference to VANET users to a tolerable level during the SPS cycle. Therefore, the scheduling
+problem is formulated as follows:
+max
+θ(t)
+i,k
+ T
+X
+t=1
+N+M
+X
+i=1
+K+Ku
+X
+k=1
+β(t)
+i,kθ(t)
+i,k −λ ·
+T
+X
+t=1
+N+M
+X
+i=1
+Ct
+i(θ(t)
+i,k)
+!
+,
+(15)
+s.t.
+N
+X
+i=1
+θ(t)
+i,k ≤1, ∀k ∈K ∪Ku, 1 ≤t ≤T,
+(15a)
+K+Ku
+X
+k=1
+T
+X
+t=1
+θ(t)
+i,k ≤S, ∀i ∈N ∪M,
+(15b)
+N+M
+X
+i=1
+θ(t)
+i,k ≤Q, ∀k ∈K ∪Ku, 1 ≤t ≤T,
+(15c)
+K
+X
+k=1
+θ(t)
+i,k ≥1, ∀i ∈N ∪M, 1 ≤t ≤T,
+(15d)
+where λ ≥0 is the penalty factor. Constraint (15a) shows that one subchannel can be allocated
+to no more than one V2I user in one subframe; (15b) shows that one vehicle can occupy no
+more than S time-frequency resources during one SPS cycle; (15c) reﬂects that one subchannel
+can be occupied by no more than Q cellular V2X users in one subframe; (15d) shows that at
+least one dedicated cellular subchannel needs to be allocated to each vehicle in each subframe
+for the reliable transmission of control signals.
+B. Matching Problem Formulation
+The time resources and frequency resources are orthogonal, and thus, we take the time-
+frequency resource as a whole, and deﬁne the subchannel k in the subframe t as Wk,t, where
+k ∈K∪Ku and t ∈T . We denote the cellular V2X user set by U = N ∪M and time-frequency
+resource set as W = (K ∪Ku) × T . U and W are considered as two disjoint sets of selﬁsh
+and rational players. The time-frequency resource allocation to cellular V2X users can then be
+considered as a matching between cellular V2X user set U and time-frequency resource set W.
+Hence, the time-frequency allocation problem in (15) can be formulated as a two-sided many-
+to-many matching problem. For convenience, we denote (Vi, Wk,t) as a matching pair if Wk,t is
+allocated to vehicle user Vi.
+In order to describe the interest of each player, we assume that each player has a preference
+over the subset of the opposite side. For vehicle Vi, its preference is determined by the data rate
+over the time-frequency resource. If vehicle Vi prefers Wj to Wj′, then we have
+Wk,t ≻Vi Wk′,t′ ⇔R(t)
+i,k > R(t′)
+i,k′,
+(16)
+∀k ∈K ∪Ku, t ∈T , |k −k′| + |t −t′| ̸= 0,
+which implies that vehicle Vi obtains higher data rate over resource Wk,t than resource Wk′,t′.
+The preference of time-frequency resource Wk,t is determined by the the utility and total
+interference area. To be speciﬁc, the utility of resource Wk,t is the number of the active cellular
+V2X users over it, which can be expressed as
+UWk,t(Θ) =
+N+M
+X
+i=1
+β(t)
+i,kθ(t)
+i,k,
+(17)
+where Θ = (θ(1)
+1,1, . . . , θ(T)
+N+M,K+Ku) be the resource allocation indicator. The total interference
+area of cellular V2X users during the SPS cycle can be expressed as
+C(Θ) =
+T
+X
+t=1
+N+M
+X
+i=1
+Ct
+i.
+(18)
+Therefore, resource Wk,t preferring vehicle Vi to vehicle Vi′ is given by
+Vi ≻Wk,t Vi′
+(19)
+⇔UWk,t(Θ) −λC(Θ) > UWk,t(Θ′) −λC(Θ′).
+With the above preference relations, we then deﬁne the preference list.
+Deﬁnition 1. A preference list is an ordered set containing all the possible subsets of the opposite
+set for player i (i ∈U ∪W). In consideration of q subsets of the opposite set of player i, denoted
+by A1, A2, . . . , Aq, the preference list of player i is deﬁned as P(i) = {A1, A2, . . . , Aq}, which
+represents that A1, A2, . . . , Aq are possible to be the player i’s matching pair and A1 ≻i A2 ≻i
+· · · ≻i Aq.
+The preference list can be determined by the BS at the beginning of each SPS cycle based
+on the channel state information. Moreover, the preference of the player, e.g. i, is transitive,
+implying that if A ≻i A′ and A′ ≻i A′′, then A ≻i A′′, where A, A′ and A′′ are subsets of the
+opposite set of player i.
+With the above deﬁnitions of matching pair and preference list, we then formulate the opti-
+mization problem shown in (15) as a two-sided many-to-many matching problem.
+Given two disjoint sets, i.e., cellular V2X user set U = {V1, V2, . . . , VN+M} and time-frequency
+resource set W = {W1,1, . . . , WK+Ku,T}, a many-to-many matching Ψ is a mapping from the
+set U ∪W to the subsets of U ∪W:
+1) Ψ(Vi) ∈W, ∀Vi ∈U, and Ψ(Wk,t) ∈U, ∀Wk,t ∈W;
+2) Ψ(Vi) = Wk,t ⇔Ψ(Wk,t) = Vi;
+3) |Ψ(Wk,t) ∩N| ≤1;
+4) |Ψ(Vi)| ≤S;
+5) |Ψ(Wk,t)| ≤Q;
+6) If ∃Wk,t ∈Ψ(Vi) in subframe t, there exists Wk′,t ∈(K × T ), Wk′,t ∈Ψ(Vi).
+Conditions 1) and 2) imply that the cellular V2X user and the time-frequency resource are
+matched with each other manually. Conditions 3)-5) correspond to constraint (15a)-(15c), respec-
+tively. Condition 6) means that a minimum of one dedicated cellular time-frequency resource is
+allocated to Vi in each occupied subframe according to constraint (15d).
+Compared to the traditional matching problems, our formulated one is rather complicated
+due to the following reasons. First, externalities or peer effects [17] are considered because
+the preference of the vehicle is inﬂuenced by the other vehicles’ co-channel interference over
+the same time-frequency resource, making the decisions of all vehicles are correlative with the
+others’ behaviors. Second, the mobility of vehicles makes the topology time-varying, and thus
+we need to consider the change of vehicles’ positions in each subframe during the SPS cycle.
+Third, the density of vehicle users is high, and each player can match with any subset of the
+opposite set, resulting in numerous matching combinations when the number of vehicles is large.
+For these reasons, existing algorithms [25] cannot be directly applied to solve our problem. Thus,
+we develop a dynamic matching algorithm.
+V. DYNAMIC VEHICLE-RESOURCE MATCHING ALGORITHM
+In this section, we design a dynamic vehicle-resource matching algorithm (DV-RMA). First
+we illustrate the matching process given the static preference list in our proposed algorithm,
+then we elaborate on the whole process of the dynamic algorithm in consideration of the peer
+effects.
+A. Algorithm Design
+The DV-RMA is constructed based on the iteratively renewed preference lists, which are
+updated at the beginning of each static matching process. The static matching process consists
+of several rounds of vehicles’ proposal and time-frequency resources’ acceptation/rejection. Three
+steps of each round are described in detail as follows.
+1) Vehicles propose to the time-frequency resources: Each incompletely matched3 vehicle
+proposes itself to its most preferred time-frequency resource according to its preference list.
+Vehicles then remove the time-frequency resource they have proposed to from their preference
+lists in the current matching process, and wait for the responses of the time-frequency resources.
+The peer effects brought by other vehicles are unpredictable for each vehicle. Therefore, the
+proposal in each round of matching process is based on the original preference list of vehicles
+constructed at the beginning of the current matching process.
+3A cellular V2X user is incompletely matched if it is matched with fewer than S time-frequency resources.
+2) The time-frequency resources accept or reject the proposal: When vehicles propose to the
+resource, the time-frequency resource needs to evaluate the utility it obtains from accepting the
+proposal against the loss brought by the increase of the co-channel interference. We introduce
+the concept of blocking pair to describe the mechanism of the time-frequency resource deciding
+whether to accept the vehicle’s proposal.
+Deﬁnition 2. Provided a matching Ψ and a pair (Vi, Wk,t) with Vi /∈Ψ(Wk,t) and Wk,t /∈
+Ψ(Vi). (Vi, Wk,t) is a blocking pair if (1)Wk,t ∈P(Vi); (2){Vi} ∪Ψ(Wk,t) ≻Wk,t Ψ(Wk,t);
+(3){Wk,t} ∪Ψ(Vi) ≻Vi Ψ(Vi).
+The blocking pair (Vi, Wk,t) is considered only when Vi and Wk,t have not matched with each
+other and Wk,t is in the preference list of Vi. Moreover, the match of Vi and Wk,t can increase
+the interest of both Vi and Wk,t, representing they both prefer to match with each other and the
+current matching structure is not optimal.
+With the deﬁnition of blocking pair, we then describe how the time-frequency resource Wk,t
+decides whether to accept the proposal of Vi. The proposals of V2I users and V2V users are
+discussed sequentially. Firstly we discuss the V2I users’ proposals. Since one time-frequency
+resource can be matched with no more than one V2I user, Wk,t need to check whether the
+proposal is from the V2I user. If Wk,t has kept the matching proposal of a V2I user V∗, Wk,t
+can match with only one of V∗and Vi to maximize its own utility as well as reducing the total
+interference area to VANET users. Otherwise, Wk,t makes different decisions in the following
+three cases:
+• Accept when Wk,t is unsaturated4 and (Vi, Wk,t) forms the blocking pair.
+• Reject when Wk,t is unsaturated and (Vi, Wk,t) is not the blocking pair.
+• Reject the least contributed5 vehicle Vm ∈Ψ(Wk,t) ∪Vi when Wk,t is saturated6.
+Secondly, we discuss the V2V users’ proposals. The process is the same as that of V2I users’
+proposal when the resource doesn’t match with any V2I user, three cases of which has been
+mentioned before.
+4A time-frequency resource is unsaturated if it is matched with fewer than Q vehicles.
+5Excluding the interference range, the utility that the least contributed vehicle brings is least.
+6A time-frequency resource is saturated if it is matched with Q vehicles.
+3) Termination conditions of the matching process: The matching process terminates when
+no vehicle users propose themselves to time-frequency resources anymore, which means that
+either the vehicle has been matched with S time-frequency resources or the preference list of
+the vehicle is empty.
+4) Dynamic algorithm: The dynamic algorithm consists of multiple static matching processes.
+We ﬁrst discuss the update of preference list between two matching processes, and then introduce
+the incompatible list to avoid the repeated proposals which has been rejected in the same matching
+structure before.
+As the result of peer effect, the preference lists of vehicles are correlated with the matching
+structure of vehicles and time-frequency resources. Hence, the static preference list is no longer
+suitable to our matching problem. We dynamically adjust the preference lists of vehicles accord-
+ing to the matching result of each static matching process. The preference of the vehicle Vi over
+each time-frequency resource Wk,t ∈W is determined by the data rate R(t)
+i,k based on the current
+matching pairs over Wk,t. To increase the possibility of the transmitted data being successfully
+received, the vehicle only proposes to access the time-frequency resources over which the SINR
+is larger than the SINR threshold γth. Hence, the time-frequency resources over which γ(t)
+i,k < γth
+are not in the preference list of the vehicle. The matching process will be repeated until all the
+vehicles are either completely matched or have an empty preference list in the ﬁrst round of
+matching process.
+In order to reduce the complexity of our algorithm, repeated attempts of formerly rejected
+matching proposals need to be avoided. For vehicle Vi, some time-frequency resources do not
+accept Vi’s matching proposal based on current matching condition, since they have rejected
+vehicle Vi in the previous iterations of matching under the same matching structure. To exclude
+these time-frequency resources from the preference list of vehicles, we introduce the concept of
+incompatible pair deﬁned as follows.
+Deﬁnition 3. For Vi ∈U, Wk,t ∈W, if Ψ(Wk,t) ≻Wk,t {Vi} ∪Ψ(Wk,t), Vi /∈Ψ(Wk,t) and
+Wk,t /∈Ψ(Vi), Ψ(Wk,t) is in incompatible list for Vi over Wk,t, denoted by Ψ(Wk,t) ∈FVi(Wk,t).
+The time-frequency resource makes the same decision when facing the same matching proposal
+under the same matching structure. Hence, the vehicle users will not propose to the time-
+frequency resource with the matching structure recorded in the incompatible list to avoid failed
+proposals. The matching pairs of Wk,t are added into the incompatible list of vehicle Vi once
+Wk,t rejects the proposal of vehicle Vi.
+Algorithm 1 Dynamic vehicle-resource matching algorithm
+Input: Set of vehicles U and time-frequency resources W.
+Output: A two-sided many-to-many matching Ψ.
+Phase1. Initialization Phase:
+Build a matching Ψ randomly satisfying all the constraints;
+Initialize the incompatible list FVi(Wk,t) as ∅, ∀Vi ∈U, Wk,t ∈W;
+Set a binary variable µ representing whether any vehicle proposes to resources;
+Set a variable κ representing the iteration times of one matching process;
+Phase2. Matching Phase:
+loop
+Construct preference list P(Vi) based on (11), (16);
+Delete Wk,t from P(Vi) if β(t)
+i,k = 0;
+Delete Wk,t from P(Vi) if Ψ(Wk,t) ∈FVi(Wk,t);
+if P(Vi) = ∅, ∀Vi ∈U then
+µ = 0;
+else
+µ = 1;
+κ = 0;
+loop
+κ = κ + 1;
+Vi proposes to P(Vi)[1], ∀Vi ∈U;
+if µ == 0 then
+Terminate the static matching process.
+break;
+for all Wk,t that vehicles propose to do
+if Vi is a V2I user then
+if Wk,t has matched with V2I user then
+Wk,t chooses the V2I user that it prefers based on (19).
+else
+if |Ψ(Wk,t)| < Q and (Vi, Wk,t) is a blocking pair then
+Wk,t accepts Vi;
+else
+Wk,t rejects Vi;
+else Vi is a V2V user
+if |Ψ(Wk,t)| < Q and (Vi, Wk,t) is a blocking pair then
+Wk,t accepts Vi;
+else
+Wk,t rejects Vi;
+Add Ψ(Wk,t) into the rejected vehicle’s incompatible list;
+if κ == 1 then
+Terminate the Matching Phase.
+break;
+Matching ﬁnished
+B. Algorithm Description
+As shown in Algorithm 1, the DV-RMA consists of the initialization phase and matching
+phase. In the initialization phase, we consider a random matching between vehicle users and
+time-frequency resources, with all the constraints satisﬁed. We initialize the incompatible lists
+of all vehicle users as ∅. In the matching phase, the process of each matching round is consist
+of updating the preference list and looking for stable matching based on current preference list.
+1) Update the preference list: The preference lists of vehicles are updated according to the
+matching structure. The time-frequency resource is deleted if γ(t)
+i,k < γth or the current matching
+structure Ψ(Wk,t) has been recorded in the incompatible list.
+2) Matching process: We obtain the matching result based on current preference list, as
+described in Section V-A. Moreover, the vehicle Vi rejected by the time-frequency resource Wk,t
+will add the matching pairs of Wk,t, denoted by Ψ(Wk,t), into its incompatible list, denoted by
+FVi(Wk,t).
+3) Termination conditions of the matching phase: The matching phase terminates when no
+vehicle users propose in the ﬁrst round of matching process. Finally, a two-sided many-to-many
+matching is returned as the result of our algorithm.
+VI. PERFORMANCE ANALYSIS
+In this section, we ﬁrst analyze the stability, convergence and complexity of the proposed
+algorithm DV-RMA. We then discuss the inﬂuence of interference caused by cellular V2X users
+on the VANET users.
+A. Stability, Convergence and Complexity of the Algorithm
+1) Stability and Convergence: We ﬁrst introduce the concept of pairwise stable matching,
+and then prove that the DV-RMA converges to a pairwise stable matching.
+Deﬁnition 4. A matching Ψ is deﬁned as pairwise stable if it is not blocked by any pair which
+does not exist in Ψ.
+Based on the deﬁnition of pairwise stable, we analyze the stability and convergence of the
+DV-RMA.
+Theorem 1. If the DV-RMA converges to a matching Ψ, then Ψ is a pairwise stable matching.
+Proof: See Appendix B.
+A pairwise stable matching implies that both vehicles and time-frequency resources obtain
+the highest utility under the current conditions. It is important to ensure that the pairwise stable
+matching results can be obtained in the ﬁnite iteration times, which can be proved as follows.
+Theorem 2. The DV-RMA converges to a pairwise stable matching after a limited number of
+iterations.
+Proof: See Appendix C.
+2) Complexity: We present the complexity of the DV-RMA and the greedy algorithm, de-
+scribed below in this part, in this part. We ﬁrst analyze the complexity of each round of the
+DV-RMA, however, the strict upper bound for the number of dynamic rounds of DV-RMA is
+hard to obtain because of the following reasons. The number of dynamic rounds in DV-RMA
+is determined by the relationship of the matching structure and adjusted preference list, and
+the two factors of each vehicle is inﬂuenced by that of others. Hence, the strict complexity of
+DV-RMA is impeded by the peer effects. Here we give the upper bound of the proposal number
+in DV-RMA.
+Theorem 3. The complexity of each round of the DV-RMA is O((N + M)(K + Ku)2T 2), and
+the upper bound of the proposal number in DV-RMA is O(T(K + Ku)(N + M)S+1).
+Proof: See Appendix D.
+We then compare the DV-RMA with the greedy algorithm. In the greedy algorithm, all vehicles
+access the time-frequency resource in turn until they are completely matched. Each vehicle
+occupies the unsaturated resource over which its SINR is the highest every time, in order to
+increase the possibility of being successfully detected. Hence, there are N + M vehicles and
+each one is matched with S time-frequency resources in the greedy algorithm. Each time the
+vehicle selects one resource to access, it needs to search through all resources that haven’t been
+matched with it and compare its SINR over these resources. Hence, the computing times for
+each vehicle are
+[(K +Ku)T]+[(K +Ku)T −1]+· · ·+[(K +Ku)T −(S −1)] = S ·[(K +Ku)T −S −1
+]. (20)
+The complexity of the greedy algorithm is
+O
+
+(N + M) · S · [(K + Ku)T −S −1
+]
+
+.
+(21)
+B. Selection of the Sensitivity Factor λ
+In a subframe, denote the maximum and minimum interference radius of the cellular V2X users
+to VANET users by LMAX and Lmin respectively. λ reﬂects the sensitivity of the interference of
+cellular V2X users to VANET users, and also controls the access of the cellular V2X users into
+the unlicensed spectrum. The value of λ is related to the data transmission demand of VANET
+users. We then analyze how it tunes the performance.
+1) λ >
+πL2
+min: In this case, neither the V2I user nor the V2V user can access the unlicensed
+time-frequency resources, since the penalty item in the objective function is large such that the
+beneﬁt of the added active number of cellular V2X users cannot offset the disadvantage of the
+increased interference to VANET users. Hence, cellular V2X users can only utilize the dedicated
+cellular spectrum.
+2)
+πL2
+min < λ ≤
+πL2
+MAX : In this case, part of the V2I users and the V2V users can access the
+unlicensed time-frequency resources. The V2V user tends to share the same unlicensed time-
+frequency resource with other neighbouring V2V users, in order to minimize the total interference
+range to VANET users. Hence, the unlicensed time-frequency resources are likely to be allocated
+to cluster-like cellular V2X users. Moreover, vehicles are encouraged to access more dedicated
+cellular time-frequency resources and fewer unlicensed time-frequency resources as the penalty
+factor increases.
+3) λ ≤
+πL2
+MAX : Cellular V2X users are able to utilize both dedicated cellular and unlicensed
+time-frequency resources freely in this case. The interference to VANET users does not affect
+the allocation of the unlicensed time-frequency resources, since the interference to VANET users
+weighs little in the objective function.
+TABLE I
+PARAMETERS SETTING FOR SIMULATION.
+Parameters
+Values
+Transmit power of vehicles P v
+23dbm
+Threshold of the receiving power P r
+−75dbm
+Noise power spectrum density
+−174dbm/Hz
+Power gain factor G
+−31.5db
+Accessible threshold γth
+0dB
+Fading factor α
+Carrier center frequency
+2.4GHz
+Subchannel bandwidth B
+10kHz
+Number of dedicated cellular subchannels K
+Number of unlicensed subchannels Ku
+Maximum number of time-frequency resources Q
+Maximum number of vehicles S
+Number of subframes in each SPS cycle T
+VII. SIMULATION RESULTS
+In this section, we evaluate the performance of the proposed DV-RMA in the urban scenario.
+We compare the number of total active cellular V2X users in two modes: 1) shared mode in
+which both dedicated cellular and unlicensed spectrum are used; 2) dedicated mode in which
+only dedicated cellular spectrum is used. In addition, the proposed DV-RMA is compared with
+the greedy algorithm, as mentioned in Section VI-A-2, in terms of the system performance.
+We discuss the urban scenario deﬁned in [26], which is presented in the Fig. 4. Both cellular
+V2X users and VANET users are randomly located on the road. The safe inter-vehicle distance
+in the same lane is 2.5s × v, where the speed of vehicles v is 15 ∼60km/h according to [26].
+Other parameters of the simulation are shown in the Table I [27].
+Fig. 5 shows the number of active cellular V2X users in the SPS cycle vs. the iteration times
+with the speed of vehicles from 15km/h to 60km/h. The number of active cellular V2X users
+decreases as the speed increases, because the number of vehicles decreases for the larger safe
+inter-vehicle distance. We also observe that the number of active cellular V2X users converges to
+a stable value as that of the iterations increases, e.g., in DV-RMA the number of active cellular
+V2X users converges after 200 cycles, thereby reﬂecting the convergence of the DV-RMA.
+Fig. 6 presents the number of active cellular V2X users v.s. the speed in the shared mode and
+Fig. 4.
+Road setting in the urban scenario.
+90
+190
+Iteration times
+100
+200
+300
+400
+500
+Number of active users
+v=15km/h
+v=30km/h
+v=45km/h
+v=60km/h
+Fig. 5.
+Number of active cellular V2X users v.s. the iteration times with different velocities.
+15
+25
+35
+45
+55
+Speed (km/h)
+100
+200
+300
+Number of active users
+=0.0014, DV-RMA, Shared Mode
+=0.0026, DV-RMA, Shared Mode
+=0.01, DV-RMA, Shared Mode
+Dedicated Mode
+Greedy Algorithm
+Fig. 6.
+Number of active cellular V2X users v.s. speed in different modes.
+dedicated mode. We can learn that all the curves decrease with the increasing speed. In the shared
+mode, the number of active cellular V2X users is no fewer than that in the dedicated mode.
+The gap between curves in the two modes increases as the speed decreases, because the limited
+dedicated cellular time-frequency resources cannot satisfy the transmission demand of vehicles,
+while the unlicensed resources can serve as the complement to support more vehicles. Besides,
+as the penalty factor λ increases, the number of active cellular V2X users decreases. Since the
+interference to VANET users caused by cellular V2X users becomes severer as the penalty factor
+λ increases, the BS is discouraged to allocate the unlicensed spectrum to the cellular V2X users.
+It is also observed that the number of active cellular V2X users in the DV-RMA is at least twice
+larger than that in the greedy algorithm, e.g. when λ = 0.0026 and the speed is 15km/h in the
+DV-RMA, the number of active cellular V2X users is more than 300, while that is only 100 in
+the greedy algorithm. The DV-RMA performs better than the greedy algorithm because vehicles
+dynamically change their preference lists and resources can be allocated to the vehicles which
+bring them better performance.
+Fig. 7 illustrates the number of active cellular V2X users v.s. the SINR threshold γth with
+different speed. It is easily observed that the DV-RMA obtains better performance than the greedy
+algorithm, even when the speed in the DV-RMA is higher than that in the greedy algorithm. In
+0
+2
+4
+SINR Threshold (dB)
+100
+200
+300
+Number of active users
+v=30km/h, DV-RMA
+v=45km/h, DV-RMA
+v=60km/h, DV-RMA
+v=30km/h, Greedy
+v=45km/h, Greedy
+v=60km/h, Greedy
+Fig. 7.
+Number of active cellular V2X users vs. active SINR threshold γth with different speed.
+the DV-RMA, the number of active cellular V2X users decreases as the SINR threshold increases.
+This implies that the higher the threshold is, the harder it is for cellular V2X users to successfully
+detect over the unlicensed resources. In the greedy algorithm, the allocation of time-frequency
+resources is only related to the rank of the SINR of the cellular V2X user. Hence, the number
+of active cellular V2X users remains the same as the SINR threshold increases. Moreover, in the
+DV-RMA, the number of active cellular V2X users grows as the speed decreases with the same
+SINR threshold, since the number of vehicles increases with the smaller inter-vehicle distance.
+Fig. 8 presents the interference range to VANET users v.s. the penalty factor λ with different
+speed. We evaluate the interference range by the ratio of the total interference range to the sum
+area. We observe that as the penalty factor λ increases, the interference range to VANET users
+decreases. This is because unlicensed resources are discouraged to be allocated to cellular V2X
+users with large penalty factor. Moreover, the interference range is larger with lower speed,
+which implies that more transmission demands need to be ofﬂoaded to unlicensed spectrum and
+the interference to VANET users is severer with lower speed.
+Fig. 9 shows the number of active V2I and V2V users over dedicated and unlicensed resources
+v.s. the penalty factor λ when the speed is 45km/h. It can be observed that the unlicensed
+subchannel for cellular V2X users decrease as the value of λ increases, in order to reduce
+1.4
+1.7
+2.3
+2.6
+2.9
+3.2
+3.5
+3.8
+4.1
+4.4
+4.4
+10-3
+0.05
+0.1
+0.15
+0.2
+0.25
+Proposition of the interference range to VANET
+v=30km/h
+v=45km/h
+v=60km/h
+Fig. 8.
+Proportion of total interference range to VANET and the sum area vs. penalty factor λ with different speed.
+0.0014
+0.0020
+0.0026
+0.0032
+0.01
+20
+60
+100
+Number of active users
+V2I over dedicated resources
+V2V over dedicated resources
+V2I over unlicensed resources
+V2V over unlicensed resources
+Fig. 9.
+Number of active V2I and V2V over dedicated and unlicensed resources vs. penalty factor λ when v = 45km/h.
+the interference to VANET users. Cellular V2X users can utilize both dedicated cellular and
+unlicensed resources freely when λ <
+πL2
+MAX , and are discouraged to access the unlicensed
+resources as λ increases. When λ is larger than a threshold, e.g., λ > 0.01, cellular V2X users
+are not allowed to utilize the unlicensed resources. This is consistent with the results analyzed
+in Section VI-B.
+VIII. CONCLUSION
+In this paper, we studied the spectrum sharing problem where cellular V2X users coexist
+with VANET users in the unlicensed spectrum. We proposed an energy sensing based spectrum
+sharing scheme for cellular V2X users to share the unlicensed spectrum fairly with VANET
+users. The allocation problem of time-frequency resources to cellular V2X users in the semi-
+persistent scheduling cycle was formulated as a two-sided many-to-many matching problem
+with peer effects. We then developed a dynamic vehicle-resource matching algorithm to solve the
+problem, and analyzed its stability, computational complexity, as well as convergence. Simulation
+results showed that enabling the sharing of the unlicensed spectrum can increase the system
+performance, and the proposed DV-RMA obtained better performance than the greedy algorithm.
+The communication demands of different types of users can be satisﬁed by adjusting the penalty
+factor. More cellular V2X users can be supported over the unlicensed spectrum as the penalty
+factor decreases.
+APPENDIX A
+PROOF OF PROPOSITION 1
+The overlapping area of cellular V2X users i and j is related to the distance di,j between
+them. Here we assume that Li < Lj, and the analysis is similar when Li < Lj.
+When di,j >
+q
+L2
+j −L2
+i , as shown in Fig. 10-(a), the overlapping area can be expressed as
+follows, as described in [28].
+Oi,j = L2
+i arccos( xi
+Li
+) −xi
+q
+L2
+i −x2
+i + L2
+j arccos( xj
+Lj
+) −xj
+q
+L2
+j −x2
+j,
+(22)
+where
+xi = d2
+i,j + L2
+i −L2
+j
+2di,j
+, xj = d2
+i,j −L2
+i + L2
+j
+2di,j
+.
+(23)
+i
+j
+j
+i
+Fig. 10.
+Two cases of calculating the overlapping area of the interference range.
+When di,j ≤
+q
+L2
+j −L2
+i , as shown in Fig. 10-(b), which is similar to the case in [28], we
+have
+
+
+
+xi + di,j = xj;
+L2
+i −x2
+i = L2
+j −x2
+j.
+Hence,
+xi = L2
+j −d2
+i,j −L2
+i
+2di,j
+, xj = d2
+i,j −L2
+i + L2
+j
+2di,j
+.
+(24)
+The overlapping area can be expressed as
+Oi,j = πL2
+i −
+
+L2
+i arccos( xi
+Li
+) −xi
+q
+L2
+i −x2
+i
+
++ L2
+j arccos( xj
+Lj
+) −xj
+q
+L2
+j −x2
+j.
+(25)
+We replace xi and xj in (22) and (25) with (23) and (24), then we have (5).
+■
+APPENDIX B
+PROOF OF THEOREM 1
+If Ψ is not a pairwise stable matching, there exists a pair (Vi, Wk,t) such that A ≻Wk,t
+Ψ(Wk,t), A ⊆{Vi} ∪Ψ(Wk,t), Vi ∈A, and Wk,t ≻Vi Wk′,t′, Wk′,t′ ∈Ψ(Vi). Apparently, Vi
+will propose itself to Wk,t in the next round of matching process to pursue its higher interest.
+However, since the algorithm has converged to Ψ, there are no more proposals of vehicles.
+The only reason why Vi does not propose itself to Wk,t is that Ψ(Wk,t) is the incompatible
+list to Vi. This means that Wk,t rejected Vi before under the same matching structure, denoted
+by Ψ(Wk,t) ≻Wk,t A′, A′ ⊆{Vi} ∪Ψ(Wk,t), which is contradictory to the pairwise stable
+assumption. Hence, theorem 1 is proved.
+■
+APPENDIX C
+PROOF OF THEOREM 2
+With the deﬁnition of incompatible list in the DV-RMA algorithm, there are only two con-
+ditions that vehicle Vi proposes to time-frequency resource Wk,t. One is that Wk,t accept the
+proposal without rejecting any other vehicle. The other is that Wk,t rejects one of Vi and formerly
+accepted vehicles, and then adds the updated Ψ(Wk,t) into the incompatible list of the rejected
+vehicle. Since one vehicle is matched with at most S time-frequency resources, the times of
+accepting without rejecting any other vehicle is limited in (N + M)S. Moreover, each vehicle
+has no more than (C1
+N+M−1 + C2
+N+M−1 + · · · + CS
+N+M−1) incompatible lists over each time-
+frequency resources, so the total incompatible lists is no more than
+T(K + Ku)(C1
+N+M−1 + C2
+N+M−1 + · · · + CS
+N+M−1).
+(26)
+Hence, the total number of matched pairs and incompatible lists is limited and the DV-RMA
+converges to a pairwise stable matching after a limited number of iterations.
+■
+APPENDIX D
+PROOF OF THEOREM 3
+Each dynamic round of DV-RMA includes preference list updating and matching process.
+Updating a preference list is actually a sorting process of preferences with the complexity of
+O ((K + Ku)2T 2). At most N + M vehicles need to update their preference lists. Hence, the
+complexity of preference list updating is O ((N + M)(K + Ku)2T 2). In the matching process,
+at most N + M vehicles propose to time-frequency resources in each round, and one vehicle
+proposes itself to no more than (K + Ku)T time-frequency resources during the matching
+process. Hence, the complexity of matching process is O ((N + M)(K + Ku)T). Therefore,
+the complexity of each dynamic round of the DV-RMA is
+O((N + M)(K + Ku)2T 2) + O((N + M)(K + Ku)T) = O((N + M)(K + Ku)2T 2).
+(27)
+The DV-RMA includes the initialization phase and matching phase. The total number of
+matching pairs initialized in the initialization phase is no more than (N +M)S. In the matching
+phase, the maximum proposal times is described as (26) in theorem 2. Hence, the upper bound
+of the proposal number in DV-RMA is
+O ((N + M)S) + O
+ T(K + Ku)(C1
+N+M−1 + C2
+N+M−1 + · · · + CS
+N+M−1)
+
+= O
+ T(K + Ku)(N + M)S+1
+.
+■
+REFERENCES
+[1] G. Karagiannis, O. Altintas, E. Ekici, G. Heijenk, B. Jarupan, K. Lin, and T. Weil, “Vehicular networking: A survey and
+tutorial on requirements, architectures, challenges, standards and solutions”, IEEE Commun. Surveys & Tutorials, vol. 13,
+no. 4, pp. 584-615, Sept. 2011.
+[2] L. Song, D. Niyato, Z. Han, and E. Hossain, Wireless device-to-device communications and networks, Cambridge University
+Press, UK, 2015.
+[3] L. Song and J. Shen, Evolved network planning and optimization for UMTS and LTE, Auerbach Publications, CRC Press,
+2010.
+[4] F. Andreas, “Standards for vehicular communication-from IEEE 802.11p to 5G”, Elektrotechnik and Informationstechnik
+vol. 132, no. 7, pp. 409-416, Sept. 2015.
+[5] I. Saﬁulin, S. Schwarz, T. Philosof and M. Rupp, “Latency and resource utilization analysis for V2X communication over
+LTE MBSFN transmission”, in Proc. WSA, Munich, Mar. 2016.
+[6] 3GPP TR 22.885, “Study on LTE support for V2X services”, Release 14, Sept. 2015.
+[7] B. Di, L. Song, Y. Li, and Z. Han, “V2X meets NOMA: Non-orthogonal multiple access for 5G enabled vehicular
+networks”, IEEE Wireless Commun., under revision.
+[8] K. Higuchi, “NOMA for future cellular systems”, in Proc. IEEE VTC, Montreal, Sept. 2016.
+[9] M. Bennis, M. Simsek, A. Czylwik, W. Saad, S. Valentin, and M. Debbah, “When cellular meets WiFi in wireless small
+cell networks?”, IEEE Commun. Mag., vol. 51, no. 6, pp. 44-50, Jun. 2013.
+[10] W. Kim, S. Y. Oh, M. Gerla and K. C. Lee, “CoRoute: A new cognitive anypath vehicular routing protocol”, in Proc.
+IWCMC, Istanbul, Jul. 2011.
+[11] J. M.-Y. Lim, Y. C. Chang, M. Y. Alias and J. Lo, “Cognitive radio network in vehicular ad hoc network (VANET): A
+survey”, Cogent Engineering, vol. 3, no. 1, pp. 1-19, Jun. 2016.
+[12] 3GPP R1-157449, “Further discussion on resource allocation mechanism in PC5-based V2V”, Nov. 2015.
+[13] D. Manlove, “Algorithmics of matching under preferences”, World Scientiﬁc, 2013.
+[14] B. Di, L. Song, and Y. Li, “Sub-channel assignment, power allocation, and user scheduling for non-orthogonal multiple
+access networks”, IEEE Trans. Wireless Commun., vol. 16, no. 11, pp. 7686-7698, Nov. 2016.
+[15] S. Zhang, B. Di, L. Song, and Y. Li. “Sub-channel and power allocation for non-orthogonal multiple access relay networks
+with amplify-and-forward protocol”, IEEE Trans. Wireless Commun., vol. 16, no. 4, pp. 2249-2261, Apr. 2017.
+[16] H. Zhang, Y. Liao and L. Song, “D2D-U: Device-to-device communications in unlicensed bands”, IEEE Trans. Wireless
+Commun., to appear.
+[17] E. Baron, C. Lee, A. Chong, B. Hassibi, and A. Wierman, “Peer effects and stability in matching markets”, in
+Proc.
+SAGT, Amalﬁ, Oct. 2011.
+[18] L.-C. Tung, J. Mena, M. Gerla, and C. Sommer, “A cluster based architecture for intersection collision avoidance using
+heterogeneous networks”, in Proc. MED-HOC-NET, Ajaccio, Jun. 2013.
+[19] S. Gopinath, L. Wischhof, C. Ponikwar and H. J. Hof, “Hybrid solutions for data dissemination in vehicular networks”,
+in Proc. WD, Toulouse, Mar. 2016.
+[20] Q. Chen, G. Yu, H. Shan, A. Maaref, G. Y. Li and A. Huang, “Cellular meets WiFi: Trafﬁc ofﬂoading or resource sharing?”,
+IEEE Trans. Wireless Commun., vol. 15, no. 5, pp. 3354-3367, May 2016.
+[21] 3GPP TR 36.808, “Evolved universal terrestrial radio access (E-UTRA); carrier aggregation; base station (BS) radio
+transmission and reception”, Release 10, Jul. 2013.
+[22] T. S. Rappaport, Wireless communications: principles and practice. Englewood Cliffs, NJ: Prentice-Hall, 1996.
+[23] Qualcomm research, “LTE in unlicensed spectrum: Harmonious coexistence with Wi-Fi”, Jun. 2014.
+[24] A. Babaei, J. Andreoli-Fang, and B. Hamzeh, “On the impact of LTE-U on Wi-Fi performance”, in Proc. PIMRC,
+Washington, Sept. 2014.
+[25] A. Roth and M. Sotomayor, Two-sided matching: A study in game theoretic modeling and analysis, Cambridge University
+Press, UK, 1992.
+[26] 3GPP RP-161894, “LTE-based V2X services”, Sept. 2016.
+[27] B. J. B. Fonseca, “A distributed procedure for carrier sensing threshold adaptation in CSMA-based mobile ad hoc networks”,
+in Proc. IEEE VTC, Baltimore, Sept. 2007.
+[28] Weisstein,
+Eric
+W.
+”Circle-Circle
+Intersection.”
+From
+MathWorld–A
+Wolfram
+Web
+Resource.
+http://mathworld.wolfram.com/Circle-CircleIntersection.html

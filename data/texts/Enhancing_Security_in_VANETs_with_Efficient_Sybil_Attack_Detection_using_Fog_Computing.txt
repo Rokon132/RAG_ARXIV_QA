@@ -1,0 +1,609 @@
+JOURNAL OF LATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015
+Enhancing Security in VANETs with Efﬁcient Sybil
+Attack Detection using Fog Computing
+Anirudh Paranjothi, Mohammed Atiquzzaman School of Computer Science, University of Oklahoma, Norman,
+Oklahoma, USA
+e-mails: {anirudh.paranjothi, atiq}@ou.edu
+Abstract—Vehicular ad hoc networks (VANETs) facilitate ve-
+hicles to broadcast beacon messages to ensure road safety. Rogue
+nodes in VANETs cause a Sybil attack to create an illusion of fake
+trafﬁc congestion by broadcasting malicious information leading
+to catastrophic consequences, such as the collision of vehicles.
+Previous researchers used either cryptography, trust scores, or
+past vehicle data to detect rogue nodes, but they suffer from
+high processing delay, overhead, and false-positive rate (FPR).
+We propose a fog computing-based Sybil attack detection for
+VANETs (FSDV), which utilizes onboard units (OBUs) of all the
+vehicles in the region to create a dynamic fog for rogue nodes
+detection. We aim to reduce the data processing delays, overhead,
+and FPR in detecting rogue nodes causing Sybil attacks at high
+vehicle densities. The performance of our framework was carried
+out with simulations using OMNET++ and SUMO simulators.
+Results show that our framework ensures 43% lower processing
+delays, 13% lower overhead, and 35% lower FPR at high vehicle
+densities compared to existing Sybil attack detection schemes.
+Index Terms—Rogue nodes, Sybil attack, Fog computing.
+I. INTRODUCTION
+Vehicular ad hoc networks (VANETs) have been emerging
+as a promising solution to intelligent transportation systems
+(ITS) with an aim to enhance road safety by reducing the
+number of road accidents and regulating trafﬁc ﬂow. In
+VANETs, the vehicles can communicate with each other using
+vehicle-to-vehicle (V2V) and vehicle-to-infrastructure (V2I)
+techniques, depends on dedicated short range communication
+(DSRC) [1]. The vehicles are equipped with on-board units
+(OBUs) for transmitting and receiving the messages between
+vehicles and between vehicles and the roadside units (RSUs).
+VANETs facilitate vehicles to broadcast beacon messages
+to disseminate network state or emergency information [2].
+However, malicious vehicles, also known as rogue nodes may
+cause a Sybil attack to create an illusion of trafﬁc congestion
+in order to reroute other honest nodes in the network to trap it
+or to cause catastrophic consequences, such as the collision of
+vehicles [3]. Therefore, efﬁcient detection of the rogue nodes
+causing a Sybil attack is crucial in containing network damage
+and establishing a secure VANETs environment.
+Previous authors used either cryptography, trust scores,
+or past vehicle data to detect rogue nodes. Baza et al. [4]
+presented an intrusion detection system (IDS) to detect rogue
+nodes based on the power of works (PoW) algorithm. Each
+vehicle starts the trajectory by transmitting the vehicle data
+using the public key and the signature using the private key
+to the RSUs. The RSUs verify the trajectory of the vehicles
+based on the historical vehicle data. If multiple trajectories
+for the same vehicle exists, the corresponding vehicle will
+be considered a rogue, and the information of the rogue
+node will be broadcasted to all vehicles in the region. The
+proposed scheme [4] suffers from a high delay and overhead
+in encrypting and decrypting the vehicle data. Zaidi et al. [5]
+proposed an IDS, where each vehicle utilizes its OBU to detect
+false data propagated by the rogue nodes based on the past
+vehicle data. Ayaida et al. [6] proposed a trust model (TM) to
+detect false messages in VANETs based on the correctness
+of the data broadcasted in beacon messages. However, [5,
+6] cannot be used in high vehicle dense regions, such as
+Manhattan and other downtown regions, due to high packet
+loss ratio (PLR) and false-positive rate (FPR).
+To address the limitations of the existing Sybil attack
+detection schemes, we propose a fog computing-based Sybil
+attack detection for VANETs (FSDV). The FSDV framework
+employs the concept of guard nodes. The guard node is the
+vehicle that has more neighboring vehicles in its transmission
+range, dynamically creates a fog utilizing the OBUs of all
+vehicles in the region, and then the dynamic fog is used to
+analyze the received beacon messages from all vehicles to
+detect rogue nodes. FSDV exploits a trafﬁc ﬂow phenomena
+to generate a residual corresponding to the difference between
+the actual speed of the guard node and the received speed
+of the neighboring vehicles in a distributed way by using the
+beacon messages broadcasted over the network. A signiﬁcant
+deviation of this residual from a dynamic threshold is consid-
+ered as an indicator of the Sybil attack. The selection of the
+dynamic threshold directly impacts the Sybil attack detection
+probability. Thus, the threshold has to be chosen properly in
+order to well detect and to avoid false-positive detections. We
+adopt the fog computing technique to detect rogue nodes,
+as it offers low latency, low overhead, and high bandwidth
+compared to traditional communication techniques [7].
+The novelty of our proposed work lies in providing low data
+processing delays and low FPR at high vehicle densities. In
+addition, FSDV does not depend on any roadside infrastruc-
+tures like RSUs or trust scores or past vehicle data in rogue
+nodes detection. The difference between our framework and
+existing schemes [4-6] is, each vehicle uses its OBU or RSU
+to detect rogue nodes. RSUs are not uniquely deployed in all
+VANETs regions. Moreover, the overloaded RSUs yields high
+data processing delay and high FPR. OBUs of an individual
+vehicle is highly resource-constrained encounters a high delay
+in analyzing the data at high vehicle densities. Whereas, in
+the FSDV, the guard node combines OBUs of all vehicles in
+arXiv:2108.10319v1  [cs.CR]  23 Aug 2021
+JOURNAL OF LATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015
+the region in creating the dynamic fog. Utilizing OBUs of all
+vehicles increases the computational power of dynamic fog
+resulting in low data processing delay and low FPR.
+Our objective is to reduce the latency in detecting rogue
+nodes and decrease FPR at high vehicle densities. We consid-
+ered three existing rogue nodes detection schemes for compari-
+son: PoW [4], IDS [5], and TM [6]. The performance of FSDV
+was carried out using OMNET++ and SUMO simulators with
+up to 4000 vehicles and 40% rogue nodes. Our results lead to
+an exciting conclusion that our framework reduces the latency
+and FPR, and performs up to 32% better than the existing
+Sybil attack detection schemes [4-6].
+The contributions of the paper are: 1) We proposed a
+framework, FSDV, that uses fog computing technique to detect
+Sybil attacks in VANETs with low delay and low FPR. 2) We
+introduced the guard node in FSDV, which uses an OBU-based
+fog computing technique to compare speed values received
+in the beacon messages from all vehicles in the region. 3)
+We performed an extensive simulation by creating a dynamic
+fog layer under varying vehicular and network conditions to
+determine false information broadcasted by rogue nodes.
+The rest of the paper is structured as follows: related work
+is discussed in Section II. The working principle of our
+proposed work to detect rogue is illustrated in Section III.
+The mathematical model analysis is discussed in Section IV.
+Section V presents the performance evaluation of the proposed
+framework. The simulation results are discussed in Section VI
+before concluding the paper in Section VII.
+II. RELATED WORK
+This section presents an overview of the most recent existing
+schemes that detect rogue nodes in VANETs. Arshad et al.
+[8] and Ahamad et al. [9] proposed a trust-based scheme to
+detect rogue nodes in VANETs. Based on the correctness of
+the data in beacon messages, positive or negative trust values
+are assigned. Positive and negative trust values represent the
+normal and abnormal behavior of the vehicles, respectively.
+When the calculated trust of any vehicle reaches a predeﬁned
+threshold limit is known as a rogue node and then the
+information is broadcasted to all the vehicles in the region.
+Iwendi et al. [10] proposed a spider money technique, which
+utilizes the RSUs in the region to authenticate the private
+key associated with beacon messages to identify malicious
+data broadcasted by the rogue nodes. Once the rogue nodes
+are identiﬁed, the RSUs send rogue nodes information to
+the department of motor vehicles (DMV) to withdraw the
+vehicle’s permit to reduce the potential damage to the network.
+However, the frameworks [8-10] encounter a low true-positive
+rate (TPR) and high FPR in detecting rogue nodes.
+Al-Otaibi et al. [11] presented a cryptography-based fog
+computing scheme to detect rogue nodes in VANETs. The
+RSUs are considered as fog nodes for rogue nodes detection.
+However, this approach [11] encounters a high processing
+delay and overhead in detecting rogue nodes when the RSUs
+are overloaded in the region. Yang et al. [12] proposed a
+machine-learning algorithm to classify the historical vehicle
+data received from all the vehicles in the region. The result
+Fig. 1. Execution scenario of FSDV in the presence of a rogue node using
+fog computing technique.
+of the classiﬁcation, i.e., whether the data received from the
+vehicle is valid or not, are then combined to detect rogue nodes
+broadcasted malicious information. However, this approach
+[12] encounters high delay and high overhead.
+To overcome the limitations of the existing Sybil attack de-
+tection schemes [4-6, 8-12], we propose the FSDV framework,
+which utilizes only vehicle speed values in beacon messages
+and does not depend on either trust score, cryptography, or
+past vehicle data in rogue nodes detection.
+III. PROPOSED FSDV FRAMEWORK
+In this section, we discuss the working principle of our
+FSDV framework. The FSDV framework engages fog com-
+puting in detecting rogue nodes involved in Sybil attacks.
+The rogue nodes broadcast multiple messages with different
+vehicle id to all vehicles in the region, thereby giving a false
+impression of fake trafﬁc congestion ahead by lowering the
+speed values in the beacon messages. One such scenario of
+Sybil attacks is illustrated in Fig. 1.
+In this paper, we employ the concept of guard node to
+detect Sybil attacks in VANETs. The vehicle which has more
+neighboring vehicles in its communication range will act as
+a guard node. Guard node dynamically creates a fog utilizing
+OBUs of all vehicles to detect rogue nodes broadcasting lower
+speed values in the region. Once the fog layer is deployed,
+the guard node starts adding the neighboring vehicles to
+the list of neighbors, as met for the ﬁrst time. Otherwise,
+it updates the timestamp of the neighboring vehicles. The
+neighbors list updated continuously when the beacon messages
+are broadcasted in the region (i.e., for every 100ms). Then,
+the detection of rogue nodes is achieved by comparing and
+analyzing the speed values broadcasted in beacon messages.
+If the speed difference is greater than the dynamic threshold,
+a Sybil attack is detected. This is due to all the vehicles in the
+region broadcast similar speed values as they are in similar
+trafﬁc conditions and dependent on other vehicles under all
+circumstances. Thus, if there is a signiﬁcant difference in
+vehicle speed, the guard node considers the vehicles as rogue
+nodes. Otherwise, the vehicles are highlighted as honest nodes.
+JOURNAL OF LATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015
+The guard node broadcasts the information of rogue nodes
+to all vehicles in the region to ignore the beacon messages
+received further from the rogue nodes to contain the network
+damage. The adoption of fog computing increases the compu-
+tation power of the guard node as the OBUs of all vehicles
+are utilized in creating a dynamic fog results in lower data
+processing delay compared to [4-6] schemes.
+A. Selection of Guard Node
+Rogue nodes are the vehicles broadcasting low-speed values
+or sudden decrease in speed to change the normal behavior of
+the vehicles for own beneﬁts. In the FSDV framework, the
+guard node analyzes the speed values in the beacon messages
+received from all vehicles in the region to detect rogue nodes.
+The following two assumptions are made in the selection of the
+guard node: First, we assume the center vehicle in the region
+will act as a guard node (𝐺𝑛), as the vehicle in the center has
+more number of the neighboring vehicles in its communication
+range compared to the front and tail-end vehicles. Second, we
+assume that the total number of vehicles (N) in the region at
+any given time is at least two. The guard node needs at least
+two vehicles in the region to compare and analyze the beacon
+messages to detect rogue nodes causing a Sybil attack.
+Initially, we take the mean of position vectors of all vehicles
+(i.e., 𝑃𝑡1, 𝑃𝑡2, ...., 𝑃𝑡𝑁) to ﬁnd a unique center point 𝜁.
+𝜁= 1
+𝑁
+𝑁
+∑︁
+𝑖=1
+𝑃𝑡𝑖
+(1)
+We calculate Euclidean distance between 𝜁and the position
+vector of each vehicle and then determine the point that has
+the minimum distance from the 𝜁. Finally, the vehicle located
+at this point will be selected as the guard node, 𝐺𝑛.
+𝐺𝑛= arg min
+𝑃𝑡𝑖∈𝑌∥𝜁−𝑃𝑡𝑖∥
+(2)
+Where, 𝑌= {𝑃𝑡1, 𝑃𝑡2....,𝑃𝑡𝑁}.
+B. Density and Speed of Vehicles
+In the FSDV framework, Greenshield’s trafﬁc ﬂow model is
+used to calculate the speed of the guard node and the density
+of the vehicles in the region. Greenshield trafﬁc model is
+considered to be a fairly accurate and simple model for real-
+world trafﬁc ﬂows works under the assumption of density (𝜌),
+and the speed of the vehicles (S) is negatively correlated [5].
+The density can be calculated as:
+𝜌= 𝐵𝑚𝑠𝑔· 𝑁
+(3)
+Where, 𝐵𝑚𝑠𝑔is the beacon message received from one
+vehicle id and 𝑁is the total number of vehicles in the
+region. As the speed and density of the vehicles are negatively
+correlated, the density increases when the speed of the vehicles
+decreases in the region. The speed of the guard node (𝑆𝐺) can
+be deﬁned as:
+𝑆𝐺= 𝑆𝑚𝑎𝑥−
+𝜌
+𝜌𝑚𝑎𝑥
+𝑆𝑚𝑎𝑥
+(4)
+Where 𝑆𝑚𝑎𝑥is the speed of the vehicle when density is zero
+and 𝜌𝑚𝑎𝑥is the maximum density, also point at which speed of
+the vehicles becomes zero. The calculated speed value of the
+guard node (𝑆𝐺) is compared with the received speed values
+of the neighboring vehicles (𝑆𝑟𝑐𝑣𝑑). If the difference in speed
+values is greater than the dynamic threshold (𝑆𝑡ℎ), i.e., 𝑆𝐺
+– 𝑆𝑟𝑐𝑣𝑑> 𝑆𝑡ℎ, a Sybil attack is detected, and the vehicle
+broadcasted corresponding speed values is considered as a
+rogue node. Thus, the guard vehicle broadcasts the information
+of rogue nodes to all the vehicles in the region.
+C. FSDV Algorithm
+Algorithm 1 FSDV Sybil Attack Detection algorithm
+Input: 𝐺𝑛receives 𝐵𝑚𝑠𝑔from all vehicles in the region
+Output: 𝐺𝑛broadcasts information of rogue nodes
+1: if (𝑁≥2) then
+2:
+Calculate 𝜁and Euclidean distance
+3:
+Assign 𝐺𝑛
+4: else GoTo 22
+5: end if
+6: 𝐺𝑛dynamically creates a fog
+7: 𝐺𝑛receives 𝐵𝑚𝑠𝑔from all vehicles in the region
+8: for each 𝐵𝑚𝑠𝑔received do
+9:
+if (𝐵𝑚𝑠𝑔.𝑆𝑒𝑛𝑑𝑒𝑟∉𝑁𝑒𝑖𝑔ℎ𝑏𝑜𝑟𝑠𝑙𝑖𝑠𝑡) then
+10:
+𝑁𝑒𝑖𝑔ℎ𝑏𝑜𝑟𝑠𝑙𝑖𝑠𝑡.add (𝑆𝑒𝑛𝑑𝑒𝑟)
+11:
+end if
+12:
+𝑁𝑒𝑖𝑔ℎ𝑏𝑜𝑟𝑠𝑙𝑖𝑠𝑡[𝑆𝑒𝑛𝑑𝑒𝑟].𝑇𝑠𝑡𝑎𝑚𝑝= 𝐵𝑚𝑠𝑔.𝑇𝑠𝑡𝑎𝑚𝑝
+13:
+Calculate 𝑆𝐺
+14:
+if (𝑆𝐺– 𝑆𝑟𝑐𝑣𝑑< 𝑆𝑡ℎ) then
+15:
+Declare the vehicle as honest node
+16:
+else
+17:
+Declare the vehcile as rogue node
+18:
+Store the rogue node id
+19:
+end if
+20: end for
+21: 𝐺𝑛broadcasts rogue nodes information through 𝐵𝑚𝑠𝑔
+22: Terminate the Sybil attack detection algorithm
+IV. MATHEMATICAL MODEL ANALYSIS
+To validate the performance of the proposed approach,
+discussed in Section III, we investigate in this section the
+theoretical expression for the delay and the probability of
+detecting the rogue nodes correctly in the Sybil attack.
+A. Analysis of Delay in FSDV
+As our objective is to reduce the latency signiﬁcantly in
+detecting rogue nodes compared to [4-6] schemes, we have
+analyzed different types of delays, such as communication
+delay, queuing delay, and data processing delay associated
+with the FSDV framework, illustrated in Section III. The
+communication delay, 𝐷𝑐associated with the guard node in
+JOURNAL OF LATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015
+Fig. 2.
+Effect of dynamic speed threshold in the Sybil attack detection
+probability.
+transmitting the received beacon messages (𝐵𝑚𝑠𝑔) from all
+vehicles in the region to the fog layer is given by:
+𝐷𝑐= 𝑥
+𝑟=
+𝑥
+𝑏log2
+
+1 + 𝑡𝑐2
+𝜎2
+
+(5)
+Where, 𝑥is the number of bits in the beacon messages, 𝑡
+is the transmission power of fog devices at the fog layer, 𝑐is
+the channel coefﬁcient between devices the guard node and the
+fog layer, 𝜎2 is the power of white Gaussian noise, 𝑟is the
+transmission rate calculated from Shannon channel capacity
+theorem, and 𝑏is the bandwidth of the link established
+between the guard node and the fog layer.
+Devices associated with the fog layer use the M/M/1 queu-
+ing model for preparing the beacon messages to be computed,
+where the arrival and service time are represented as
+𝜆1 and
+𝜇1 , respectively. The queuing delay (𝐷𝑞) associated with a
+fog layer of our FSDV framework is given by:
+𝐷𝑞= 1 −1
+𝜆1
++
+𝜆12
+𝜇2
+1(𝜇1 −𝜆1)
+(6)
+The data processing delay (𝐷𝑝) indicates the required time
+to process all received beacon messages in the fog layer to
+detect rogue nodes is given by:
+𝐷𝑝= 𝑇𝐶(𝑥) 𝑓
+𝑐𝑓𝑙
+(7)
+Where 𝑐𝑓𝑙is the computation capability of the fog layer, 𝑓
+is the number of CPU cycles required for computing one bit of
+data at the fog layer, and 𝑇𝐶(𝑥) is the time complexity for 𝑥
+bits of data in the beacon messages, depends on the algorithm
+discussed in Section III. The total delay (𝐷𝑡) of our FSDV
+framework in the fog layer is given by:
+𝐷𝑡= 𝐷𝑐+ 𝐷𝑞+ 𝐷𝑝
+(8)
+B. Rogue Nodes Veriﬁcation
+Assume the beacon messages from all other vehicles in
+the region are successfully received by the guard vehicle.
+The probability of comparing the speed values in the beacon
+messages to detect the rogue nodes correctly is given by:
+𝑋(𝑃1𝑃+ 𝑃2𝑃)
+(9)
+The parameter 𝑃is the probability that beacon messages
+positively reach the guard vehicle from all other vehicles in the
+region. 𝑃1 represents the probability of predicting the honest
+node correctly if the difference between the calculated speed
+of the guard node and the honest node is lower than the
+dynamic threshold (i.e., 𝑆𝐺– 𝑆𝑟𝑐𝑣𝑑< 𝑆𝑡ℎ). 𝑃2 represents
+the probability of predicting the rogue node correctly if the
+difference between the calculated speed of the guard node and
+the rogue node is greater than the dynamic threshold (i.e., 𝑆𝐺
+– 𝑆𝑟𝑐𝑣𝑑> 𝑆𝑡ℎ). 𝑋represents the probability that the guard
+node successfully creates a dynamic fog layer to compare
+and analyze the speed values in the beacon message to detect
+the rogue nodes in the region. The probability of incorrectly
+predicting the rogue nodes, 𝑃𝑖is given by:
+𝑃𝑖= 1 −[𝑋𝑃1𝑃+ 𝑋𝑃2𝑃]
+= 1 −[𝑋𝑃1 + 𝑋𝑃2]𝑃
+≈1 −𝑋𝑃2𝑃
+(10)
+V. PERFORMANCE EVALUATION
+This section evaluates and analyzes the performance of the
+FSDV framework discussed in Section III.
+A. Evaluation of Speed Threshold in FSDV
+As discussed in Section III, a signiﬁcant deviation of the
+speed values from a dynamic threshold (𝑆𝑡ℎ) is considered
+as a Sybil attack. The threshold value is more dynamic as
+it depends on the speed of the vehicles in the region. Thus,
+when the speed of the vehicle decreases, the dynamic threshold
+value also decreases in the region. For example, the dynamic
+threshold value in the dense vehicle region, such as the
+downtown region is lower, compared to the dynamic threshold
+value in the ﬂuid trafﬁc region. This is due to the speed of
+the vehicles in a high dense vehicle region is lower compared
+to the ﬂuid trafﬁc region. The Fig. 2 shows how the selected
+speed threshold 𝑆𝑡ℎimpacts the detection probability 𝑃𝑠𝑎.
+From Fig. 2, we can infer that the probability of Sybil attack
+detection is high when the speed threshold (𝑆𝑡ℎ) is low. This
+is due to we were able to identify all the rogue nodes in
+the region. However, the low-speed threshold may hide false
+positive detection. When the speed threshold (𝑆𝑡ℎ) increases,
+the detection probability decreases since we can miss some
+rogue nodes due to the high-speed threshold. Therefore, to
+detect all the rogue nodes in the region and to reduce FPR,
+the speed threshold has to be chosen dynamically based on
+the speed of the vehicles in the region.
+JOURNAL OF LATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015
+TABLE I
+PARAMETERS USED IN SIMULATION OF THE FSDV FRAMEWORK
+Parameters
+Values
+Number of vehicles
+500-4000
+Road length
+5 Miles
+Number of lanes
+Vehicle speed
+30-65 Miles/hr
+Transmission range
+500 m
+Beacon message size
+256 bytes
+Protocol
+IEEE802.11p
+B. Simulation Setup
+The simulations are carried out using OMNET++ and
+SUMO simulators. SUMO is an open-source trafﬁc-events
+simulator, provides a trace of vehicle movements, such as
+vehicle speed, position, acceleration, etc. at the end of every
+simulation for a map imported from OpenStreetMap. OM-
+NET++ is a discrete event simulator, used to measure the
+performance of the network using the node deployment model,
+node mobility model, etc. To perform the simulation, we
+imported the map of the city of Norman, Oklahoma into the
+SUMO simulator. The output of the SUMO simulator, i.e.,
+the trace of vehicles, is given as input to the OMNET++
+simulator for rogue nodes detection. To assess the scalability
+and behavior of the FSDV framework, we increase the number
+of vehicles up to 4000 and the presence of rogue nodes in the
+network up to 40%. Table I summarizes the most commonly
+used parameters used in the simulation.
+C. Performance Metrics
+The simulations were performed based on the equations
+formulated in Section III and IV. We considered the following
+metrics to evaluate the performance of our FSDV framework
+and to compare our results with PoW, IDS, and TM schemes:
+• Data processing time: The time needed by the guard node
+to analyze the beacon messages received in the region.
+• PLR: The ratio of the number of lost packets to the total
+number of packets sent across a communication channel.
+• Average throughput: Average rate of successfully broad-
+casted beacon messages across a communication channel.
+• Overhead: The additional information exchanged between
+the vehicles to detect rogue nodes in the region.
+• True positive rate: The percentage of rogue nodes is
+accurately detected and classiﬁed as rogue nodes.
+TPR = No. of rogue nodes detected correctly
+Total no. of rogue nodes
+(11)
+• False positive rate: The percentage of honest nodes is
+incorrectly detected and classiﬁed as rogue nodes.
+FPR = No. of honest nodes detected incorrectly
+Total no. of honest nodes
+(12)
+VI. RESULTS
+During the simulation, the FSDV framework is analyzed
+based on the equations formulated in Section III and Section
+IV, and the performance metrics illustrated in Section V. The
+results are presented below:
+1) Data processing time: The time taken by the guard node
+to process speed values in the received beacon messages (Eq.
+7). When the number of vehicles increases from 500 to 4000,
+the data processing time increases as the guard node needs
+to process a large number of beacon messages received from
+all the vehicles in the region. However, as the OBUs of all
+vehicles are utilized in creating the dynamic fog layer, the
+computation power of the guard node increases when the
+number of vehicles increases in the region results in a 43%
+lower processing delay compared to [4-6] schemes. In the 4000
+vehicles simulation, the data processing time is 39%, 51%, and
+54% lower than PoW, IDS, and TM schemes, respectively, as
+shown in Fig. 3a. The results show that our FSDV framework
+is efﬁcient and can handle high vehicle densities.
+2) PLR: PLR of the FSDV framework increases when
+the number of vehicles increases from 500 to 4000 due to
+the high mobility of the vehicles resulting in a collision
+of some packets. However, the PLR of our framework is
+lower compared to [4-6] at all vehicle densities. The PLR is
+calculated against the number of vehicles. In 4000 vehicles
+simulation, PLR is 22%, 29%, and 38% lower than the PoW,
+IDS, and TM schemes, respectively, as shown in Fig. 3b.
+3) Average throughput: The average throughput is calculated
+against the number of vehicles and increases when the number
+of vehicles increases, as shown in Fig. 3c. Due to a large
+number of messages are successfully broadcasted to all vehi-
+cles region, the average throughput of the FSDV framework is
+higher compared to [4-6] schemes at all vehicle densities. In
+the 4000 vehicle simulation, average throughput is 14%, 15%,
+and 19% higher than the PoW, IDS, and TM, respectively.
+4) Overhead: The overhead of our framework is calculated
+against the number of rogue nodes (Fig. 3d). Finding the
+dynamic threshold increases the overhead of our framework
+(Section V). However, the adoption of the fog computing tech-
+nique yields lower network overhead compared to traditional
+communication techniques. Thus, the overhead of the FSDV
+framework is 13% lower compared to [4-6] schemes. For a
+network with 40% rogue nodes, the overhead is 7%, 6%, and
+10% lower than the PoW, IDS, and TM schemes, respectively.
+5) TPR: It is difﬁcult to detect the rogue nodes broadcasting
+false information if the speed varies gradually in the received
+beacon messages. However, to generate either fake trafﬁc
+congestion or accident, the target rogue node decreases the
+speed values quickly. Therefore, our FSDV framework detects
+rogue nodes correctly (i.e.,100%) up to 30% rogue nodes in
+the region and decreases slightly to 98.7% when the number of
+rogue nodes increased to 40%, as shown in Fig. 3e. Moreover,
+the TPR of the FSDV framework is higher compared to PoW,
+IDS, and TM schemes at all vehicle densities.
+6) FPR: The increase in FPR increases rogue nodes in the
+region as well as deteriorates the performance of the rogue
+node detection schemes (Section V). In the FSDV framework,
+the rogue nodes detection relies only on the speed values in
+beacon messages broadcasted by all vehicles in the region
+without taking into any trust scores or past vehicle data into
+consideration resulting in 35% lower FPR compared to [4-6]
+JOURNAL OF LATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015
+Fig. 3. Comparison of the FSDV framework with PoW, IDS, and TM schemes: (a) data processing time, (b) PLR, (c) average throughput, (d) overhead, (e)
+TPR, (f) FPR.
+schemes. For a network with 40% rogue nodes, the FPR is
+31%, 51%, and 38% lower than PoW, IDS, and TM schemes,
+respectively, as shown in Fig. 3f.
+VII. CONCLUSIONS AND FUTURE WORK
+We studied the challenges in detecting Sybil attacks, such as
+high processing delay, high network overhead, low TPR, and
+high FPR, notably when the number of rogue nodes increases
+in the region. To address these limitations and to provide an
+efﬁcient scheme to detect false messages broadcasted over the
+network, we proposed an OBU-based fog computing technique
+called FSDV to detect rogue nodes increases by up to 40%
+in the region. The simulations were performed to evaluate the
+performance of the FSDV framework using OMNET++ and
+SUMO simulators. Results showed that the FSDV framework
+is scalable, efﬁcient, robust, and performs up to 32% better
+than [4-6] techniques. Moreover, the FSDV framework ensures
+a 43% lower processing delay, 35% lower FPR, and 13% lower
+overhead at high vehicle densities compared to existing Sybil
+attack detection schemes [4-6].
+Our framework does not depend on any roadside infras-
+tructures like RSUs or trust scores or past vehicle data in
+rogue nodes detection, which is a major advantage compared
+to existing schemes [4-6, 8-12]. In the future, we are planning
+to extend this work to detect various attacks, such as tunneling
+attacks, impersonation attacks, etc. This can be done by
+simulating the environment of the security attacks and then
+detecting the malicious information broadcasted using rogue
+nodes detection techniques.
+REFERENCES
+[1] H. Hasrouny, A. E. Samhat, C. Bassil, and A. Laouiti, “VANET security
+challenges and solutions: A survey,” Vehicular Communications, vol. 7,
+pp. 7-20, 2017.
+[2] Y. Yao, B. Xiao, G. Yang, Y. Hu, L. Wang, and X. Zhou, “Power control
+identiﬁcation: A novel Sybil attack detection scheme in VANETs using
+RSSI,” IEEE Journal on Selected Areas in Communications, vol. 37, pp.
+2588-2602, 2019.
+[3] R. G. Engoulou, M. Bella¨ıche, S. Pierre, and A. Quintero, “VANET
+security surveys,” Computer Communications, vol. 44, pp. 1-13, 2014.
+[4] M. Baza, M. Nabil, M. Mahmoud, N. Bewermeier, K. Fidan, W.
+Alasmary, and M. Abdallah, “Detecting Sybil attacks using proofs of
+work and location in VANETs,” IEEE Transactions on Dependable and
+Secure Computing, vol. 17, pp. 2701-2716, 2020.
+[5] K. Zaidi, M. B. Milojevic, V. Rakocevic, A. Nallanathan, and M.
+Rajarajan, “Host-based intrusion detection for VANETs: A statistical
+approach to rogue node detection,” IEEE Transactions on Vehicular
+Technology, vol. 65, pp. 6703-6714, 2016.
+[6] M. Ayaida, N. Messai, S. Najeh, and K. Ndjore, “A macroscopic trafﬁc
+model-based approach for Sybil attack detection in VANETs,” Ad Hoc
+Networks, vol. 90, pp. 1-12, 2019.
+[7] A. Paranjothi, U. Tanik, Y. Wang, and M. S. Khan, “Hybrid-Vehfog:
+A robust approach for dissemination of critical messages in connected
+vehicles,” Transactions on Emerging Telecommunications Technologies,
+vol. 30, pp. 359-375, 2019.
+[8] M. Arshad, Z. Ullah, M. Khalid, N. Ahmad, W. Khalid, and Y. Cao,
+“Beacon trust management and fake data detection in vehicular ad-hoc
+networks,” IET Intelligent Transport Systems, vol. 13, pp. 780-788, 2018.
+[9] F. Ahmad, V. N. Franqueira, and A. Adnane, “TEAM: A trust evalu-
+ation and management framework in context-enabled vehicular ad-hoc
+networks,” IEEE Access, vol. 6, pp. 28643-28660, 2018.
+[10] C. Iwendi, M. Uddin, J. Ansere, P. Nkurunziza, J. Anajemba, and A.
+Bashir, “On detection of Sybil attack in large-scale VANETs using
+spider-monkey technique,” IEEE Access, vol. 6, pp. 47258-47267, 2018.
+[11] B. Al-Otaibi, N. Al-Nabhan, and Y. Tian, “Privacy-preserving vehicular
+rogue node detection scheme for fog computing,” Sensors, vol. 19, pp.
+965-983, 2019.
+[12] L. Yang, A. Moubayed, I. Hamieh, and A. Shami, “Tree-based intel-
+ligent intrusion detection system in internet of vehicles,” IEEE Global
+Communications Conference (GLOBECOM), pp. 1-6, 2019.

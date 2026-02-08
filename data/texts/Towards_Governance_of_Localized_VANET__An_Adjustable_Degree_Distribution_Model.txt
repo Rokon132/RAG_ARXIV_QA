@@ -1,0 +1,1323 @@
+1
+Towards Governance of Localized VANET: An
+Adjustable Degree Distribution Model
+Ruixing Ren İD , Junhui Zhao İD , Senior Member, IEEE, Xiaoke Sun İD , and Shanjin Ni İD
+Abstract—Vehicular Ad-hoc Networks (VANETs) serve as a
+critical enabler for intelligent transportation systems. However,
+their practical deployment faces a core governance dilemma:
+the network topology requires a dynamic trade-off between
+robustness against targeted attacks and ensuring low-latency
+information transmission. Most existing models generate fixed
+degree distributions, lacking the ability to adapt autonomously
+to the demands of diverse traffic scenarios. To address this
+challenge, this paper innovatively proposes a schedulable degree
+distribution model for localized VANETs. The core of this model
+lies in introducing a hybrid connection mechanism. When estab-
+lishing connections, newly joining nodes do not follow a single
+rule but instead collaboratively perform random attachment
+and preferential attachment. Through theoretical derivation and
+simulation validation, this study demonstrates that by adjusting
+the cooperative weighting between these two mechanisms, the
+overall network degree distribution can achieve a continuous
+and controllable transition between a uniform distribution and
+a power-law distribution. The former effectively disperses attack
+risks and enhances robustness, while the latter facilitates the
+formation of hub nodes, shortening transmission paths to reduce
+latency. Experimental results based on the real-world road
+network of Beijing indicate that this model can precisely regulate
+node connection heterogeneity, attack resistance, and average
+transmission path length through the reshaping of the under-
+lying topology. This provides a forward-looking and practical
+governance paradigm for constructing next-generation VANETs
+capable of dynamically adapting to complex environments.
+Index Terms—Vehicular Ad-hoc Network, topology gover-
+nance, complex networks, information transmission efficiency,
+network survivability.
+I. INTRODUCTION
+The Vehicular Ad-hoc Network (VANET) serves as the
+core infrastructure for Intelligent Transportation Systems (ITS)
+and a critical enabler for the deep integration of vehicles,
+roadside units, and cloud services [1], [2]. By establishing
+real-time, dynamic Vehicle-to-Vehicle (V2V) and Vehicle-to-
+Infrastructure (V2I) communication capabilities, it directly
+empowers critical applications such as real-time collision
+warning, dynamic traffic control, and cooperative autonomous
+driving [3]. Consequently, VANET fundamentally determines
+the ultimate efficacy of ITS in enhancing road safety, traffic
+efficiency, and user experience [4]–[6].
+However, the practical deployment of this promising vi-
+sion faces significant challenges. The predominant commu-
+Corresponding author: Junhui Zhao.
+Ruixing Ren, Junhui Zhao are with the School of Electronic and Information
+Engineering, Beijing Jiaotong University, Beijing 100044, China. (e-mail:
+renruixing0604@163.com; junhuizhao@hotmail.com)
+Xiaoke Sun and Shanjin Ni are with the National Computer Net-
+work Emergency Response Technical Team/Coordination Center of China
+(CNCERT/CC), Beijing 100029, China.
+nication standard for VANETs, IEEE 802.11p, typically has
+a limited coverage radius of 300-500 meters, imposing an
+inherent constraint on the perceptual range of On-Board Unit
+(OBU) nodes [7]. A more critical issue is the high mobility
+of vehicles (e.g., reaching 120 km/h on highways), which
+makes the real-time acquisition of global network topology
+information extremely costly, or even entirely infeasible in
+scenarios involving massive, densely interacting nodes [8]–
+[10]. These two inherent constraints collectively dictate that
+the topological evolution of VANETs cannot rely on global
+information. Instead, connections must be established based
+on data from neighboring nodes within the communication
+range, thereby giving rise to the localized VANET paradigm
+as a fundamental operational model.
+However, while circumventing the need for global informa-
+tion, this localized paradigm introduces distinct governance
+challenges that directly impact the reliability of intelligent
+transportation applications. The first issue is robustness against
+targeted attacks. The presence of high-degree hub nodes, such
+as critical Roadside Units (RSUs), makes the network vulner-
+able. If such a node is compromised by jamming or physical
+destruction, it can lead to localized network failure [11], a risk
+especially critical in congested urban areas [12]. Conversely,
+the second challenge concerns low-latency transmission. High-
+speed scenarios require millisecond-level responses for appli-
+cations like collision warning. Without efficient hub nodes,
+information must travel through multiple hops, increasing the
+average path length and transmission delay beyond acceptable
+limits for real-time operation [13]. The core challenge, how-
+ever, lies in dynamic adaptation. Different traffic scenarios
+impose conflicting requirements: urban congestion demands
+robust, interference-tolerant topologies, while highway envi-
+ronments prioritize minimal latency. Existing static models
+cannot dynamically adjust network properties according to
+operational context. Relying on a single, fixed configuration in
+dynamic environments constitutes a major bottleneck for the
+practical deployment of VANETs.
+The academic community has explored VANET governance
+challenges from multiple dimensions, which can be broadly
+categorized as follows. Research in topology management and
+optimization focuses on constructing robust and efficient net-
+work structures. Existing efforts include centralized periodic
+interventions for long-term routing planning at intersections
+[14], and improved multi-relay mechanisms to reduce control
+overhead and optimize latency and throughput [15]. A sys-
+tematic review of umanned aerial vehicle network topology
+control [16] also offers cross-domain algorithmic insights.
+Furthermore, studies have revealed the fundamental impact
+arXiv:2601.21176v1  [eess.SY]  29 Jan 2026
+of topology on system resilience: while traditional nearest-
+neighbor topologies exhibit security flaws [17], k-nearest
+neighbor topologies achieve a better balance between perfor-
+mance and security. Connectivity analysis in platoon-based
+VANETs [18] further quantifies performance gains from struc-
+tured vehicle formations. However, most approaches focus
+either on optimizing specific static or quasi-static topologies,
+or merely revealing inherent properties of particular structures.
+They lack a general mechanism capable of proactively and
+precisely reshaping the underlying degree distribution of the
+network according to dynamic scenario requirements.
+In the domain of routing and resource management, research
+focuses on efficient data dissemination over a given topology.
+Examples include integrating Manhattan grid topology with
+intelligent algorithms to enhance communication efficiency
+and resist jamming attacks [19], dynamically allocating re-
+sources using fuzzy logic and Markov chains to optimize
+throughput and latency [20], [21], and reducing total video
+delivery delay through joint topology and cache optimization
+[22]. In urban settings, hybrid routing protocols incorporating
+mobility models have proven effective in improving delivery
+rate and reducing latency [23]. While these schemes achieve
+effective traffic governance on existing networks, their per-
+formance ceiling is constrained by the inherent properties of
+the underlying topology. If the network itself is vulnerable
+due to overly centralized hubs, or suffers from excessively
+long paths due to overly uniform connectivity, upper-layer
+routing and resource scheduling alone can achieve only limited
+effectiveness.
+Finally, in the domain of security, privacy, and trust gover-
+nance, research aims to identify and eliminate malicious nodes
+to enhance network security [24]. Trust management models
+leveraging blockchain and machine learning [25], [26] can
+effectively assess vehicle credibility and filter misinformation,
+while efficient anonymous authentication schemes [27] enable
+traceability of malicious vehicles without compromising pri-
+vacy. A comprehensive survey on identity-based authentication
+[1] systematically outlines the trade-offs in this field. These
+technologies are indispensable for VANET governance, but
+their primary role lies in filtering network participants rather
+than shaping the underlying connectivity structure. As revealed
+in [28], blackhole attacks can easily double latency and reduce
+throughput, underscoring that even within a "trusted" network,
+the inherent fragility of the topology itself remains a critical
+threat.
+In summary, while existing research has made significant
+progress in protocol optimization, traffic management, and se-
+curity authentication for VANETs, a fundamental governance
+challenge remains inadequately addressed: the construction of
+a VANET with an inherently malleable underlying topology.
+Such a network should dynamically and seamlessly transition
+between the efficiency of scale-free networks [29] and the
+robustness of random networks [30] in response to real-
+time scenario demands, prioritizing low latency on suburban
+highways and attack resistance in congested urban areas. Most
+existing models adhere to a fixed degree distribution pattern,
+rendering them incapable of this cross-paradigm adaptive gov-
+ernance. This limitation constitutes a core bottleneck hindering
+the transition of VANETs from theoretical frameworks to
+large-scale practical deployment.
+To address this gap, this paper innovatively proposes a
+schedulable degree distribution model for localized VANET
+governance. The core of this model lies in introducing a
+uniform-preference connection probability. Through theoret-
+ical derivation and simulation, we demonstrate that the model
+enables a continuous, controllable transition of the network
+degree distribution between an attack-resistant exponential
+distribution and a low-latency power-law distribution. This
+offers a forward-looking and flexible governance paradigm for
+dynamic traffic environments. The core contributions are:
+• It systematically analyzes the degree distribution limi-
+tations in basic localized VANET models and proposes
+a schedulable degree distribution model. By integrating
+a hybrid connection mechanism that balances uniform
+and preferential attachment, the model achieves dynamic
+switching between robustness-oriented exponential and
+latency-oriented power-law degree distributions.
+• Using the mean-field approach, it mathematically de-
+rives the model’s degree distribution properties, explic-
+itly quantifying the distribution patterns under different
+connection probabilities. Complete differential equation
+solving and continuous-field approximation provide a
+rigorous mathematical foundation, validating the model’s
+design.
+• An experimental environment is built using the SUMO
+traffic simulator with a real-world road network east of
+Beijing’s Forbidden City. Degree distribution statistics
+confirm the theoretical derivation. Attack resistance is
+verified via targeted and random attack tests, while trans-
+mission efficiency is evaluated by measuring the average
+path length, collectively demonstrating the model’s gov-
+ernance effectiveness in practical VANET scenarios.
+The remainder of this paper is organized as follows. Sec-
+tion II analyzes the limitations of existing localized VANET
+models. Section III details the proposed adjustable degree dis-
+tribution model. Section IV provides a theoretical derivation of
+the model’s degree distribution properties. Section V presents
+the simulation setup and a quantitative analysis of the model’s
+governance performance. Finally, Section VI concludes the
+paper and suggests future research directions.
+II. ANALYSIS OF DEGREE DISTRIBUTION LIMITATIONS IN
+BASIC LOCALIZED VANET MODELS
+Basic localized VANET models, built upon the local-world
+assumption of the BA model, restrict node connections to
+within communication range [31]. However, their reliance on
+a single attachment rule results in a fixed degree distribution,
+lacking schedulability. This section outlines the core logic of
+these baseline models, followed by an analysis of their inherent
+limitations due to static degree distributions.
+A. Core Logic of the Baseline Model
+In the evolution of the BA scale-free network model,
+new nodes require global network information and establish
+connections via preferential attachment, ultimately forming a
+power-law degree distribution with an exponent of 3 [29], [32].
+However, in VANETs, the communication range of OBUs is
+limited by the coverage radius of wireless technology (e.g.,
+typically 300–500 m for IEEE 802.11p), and high vehicle
+mobility makes global information acquisition prohibitively
+costly. This necessitates the introduction of a local-world
+concept. The evolution of the basic localized VANET model
+proceeds as follows.
+Initial Network Construction. Initially, m0 core nodes,
+comprising s RSUs fixed at intersections or road segments and
+m0 −s OBUs, are deployed in the monitoring area. These
+nodes form e0 initial links (e.g., full connectivity between
+RSUs and between RSUs and nearby OBUs) via the IEEE
+802.11p protocol.
+New Node Joining and Local World Selection. At each
+time step, a newly joined OBU detects all existing nodes
+within its communication range and randomly selects M nodes
+as its local world. It then establishes connections with m
+(m ≤M) nodes from this local world.
+Local Preferential Attachment. During network growth,
+each newly joined OBU bases its attachment decisions not on
+global information, but on its local world. This mechanism bet-
+ter reflects the real VANET scenario of limited communication
+range and localized information. Building upon the preferential
+attachment principle of the classic BA scale-free network
+model but constrained by the local world, the probability
+ΠLocal(ki) that a new node connects to an existing node i
+within its local world is a joint probability determined by two
+events:
+• Event 1: Node i is included in the new node’s local
+world. Assuming the total number of nodes at time step
+t is N(t) = m0 + t, where m0 is the initial number
+of nodes, the new node randomly selects M nodes
+from its communication range to form its local world
+(M ≤N(t)). Thus, the probability that any existing node
+i is included in this local world is:
+Π(i ∈Local) =
+M
+m0 + t.
+(1)
+This term reflects the impact of global network growth
+dynamics on node visibility.
+• Event 2: Node i is selected via preferential attachment
+within the local world. Inside a given local world, the
+new OBU follows the rich-get-richer principle, preferring
+to connect to nodes with higher degrees. Let P
+j∈Local kj
+be the sum of the degrees of all nodes in the local world.
+The conditional probability that node i is selected given
+its inclusion in the local world is:
+Π(Select i|i ∈Local) =
+ki
+P
+j∈Local kj
+.
+(2)
+This term ensures that connection preference is propor-
+tional to node degree within the local scope.
+Integrating the above two events, the final probability for a
+new OBU to connect to an existing node i is therefore given
+by the product of these two probabilities:
+ΠLocal(ki) = Π(i ∈Local)·
+ki
+P
+j∈Local kj
+=
+M
+m0 + t·
+ki
+P
+j∈Local kj
+.
+(3)
+B. Scenario Mapping of Degree Distribution Limitations
+The degree distribution of the baseline model is solely
+determined by the local world size M, constrained by m ≤
+M ≤m0 + t. Three typical scenarios are analyzed based on
+the value of M:
+(1) When M = m: The number of nodes in the new OBU’s
+local world exactly equals its required number of connections
+m. Consequently, the new node must establish links with all
+nodes in its local world. In this scenario, network evolu-
+tion involves only a growth mechanism without preferential
+attachment. This resembles a blind connection scenario in
+VANETs, such as when a vehicle rapidly enters a suburban
+or remote highway area without RSU coverage, forcing it to
+form temporary connections with a limited number of nearby
+vehicles without the ability to select highly connected nodes.
+Based on the mean-field approach, the discrete evolution of
+node degree is approximated using a continuous real variable.
+The change in degree ki of node i with respect to time step t
+can be described by the following equation:
+∂ki
+∂t =
+m
+m0 + t
+(4)
+Solving this differential equation yields an exponential degree
+distribution of the form:
+P(k) ∝e−k
+m
+(5)
+The resulting uniform degree distribution, lacking prominent
+hubs, disperses the impact of targeted attacks (e.g., jamming,
+physical destruction), thereby preserving basic connectivity
+even under partial node failures. However, the absence of hub
+nodes for efficient multi-hop forwarding increases the average
+path length, ultimately failing to meet the low-latency demands
+of VANET applications such as collision warning and real-time
+coordination.
+(2) When M = m0+t: The new OBU’s local world encom-
+passes all nodes in the entire network, reducing the model to
+the BA scale-free model. In this scenario, new nodes acquire
+global network information and select connections based on
+preferential attachment. This is only feasible in small-scale,
+low-mobility environments like vehicle networks in confined
+areas, as global information perception is impractical for large-
+scale VANETs. The probability of an existing node i being
+selected by a new node is:
+Π(ki) =
+ki
+P
+j kj
+,
+(6)
+Each newly joined OBU establishes m new connections. Thus,
+at time step t, the total number of edges is E = t · m. Since
+each edge contributes 2 to the total degree count, the sum of
+all node degrees in the network is
+P
+j kj = 2E = 2tm.
+(7)
+Under the preferential attachment mechanism in the BA
+model, the probability that a new node selects an existing node
+i is given by:
+Π(ki) =
+ki
+P
+j kj
+=
+ki
+2tm
+(8)
+Assuming one new OBU joins per time step and establishes m
+new connections, the rate of change of node i’s degree equals
+the probability of its selection multiplied by m, expressed as:
+∂ki
+∂t = m · Π(ki)
+(9)
+Substitution yields the temporal evolution of node i’s degree
+ki with respect to time step t as:
+∂ki
+∂t = m · ki
+2tm = ki
+2t
+(10)
+This demonstrates that a higher degree ki leads to a greater
+rate of change
+∂ki
+∂t , reflecting the rich-get-richer nature of
+preferential attachment. Meanwhile, as the network matures
+(larger t), the impact of new connections on individual node
+degrees dilutes. Solving the equation confirms the degree
+distribution follows a power law, expressed as:
+P(k) ∝2m2k−3
+(11)
+This configuration generates a small number of highly con-
+nected hubs (e.g., critical RSUs or highly active vehicles),
+which facilitate efficient data forwarding. However, this makes
+the network highly vulnerable to targeted attacks, as the
+compromise of a single hub can trigger localized network
+paralysis.
+(3) When m < M < m0 + t: This represents the typical
+operational regime of the localized VANET model. New OBUs
+select their local world from a partial set of neighbors within
+communication range, adhering to practical constraints while
+enabling emergent scale-free characteristics through localized
+preferential attachment. The degree ki of node i evolves with
+time step t as governed by:
+∂ki
+∂t = m ·
+M
+m0 + t ·
+ki
+P
+j∈Local kj
+(12)
+The total number of links in the network is the sum of the
+initial links e0 and the m links added per time step over t
+steps, giving mt+e0. With a total of t+m0 nodes, and since
+each link contributes 2 to the total degree, the average node
+degree ⟨k⟩at time step t is:
+⟨k⟩= 2(mt + e0)
+m0 + t
+(13)
+The sum of the degrees of nodes within the local world equals
+the average degree multiplied by M:
+X
+j∈Local
+kj = M· < k >= 2M(mt + e0)
+m0 + t
+(14)
+Integrating these expressions, the resulting degree distribution
+for this scenario is derived as:
+P(k) ≈2m2k−3
+(15)
+This network exhibits both local constraints and preferential
+attachment, producing a degree distribution that approximates
+a power law, similar to a scale-free network but distinct
+from the pure BA model due to its localized preference,
+demonstrating an extension of the BA model that preserves
+scale-free properties under local constraints.
+Analysis of the three scenarios reveals that as the local world
+size M increases, the network’s degree distribution transitions
+from exponential to power-law, shifting its properties from
+attack resistance towards low-latency transmission. However,
+the model inherently lacks dynamic schedulability—it cannot
+actively balance robustness and transmission efficiency accord-
+ing to specific traffic scenarios (e.g., prioritizing low latency
+on highways). This highlights the critical need for a VANET
+model capable of achieving on-demand degree distribution
+scheduling through active parameter control.
+III. DESIGN OF AN ADJUSTABLE DISTRIBUTION-BASED
+LOCALIZED VANET MODEL
+To address the limitations of the baseline model, this paper
+introduces a hybrid connection mechanism, enabling contin-
+uous degree distribution scheduling between exponential and
+power-law regimes. This section details the model’s design
+principles, evolutionary steps, and core mechanism.
+A. Design Principles and Core Logic for Degree Distribution
+Scheduling
+As a dynamic complex network, VANET topology evolution
+must satisfy the following core requirements, which form the
+basis for our model enhancement:
+• Distributed Construction: Due to mobility and limited
+communication range, nodes cannot access global net-
+work information. The model must support distributed
+networking using local data, avoiding the high overhead
+of centralized control, while accommodating different
+node types.
+• Dynamic Robustness Adaptation: VANETs face both
+random and targeted attacks. The fixed degree distribution
+of the baseline model cannot simultaneously address
+both threats, necessitating a tunable attachment rule to
+dynamically adapt robustness.
+• Low-Latency Transmission: Core VANET applications
+require minimal latency. The ultra-small-world charac-
+teristic of scale-free networks, exhibiting short average
+path lengths, is crucial for meeting this requirement.
+Model improvements must strive to preserve low-latency
+characteristics while adjusting robustness.
+To address these requirements, we introduce a hybrid
+attachment probability p to enable dynamic degree distri-
+bution scheduling. Each new OBU establishes connections
+via uniform attachment with probability p, and preferential
+attachment with probability 1 −p. By adjusting p, the degree
+distribution can be dynamically tuned between an exponential
+distribution (for attack resistance) and a power-law distribution
+(for low latency), precisely adapting to different scenarios.
+When p = 1, uniform attachment dominates, forming an
+exponential degree distribution (interference-resistant mode).
+When p = 0, preferential attachment prevails, yielding a
+power-law distribution (low-latency mode). When 0 < p < 1,
+hybrid attachment produces a tunable power-law variant.
+Periodic Broadcasting
+RSU
+OBU
+OBU
+RSU
+OBU
+OBU
+Initial Network Construction
+Step 2
+Step 1
+OBU
+OBU
+OBU
+New
+OBU
+New
+OBU
+New
+New Node Connection Selection by
+OBU
+New
+New Node Connection Selection by
+Periodic Broadcasting
+Periodic Broadcasting
+Updating the Degree Sum 
+within the Local World
+Updating the Degree Sum 
+within the Local World
+Step 4
+Step 3
+Fig. 1. Process diagram for model evolution steps.
+B. Model Evolution Process
+The model evolution, illustrated in Fig. 1, adheres to
+VANET deployment scenarios and protocol specifications
+through the following steps:
+Step 1: Local World Sensing. Nodes periodically broadcast
+IEEE 802.11p Beacon frames, recording neighbor IDs within
+communication range to define their local world.
+Step 2: Initial Network Construction. Initialize the net-
+work with s RSUs and m0 −s OBUs, forming a fully
+connected topology with e0 = m0(m0+1)
+initial links.
+Step 3: New OBU Joining and Connection. At each time
+step, n new OBUs join. If a new OBU’s local world contains
+at least m nodes, it selects m nodes using the proposed
+probabilistic model; otherwise, it connects to all existing nodes
+in its local world.
+The core innovation lies in the hybrid attachment probability
+p, mathematically expressed as a weighted combination of uni-
+form and preferential attachment. The connection probability
+for node i in the local world of the new node is defined as:
+ΠLocal(ki) = p
+Mi
++ ki(1 −p)
+P
+j∈Local kj
+(16)
+where ki denotes the degree of node i, P
+j∈Local kj represents
+the total degree of nodes within the local world, and Mi is
+the total number of nodes in the new node’s local world.
+Note that Equation (16) is a theoretical probability ex-
+pression. Two key issues in practical simulations require
+engineering solutions: 1) Floating-point precision limitations
+can lead to some nodes’ calculated probabilities approaching
+0 (not strictly 0) or the total probability deviating from 1,
+violating random sampling’s probability axioms; 2) In extreme
+scenarios (e.g., high proportion of low-degree nodes in the
+local world), valid selectable nodes may be fewer than the
+preset connection count m, causing direct probability-based
+sampling to fail. To ensure connection selection’s stability,
+legality, and accuracy, final node sampling follows two steps:
+• Probability Preprocessing and Normalization: Extract
+candidate nodes and their initial probabilities from the
+local world, and construct a probability array. Replace ex-
+tremely small values (less than ϵ) with ϵ to avoid effective
+probability loss from rounding errors, then normalize the
+array to ensure the total probability is strictly 1, meeting
+random sampling’s mathematical premise.
+• Without-Replacement
+Sampling:
+Count
+valid
+nodes
+(probability > ϵ). If fewer than m, adopt random without-
+replacement sampling as a fallback; otherwise, sample
+based on normalized hybrid attachment probabilities.
+This adheres to Equation (16)’s design, avoids duplicate
+connections to the same node, and aligns with VANETs’
+single-link communication.
+These engineering adaptations realize seamless integration
+of the theoretical model and simulation practice, ensuring the
+hybrid attachment strategy aligns with the original design and
+boosting the algorithm’s robustness in complex scenarios.
+Step 4: Real-time Degree Distribution Update. New
+OBUs broadcast updated degree information via extended
+Beacon frames (2-byte payload expansion). Neighbors update
+local degree sums P
+j∈Local kj to enable dynamic feedback
+regulation.
+The following section will demonstrate that continuous
+adjustment of p ∈[0, 1] enables smooth transition of at-
+tachment behavior from purely uniform to purely preferential,
+thereby providing rigorous mathematical support for dynamic
+scheduling of VANET degree distributions across exponential
+and power-law regimes.
+IV. ANALYSIS OF DEGREE DISTRIBUTION SCHEDULING
+CHARACTERISTICS
+This section employs the mean-field approach to theoreti-
+cally derive the degree distribution under different values of
+p, clarifying its schedulable range and parametric behavior to
+validate the model’s adaptability across VANET scenarios.
+(1) When p = 1: Purely Uniform Attachment
+A new OBU selects nodes within its local world with equal
+probability, reducing network evolution to a growth process
+without preferential attachment. The rate of change of degree
+ki for node i is:
+∂ki
+∂t =
+Mi
+m0 + t · m
+Mi
+=
+m
+m0 + t
+(17)
+Given the initial condition at its joining time ti: ki(ti) = m.
+Integrating the rate equation yields:
+ki(t) = m
+Z t
+ti
+m0 + τ dτ + C
+(18)
+Solving with the initial condition gives the degree-time rela-
+tionship:
+ki(t) = m
+
+ln m0 + t
+m0 + ti
++ 1
+
+(19)
+Under the continuous approximation, the degree distribution
+can be derived from the uniform joining time distribution of
+nodes, P(ti) = 1/t for 0 ≤ti ≤t. Let T = m0 + t and
+Ti = m0 + ti, then:
+k = m
+
+ln T
+Ti
++ 1
+
+(20)
+which gives Ti = Te1−k/m.
+The cumulative distribution function is given by F(k) =
+P(ki(t) ≤k). Since ki(t) decreases as Ti increases:
+ki(t) ≤k ⇔Ti ≥Te1−k/m
+(21)
+With Ti uniformly distributed over [m0, T] with density
+T −m0 :
+F(k) = P(Ti ≥Te1−k/m) = T −Te1−k/m
+T −m0
+(22)
+For large t where T ≈t and T −m0 ≈t: F(k) ≈1−e1−k/m.
+The probability density function is then:
+P(k) = dF(k)
+dk
+= e
+me−k/m.
+(23)
+This confirms an exponential degree distribution with uniform
+node degrees and no significant hubs. As k increases, P(k)
+decays exponentially, making high-degree nodes rare. Suitable
+for interference-resistant VANET scenarios (e.g., urban con-
+gestion), this distribution maintains basic connectivity under
+node failures with strong robustness against targeted attacks,
+albeit at the cost of longer average transmission paths.
+(2) When p = 0: Purely Preferential Attachment
+New OBUs select nodes solely through preferential attach-
+ment within their local world, reducing the model to the
+baseline localized VANET model. The rate of change of node
+i’s degree is:
+∂ki
+∂t = m ·
+Mi
+m0 + t ·
+ki
+P
+j∈Local kj
+(24)
+The average node degree and local world degree sum are:
+⟨k⟩= 2mt + m0(m0 −1)
+m0 + t
+,
+(25)
+X
+j∈Local
+kj = Mi · ⟨k⟩
+(26)
+For large t, the term m0(m0−1) becomes negligible, yielding:
+⟨k⟩≈
+2mt
+m0 + t
+(27)
+Substituting into the rate equation gives:
+∂ki
+∂t =
+m
+m0 + t · ki
+⟨k⟩≈
+m
+m0 + t ·
+ki
+2mt
+m0+t
+= ki
+2t
+(28)
+Similarly, applying the initial condition ki(ti) = m, the
+degree-time relationship is solved as:
+ki(t) = m
+ t
+ti
+1/2
+(29)
+Using the continuum approach with P(ti) = 1/t for 0 ≤
+ti ≤t, equation (29) yields ti = m2tk−2. Since k decreases
+with increasing ti, that is, nodes that join earlier have larger
+degrees, the cumulative distribution function becomes:
+F(k) = P(ki ≤k) = P(ti ≥m2tk−2) = 1 −m2k−2
+(30)
+Here, it is required that m2tk−2 ≥t, which is equivalent to
+k ≥m, and m2tk−2 ≥0 holds automatically, then:
+P(k) = dF(k)
+dk
+= 2m2k−3
+(31)
+Thus, the degree distribution follows a power law:
+P(k) ∝2m2k−3
+(32)
+This regime produces a scale-free network with few high-
+degree hubs, suitable for low-latency VANET scenarios (e.g.,
+highways). Hub nodes shorten communication paths, meeting
+delay-sensitive application requirements, but create vulnerabil-
+ity to targeted attacks where hub failure may cause localized
+network disruption.
+(3) When 0 < p < 1: Hybrid Attachment
+New OBUs employ both uniform and preferential attach-
+ment, representing the model’s typical operational regime. For
+large t, the rate of change of node i’s degree is:
+∂ki
+∂t =
+mp
+m0 + t + ki(1 −p)
+2t
+≈mp
+t
++ ki(1 −p)
+2t
+(33)
+Similarly, by solving the differential equation in Formula (33)
+and combining it with the initial condition ki(ti) = m, the
+relationship between the node degree and the time step can be
+derived, that is
+ki(t) = m(1 + p)
+1 −p
+·
+ t
+ti
+ 1−p
+−2mp
+1 −p
+(34)
+Let β = 1−p
+2 , A = m(1+p)
+1−p , B = 2mp
+1−p . Through algebraic
+derivation:
+k = A
+ t
+ti
+β
+−B
+(35)
+ti = t
+k + B
+A
+−1/β
+(36)
+The cumulative distribution function is:
+F(k) = P(ki ≤k) = P
+ 
+ti ≥t
+k + B
+A
+−1/β!
+(37)
+Since ki decreases with increasing ti, further derivation yields:
+F(k) = 1 −t ·
+  k+B
+A
+−1/β
+t
+= 1 −
+k + B
+A
+−1/β
+(38)
+The probability density function is obtained by differentia-
+tion:
+P(k) = dF(k)
+dk
+= −d
+dk
+"
+A
+k + B
+1/β#
+(39)
+Differentiating
+
+A
+k+B
+1/β
+:
+d
+dk
+
+A
+k + B
+1/β
+= 1
+β
+
+A
+k + B
+ 1
+β −1
+· A ·
+
+−
+(k + B)2
+
+= −1
+β A1/β(k + B)−1/β−1
+Thus:
+P(k) = −
+
+−1
+β A1/β(k + B)−1/β−1
+
+= 1
+β A1/β(k+B)−1/β−1
+(40)
+Substituting A, β, and B yields the final probability density
+function:
+P(k) =
+1 −p
+m(1 + p)
+1 −p
+
+1−p 
+k + 2mp
+1 −p
+−3−p
+1−p
+(41)
+Fig. 2. Net of an area to the east of the Forbidden City in Beijing.
+Letting C =
+1−p
+h
+m(1+p)
+1−p
+i
+1−p , a =
+2mp
+1−p , γ =
+3−p
+1−p, we
+obtain:
+P(k) = C · (k + a)−γ ∝(k + a)−γ
+(42)
+This indicates the degree distribution approximately follows
+a tunable power law. With 0 < p < 1, γ
+> 3, and
+increasing with p, the distribution transitions gradually from a
+steep power-law (close to BA model) to a flatter exponential
+form. The number of hub nodes decreases while node degrees
+become more uniformly distributed.
+Algorithm 1: VANET Simulation Procedure
+Initialization: Configure the SUMO environment, the
+random seed, define data structures for storing
+connection pairs and node degrees.
+Launch SUMO and deploy RSUs.
+1: for each simulation step do
+2:
+a. Advance the simulation by one step; retrieve
+currently active OBUs and their positions.
+3:
+b. Remove invalid connections: Disconnect nodes that
+are out of communication range or have left the scene;
+update node degrees accordingly.
+4:
+c. Establish new connections:
+5:
+For each OBU, filter RSUs and OBUs within
+communication range to form a local node set.
+6:
+Select m nodes from local set by Equation (16).
+7:
+Establish new connections and update the degrees
+of corresponding nodes.
+8:
+d. Calculate metrics such as the proportion of the
+largest connected component and degree variance;
+record results into statistics.
+9: end for
+10: Terminate the simulation; save every step statistics, final
+topology, and degree distribution to files.
+V. SIMULATION EXPERIMENTS AND RESULT ANALYSIS
+To validate the degree distribution schedulability and sce-
+nario adaptability of the proposed model, an experimental
+X-coordinate (0.00
+1426.16m)
+Y-coordinate (0.00
+1145.47m)
+X-coordinate (0.00
+1426.16m)
+Y-coordinate (0.00
+1145.47m)
+X-coordinate (0.00
+1426.16m)
+Y-coordinate (0.00
+1145.47m)
+5
+15
+25
+node degree
+50
+150
+250
+node number
+Actual degree distribution
+Theoretical power-law distribution k
+0
+10
+node degree
+20
+60
+100
+node number
+Actual degree distribution
+Theoretical adjustable power-law distribution = 5.00
+0.0
+2.5
+5.0
+7.5
+10.0
+12.5
+node degree
+20
+60
+node number
+Actual degree distribution
+Theoretical index distribution m = 3
+Fig. 3. Topological links and corresponding degree distributions under differ-
+ent p, with upper, middle, and lower subfigures corresponding to p = 0.0, 0.5,
+and 1.0, respectively.
+environment is constructed based on SUMO and Python. All
+experiments are conducted on a system equipped with a 12th
+Gen Intel(R) Core(TM) i5-12400F CPU @ 2.50GHz processor
+and 16GB RAM. The software configuration consisted of
+Anaconda3-2021.11-Windows-x86_64 and Python 3.8.
+Using the OSMWebWizard.py tool provided by SUMO, a
+real road network section (1426.16 × 1145.47 m) east of
+Beijing’s Forbidden City is extracted from OpenStreetMap as
+the simulation scenario. The network is processed by retaining
+only motor-vehicle routes and rendered as shown in Fig. 2.
+Vehicle traffic trajectories are generated via randomTrips.py,
+with one new OBU joining per second. For simplicity, RSUs
+are deployed at key intersections. Following the IEEE 802.11p
+protocol, the communication range is set to 300 m for OBUs
+and 500 m for RSUs. The procedure for the simulation
+implementation code is presented in Algorithm 1.
+To clearly observe the distribution patterns under differ-
+ent values of p, we randomly generated 200 OBU nodes
+within the imported road network and constructed topological
+connections according to different p values. The resulting
+degree distributions are shown in Fig. 3. The experimental
+results align well with theoretical expectations. In the topology
+diagrams, node radius scales with degree to visually emphasize
+hubs. When p = 0.0, distinct large hub nodes emerge, form-
+ing a centralized rich-get-richer structure. This configuration
+shortens transmission paths in highway scenarios but remains
+vulnerable to hub failures. At p = 0.5, hub concentration
+moderates, balancing latency optimization and interference
+resistance for suburban environments. With p = 1.0, nodes
+0
+200
+400
+600
+800
+Simulation step
+100
+300
+Variance of all node degrees
+p=0.0
+p=0.3
+p=0.5
+p=0.7
+p=1.0
+Fig. 4. Variance of all node degrees.
+100
+300
+500
+700
+Simulation step
+200
+600
+1000
+Variance of RSU node degrees
+p=0.0
+p=0.3
+p=0.5
+p=0.7
+p=1.0
+Fig. 5. Variance of RSU node degrees.
+exhibit minimal size variation with uniformly distributed links,
+enhancing resilience against node failures in urban congestion.
+In terms of degree distribution, the empirical distribution at
+p = 0.0 closely aligns with the theoretical power-law k−3,
+exhibiting characteristics of a scale-free network where a few
+nodes possess extremely high degrees while the majority have
+low connectivity. At p = 0.5, the empirical distribution fits
+well with the theoretical tunable power-law with γ = 5.0,
+demonstrating a degree inequality that lies between the cases
+of p = 0 and p = 1. When p = 1.0, the empirical distribution
+follows the theoretical exponential trend. Due to the pure
+uniform attachment rule, node degrees concentrate around the
+mean, eliminating the prevalence of very low-degree nodes.
+This results in a small first-bin value, a typical feature distin-
+guishing exponential from power-law distributions, reflecting
+how uniform attachment leads to degree distributions clustered
+near the average.
+Figs. 4 and 5 illustrate the dynamic evolution of node degree
+variance under different hybrid attachment probabilities p over
+800 simulation steps. Throughout the simulation, the degree
+variance exhibits significant fluctuations due to continuous
+topological dynamics. The initial increase arises from new
+OBUs joining and establishing connections, rapidly amplify-
+ing degree disparities during the early growth phase. RSUs
+demonstrate a more prolonged growth period, as their larger
+communication range and fixed positioning enable sustained
+link formation with incoming nodes. Notably, degree variance
+consistently decreases with increasing p for both all nodes
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+p values
+0.97
+0.98
+0.99
+1.00
+Relative size of the LCC
+random attack intensity 0.1
+random attack intensity 0.15
+random attack intensity 0.2
+random attack intensity 0.25
+random attack intensity 0.3
+Fig. 6. Random attack trend.
+and RSUs. This trend confirms that higher uniform attachment
+probability effectively suppresses degree heterogeneity by dis-
+tributing connections more evenly within local worlds, thereby
+mitigating the rich-get-richer effect. At any given p, RSUs
+maintain substantially higher variance than the network-wide
+average. This disparity stems from their strategic deployment
+at key locations (e.g., intersections), which ensures higher
+baseline connectivity, and the inherent heterogeneity in their
+spatial distribution leading to varied interaction opportunities.
+To quantify the connectivity robustness of VANETs under
+attack, a stable simulation step is selected, and the metric
+relative size of the Largest Connected Component (LCC) is
+introduced. This metric is defined as the ratio of the number of
+nodes in the largest connected component to the total number
+of nodes in the network. It directly quantifies the preservation
+of large-scale connectivity after node failures, aligning with the
+requirement for continuous V2V communication in VANETs
+and serving as a core measure of network survivability.
+Fig. 6 shows the variation of the LCC size with the hybrid
+attachment probability p under different intensities of random
+attacks. The results indicate that regardless of the attack inten-
+sity, the LCC size remains consistently above 0.97 and shows
+no significant fluctuation as p changes. This stability occurs
+because random attacks disrupt nodes indiscriminately and are
+unlikely to cripple critical connective nodes. The remaining
+nodes can maintain large-scale connectivity through existing
+links, demonstrating that VANETs possess strong inherent
+robustness against random attacks. Their connectivity remains
+nearly unaffected by either the type of degree distribution or
+the intensity of such random failures.
+Fig. 7 illustrates the variation in the relative size of LCC
+under different intensities of targeted attacks as a function of
+the parameter p. Since targeted attacks deliberately remove
+high-degree nodes, their impact on connectivity strongly de-
+pends on both the attack intensity and the value of p. Under
+low-intensity attacks, only a slight fluctuation is observed
+near p = 0, without a significant drop in LCC size. This
+is because, even after some hub nodes are removed, the
+remaining hubs and numerous ordinary nodes retain sufficient
+alternative pathways to maintain large-scale connectivity. In
+contrast, under high-intensity attacks, the LCC size drops
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+p values
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+Relative size of the LCC
+targeted attack intensity 0.1
+targeted attack intensity 0.15
+targeted attack intensity 0.2
+targeted attack intensity 0.25
+targeted attack intensity 0.3
+Fig. 7. Targeted attack trend.
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+p
+6
+10
+14
+18
+Average path length
+m=1
+m=2
+m=3
+Fig. 8. Average path length of information transmission.
+sharply at p = 0 but gradually recovers to nearly 1.0 as
+p increases. This demonstrates that increasing p, thereby
+enhancing the proportion of uniform attachment, shifts the
+VANET from a hub-dependent architecture toward a more
+distributed topology, significantly improving its robustness
+against targeted attacks. Conversely, the power-law network
+at p = 0, which relies heavily on a few critical hubs, remains
+highly vulnerable to such attacks.
+Fig. 8 compares the variation of average path length with
+parameter p under different initial connection numbers m for
+new nodes. The results represent averages over 10 simulation
+steps. For all values of m, the average path length increases
+with p. This occurs because as p increases, regulating the
+balance between uniform and preferential attachment, the
+degree distribution shifts from a pure power-law (under pref-
+erential attachment) to a tunable power-law variant, eventually
+approaching an exponential distribution (under uniform attach-
+ment). This progression reduces the availability of efficient
+hub-based routing paths, forcing information to traverse more
+intermediate nodes.
+Notably, for m = 2 and m = 3, the average path length re-
+mains relatively short and shows low sensitivity to changes in
+p. This stability stems from higher initial connectivity: during
+the preferential attachment phase, multiple initial connections
+enhance the multi-path relay capability of hubs, maintaining
+short paths. Even as uniform attachment increases with p, the
+dense connectivity provides ample alternative routes, prevent-
+ing significant path elongation. In contrast, the sparse network
+with m = 1 exhibits longer paths and greater sensitivity to p,
+as the limited connectivity amplifies the impact of hub dilution
+on routing efficiency.
+VI. CONCLUSION AND DISCUSSION
+This paper addressed the topological governance challenges
+in localized VANET under dynamic traffic scenarios by
+proposing a schedulable degree distribution model based on
+a hybrid attachment mechanism. Through theoretical analysis
+and simulation experiments, we systematically demonstrated
+the model’s core capability: by adjusting the hybrid attachment
+probability p, the network degree distribution can transition
+continuously between an exponential and a power-law dis-
+tribution. This enabled dynamic trade-offs between network
+robustness and low-latency transmission efficiency. Simulation
+results confirmed that increasing p effectively suppressed
+node degree heterogeneity and enhanced tolerance to targeted
+attacks, albeit at the cost of reduced transmission efficiency.
+Conversely, decreasing p promoted hub formation, shortend
+the average path length to meet low-latency demands, but in-
+troduced vulnerability to hub failures. These findings validated
+the model’s potential to provide a novel governance paradigm
+with a malleable underlying topology for diverse scenarios
+such as urban congestion and suburban highways.
+However, this study has certain limitations. The core tuning
+parameter p is currently treated as a pre-defined static value,
+requiring manual configuration or prior knowledge of the
+external environment. This open-loop control paradigm cannot
+adequately respond to the real-time, nonlinear variations in
+environmental factors like vehicle density, mobility speed, and
+communication load within VANETs, thus failing to fully
+unlock the model’s potential for autonomous, closed-loop
+governance in realistic dynamic settings.
+Looking forward, we aim to transition the model from being
+merely schedulable to becoming self-scheduling. A highly
+promising direction is the integration of Deep Reinforcement
+Learning (DRL) to address the aforementioned limitations.
+Specifically, future work will focus on developing a DRL
+agent that continuously perceives the network state (e.g., node
+density, connection dynamics, historical attack frequency) as
+its input, uses the hybrid attachment weighting as its action
+output, and operates based on a reward function designed to
+optimize long-term network performance (e.g., comprehen-
+sively balancing connectivity, latency, and energy consump-
+tion). This approach would enable VANETs to autonomously
+and intelligently adapt their topological generation strategies
+in real-time according to operational contexts, ultimately re-
+alizing a truly adaptive and resilient intelligent transportation
+network system.
+REFERENCES
+[1] A. Manasrah, Q. Yaseen, H. Al-Aqrabi, and L. Liu, “Identity-based
+authentication in VANETs: A review,” IEEE Transactions on Intelligent
+Transportation Systems, vol. 26, pp. 4260–4282, Apr. 2025.
+[2] P. Suman, S. Padhy, and et al., “An improved deep learning-based
+intrusion detection for reliable communication in VANET,” IEEE Trans-
+actions on Consumer Electronics, vol. 71, pp. 209–217, Feb. 2025.
+[3] R. Ren, J. Zhao, and Q. Zhang, “UAV-assisted collaborative sensing
+task offloading and resource allocation in IoV,” IEEE Transactions on
+Vehicular Technology, pp. 1–10, 2025.
+[4] R. Ren, J. Zhao, D. Zou, Q. Zhang, D. Wang, and W. Xu, “Collaborative
+computation in integrated sensing, communication, and computation
+system for autonomous driving,” IEEE Transactions on Intelligent
+Transportation Systems, vol. 27, no. 1, pp. 883–894, Jan. 2026.
+[5] J. Zhao, R. Ren, Y. Nie, and D. Wang, “Decision intelligence empower-
+ing resource management for 6G-V2X communications,” IEEE Internet
+of Things Magazine, vol. 8, no. 6, pp. 88–96, Nov. 2025.
+[6] M. S. HaghighiFard and S. Coleri, “Hierarchical federated learning
+in multi-hop cluster-based VANETs,” IEEE Transactions on Vehicular
+Technology, vol. 74, pp. 15371–15385, Oct. 2025.
+[7] D. Jiang and L. Delgrossi, “IEEE 802.11p: Towards an international
+standard for wireless access in vehicular environments,” in VTC Spring
+2008 - IEEE Vehicular Technology Conference, pp. 2036–2040, May
+2008.
+[8] R. Ren, J. Zhao, Y. Li, D. Zou, Q. Zhang, and Y. Gong, “DRL-based
+performance optimization of IoT integrated sensing, communication, and
+computation systems,” in 2024 3rd International Joint Conference on
+Information and Communication Engineering (JCICE), pp. 134–138,
+2024.
+[9] J. Zhao, R. Ren, D. Zou, Q. Zhang, and W. Xu, “IoV-oriented integrated
+sensing, computation, and communication: System design and resource
+allocation,” IEEE Transactions on Vehicular Technology, vol. 73, no. 11,
+pp. 16283–16294, Nov. 2024.
+[10] R. Ren, J. Zhao, Q. Zhang, D. Wang, and J. Li, “DRL beamforming
+in RIS-aided IoV for integrated-sensing-communication-computation,”
+IEEE Internet of Things Journal, vol. 12, no. 14, pp. 28201–28213, Jul.
+2025.
+[11] W. El-Shafai, A. T. Azar, and S. Ahmed, “AI-driven ensemble classifier
+for jamming attack detection in VANETs to enhance security in smart
+cities,” IEEE Access, vol. 13, pp. 50687–50713, Mar. 2025.
+[12] Y. Yao, J. Zhao, Z. Li, X. Cheng, and L. Wu, “Jamming and
+eavesdropping defense scheme based on deep reinforcement learning
+in autonomous vehicle networks,” IEEE Transactions on Information
+Forensics and Security, vol. 18, pp. 1211–1224, Jan. 2023.
+[13] M. Tao, G. Zhang, D. Zou, and J. Zhao, “Driven communication conges-
+tion in connected vehicle networks: A complexity metrics approach,” in
+2025 IEEE/CIC International Conference on Communications in China
+(ICCC Workshops), pp. 1–6, Sept. 2025.
+[14] Z. Wu, Z. He, Q. Lin, J. Wang, and G. Li, “Vehicular ad hoc networks
+topology optimization for autonomous intersection management system:
+A periodic intervention-based approach,” IEEE Transactions on Intelli-
+gent Transportation Systems, vol. 25, pp. 16005–16023, Nov. 2024.
+[15] W. K. Ahmed, M. N. M. Warip, M. E. E. S. Ahmed, and P. Ehkan,
+“Multipoint relay path for efficient topology maintenance algorithm in
+optimized link state routing-based for VANET,” International journal of
+Computer Networks & Communications, vol. 16, Jan. 2024.
+[16] M. M. Alam, M. Y. Arafat, S. Moh, and J. Shen, “Topology control
+algorithms in multi-unmanned aerial vehicle networks: An extensive
+survey,” Journal of Network and Computer Applications, vol. 207,
+p. 103495, Nov. 2022.
+[17] M. Pirani, S. Baldi, and K. H. Johansson, “Impact of network topology
+on the resilience of vehicle platoons,” IEEE Transactions on Intelligent
+Transportation Systems, vol. 23, pp. 15166–15177, Sept. 2022.
+[18] C. Bian, J. Zhao, X. Sun, X. Li, and D. Zou, “Network connectivity
+performance analysis of platoon-based vehicular ad-hoc network on
+a two-way lane,” in 2019 IEEE International Conference on Signal,
+Information and Data Processing (ICSIDP), pp. 1–5, Aug. 2019.
+[19] G. B. Santhi, S. S. Jacob, and et al., “Traffic coordination by reducing
+jamming attackers in VANET using probabilistic manhattan grid topol-
+ogy for automobile applications,” Scientific Reports, vol. 14, Apr. 2024.
+[20] K. Nagababu, A. Vanathi, R. Ratheesh, C. Nalini, G. Karthikeyan, and
+F. F. Vinnarasi, “Traffic congestion reduction using fuzzy optimization
+scheme in heterogeneous vehicular communication network,” in 2024
+International Conference on Innovative Computing, Intelligent Commu-
+nication and Smart Electrical Systems (ICSES), pp. 1–6, 2024.
+[21] A. Annu and P. Rajalakshmi, “Enhancing sidelink 5G V2V communica-
+tion: A distributed probabilistic congestion control for dynamic resource
+allocation,” in 2023 IEEE International Conference on Advanced Net-
+works and Telecommunications Systems (ANTS), pp. 1–6, Mar. 2023.
+[22] Z. Hu, Y. Li, and S. Tang, “Efficient caching and spreading of traffic
+videos by optimized topology in IoV,” IEEE Transactions on Vehicular
+Technology, vol. 73, pp. 11821–11833, Aug. 2024.
+[23] M. I. Habelalmateen, D. Jawad Hashim, B. Arunagiri, K. Aljawaheri,
+F. H. Alsalamy, and I. Badi Khalaf, “An effectual approach for mobility
+and traffic monitoring based VANET’s routing protocol in urban en-
+vironment,” in 2025 11th International Conference on Communication
+and Signal Processing (ICCSP), pp. 1130–1134, Jul. 2025.
+[24] G. K. Verma, S. Rana, A. Tiwari, N. Kumar, and A. Barnawi, “Dynamic
+anonymous hierarchical edge-assisted batch verifiable authentication
+for VANETs,” IEEE Transactions on Vehicular Technology, vol. 74,
+pp. 14735–14744, Sept. 2025.
+[25] J. Zhao, F. Huang, L. Liao, and Q. Zhang, “Blockchain-based trust
+management model for vehicular ad hoc networks,” IEEE Internet of
+Things Journal, vol. 11, pp. 8118–8132, Mar. 2024.
+[26] F. Huang, Q. Li, and J. Zhao, “Trust management model of VANETs
+based on machine learning and active detection technology,” in 2022
+IEEE/CIC International Conference on Communications in China
+(ICCC Workshops), pp. 412–416, Oct. 2022.
+[27] J. Zhao, Y. Guo, L. Liao, and D. Wang, “A blockchain-based efficient
+traceability authentication scheme in VANET,” Digital Communications
+and Networks, May 2025.
+[28] N. T. Yang, S. F. Abdul Razak, S. Yogarayan, and N. H. Kamis,
+“Assessing implications of black hole attacks on VANET performance,”
+in 2024 International Conference on Artificial Intelligence, Blockchain,
+Cloud Computing, and Data Analytics (ICoABCD), pp. 90–94, Oct.
+2024.
+[29] A.-L. Barabási and R. Albert, “Emergence of scaling in random net-
+works,” Science, vol. 286, pp. 509–512, Oct. 1999.
+[30] R. Albert, H. Jeong, and A.-L. Barabási, “Error and attack tolerance of
+complex networks,” Nature, vol. 406, pp. 378–382, Jul. 2000.
+[31] Y. Zhang, “Research on construction methods of wireless sensor net-
+works based on complex network theory,” Master’s thesis, Beijing
+Jiaotong University, Beijing, China, 2024.
+[32] R. Albert and A.-L. Barabási, “Statistical mechanics of complex net-
+works,” Reviews of Modern Physics, vol. 74, pp. 47–97, Jan. 2002.

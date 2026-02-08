@@ -1,0 +1,1640 @@
+Internet Service Providers’ and Individuals’
+Attitudes, Barriers, and Incentives to Secure IoT
+Nissy Sombatruang1
+Tristan Caulﬁeld2
+Ingolf Becker2
+Akira Fujita1
+Takahiro Kasama1
+Koji Nakao1
+Daisuke Inoue1
+1National Institute of Information and Communications Technology
+2University College London
+Abstract
+Internet Service Providers (ISPs) and individual users of
+Internet of Things (IoT) play a vital role in securing IoT.
+However, encouraging them to do so is hard. Our study inves-
+tigates ISPs’ and individuals’ attitudes towards the security
+of IoT, the obstacles they face, and their incentives to keep
+IoT secure, drawing evidence from Japan.
+Due to the complex interactions of the stakeholders, we
+follow an iterative methodology where we present issues and
+potential solutions to our stakeholders in turn. For ISPs, we
+survey 27 ISPs in Japan, followed by a workshop with repre-
+sentatives from government and 5 ISPs. Based on the ﬁndings
+from this, we conduct semi-structured interviews with 20 par-
+ticipants followed by a more quantitative survey with 328
+participants. We review these results in a second workshop
+with representatives from government and 7 ISPs. The appre-
+ciation of challenges by each party has lead to ﬁndings that
+are supported by all stakeholders.
+Securing IoT devices is neither users’ nor ISPs’ priority.
+Individuals are keen on more interventions both from the
+government as part of regulation and from ISPs in terms of
+ﬁltering malicious trafﬁc. Participants are willing to pay for
+enhanced monitoring and ﬁltering. While ISPs do want to help
+users, there appears to be a lack of effective technology to
+aid them. ISPs would like to see more public recognition for
+their efforts, but internally they struggle with executive buy-in
+and effective means to communicate with their customers.
+The majority of barriers and incentives are external to ISPs
+and individuals, demonstrating the complexity of keeping IoT
+secure and emphasizing the need for relevant stakeholders in
+the IoT ecosystem to work in tandem.
+Copyright is held by the authors.
+This is an extended version of our USENIX Security ’23 paper [41].
+Introduction
+The Internet of Things (IoT) brings several beneﬁts to individ-
+uals and society. The ability to monitor properties remotely
+via smart CCTV, adjust heating remotely, and utilise energy
+more efﬁciently with a smart meter are just a few examples
+that are gradually becoming part of many people’s lives. How-
+ever, the lagging of security and privacy on these IoT devices
+can expose users and the supporting networks to cybersecurity
+risks. The 2016 Dyn attack which caused large-scale disrup-
+tion to Internet services is a prime example of the risks that
+the IoT can pose to both individual users of IoT and ISPs [3].
+It provides compelling evidence for the need for both parties
+to keep IoT secure.
+The increasing involvement of ISPs in cleaning up infected
+home computers [1,4,11,14,22] demonstrates that ISPs are
+key to securing IoT. Individuals, as the owner and the user of
+IoT devices, also have an important role in securing these de-
+vices. However, the attitudes of ISPs and individuals towards
+the need to secure IoT, and the incentives and obstacles that
+encourage or discourage them to act to secure IoT are still
+poorly understood.
+This study seeks to understand these attitudes, obstacles,
+and incentives by investigating ISPs and individuals in Japan.
+Japan is of particular interest due to the country’s fast-growing
+IoT adoption [29,42] and the government’s ambition to keep
+the IoT ecosystem secure. This is most notably evident in the
+National Operation Towards IoT Clean Environment (NO-
+TICE), an ongoing nationwide project to identify and remedi-
+ate vulnerable and infected IoT devices [33]. Our ﬁndings will
+improve the effectiveness of NOTICE and similar projects
+elsewhere.
+For ISPs, we survey 27 ISPs across Japan followed by two
+workshops in which 5 and 7 ISPs participated. For individuals,
+we conduct semi-structured interviews with 20 participants
+and followed this up with an online survey with 328 partici-
+pants.
+Our ﬁndings shed light on the profound complexity of the
+effort to encourage ISPs and individuals to keep IoT secure.
+arXiv:2210.02137v1  [cs.CY]  5 Oct 2022
+While individuals have some concerns about the security and
+privacy of IoT devices and ISPs are concerned about their
+networks hosting infected/vulnerable IoT devices, keeping
+IoT secure is only a secondary priority for them. Individuals
+and ISPs also faced various barriers that deterred them from
+doing so.
+Most of the key incentives are external to ISPs and individ-
+uals; hence, the onus of implementing these incentives falls
+onto other stakeholders in the IoT ecosystem. In the grand
+scheme of things, these ﬁndings suggest that: 1) solutions
+can not be unilateral on the part of one stakeholder, 2) good
+solutions require ISPs, governments, device manufacturers,
+and individuals to work together, and 3) the other stakeholders
+must help support and motivate individuals in their role.
+In summary, our contributions are as follows:
+• We investigate ISPs’ and individuals’ attitudes, barriers,
+and incentives to secure IoT, being the ﬁrst to undertake
+an integrated approach — by examining three aspects
+from two stakeholders in one study.
+• We provide evidence of these attitudes, barriers, and
+incentives, the latter of which include the misaligned
+incentive between ISPs and individuals.
+• We synthesise lessons learned and propose considera-
+tions to encourage ISPs and individuals to secure IoT.
+Background and related work
+Along with its many beneﬁts, the IoT also has disadvantages—
+one of the most criticised being the risks to security and
+privacy. Plenty of previous studies have produced evidence
+of the vulnerabilities found on IoT devices. For example, Liu
+et al [28] uncovered security issues in one smart home sys-
+tem which allowed an attacker to compromise a passphrase
+guarding the communication over the local wireless network.
+Morgner et al [32] showed how an attacker can exploit a vul-
+nerability in Zigbee 3.0, a wireless technology used in devices
+such as door locks, and take over the devices from distance.
+Alrawi et al [2] also evaluated and found vulnerabilities in a
+long list of IoT devices, concerning as some of these devices
+are popular products in the market.
+More frightening than the theoretical attacks is the mount-
+ing evidence of real-life attacks on IoT devices. Media reports
+about the hacking of IoT such as Internet-connected CCTV
+(e.g. [6, 45, 46]), and smart home systems [30] are not new
+today. The most infamous IoT attack to date is the 2016 DYN
+attacks in which millions of IoT devices infected by Mirai,
+an IoT malware, were compromised and used to launch a
+distributed denial-of services, causing a large-scale disruption
+to Internet services [3,27].
+With the IoT market expected to grow exponentially—
+consumer spending is estimated to be 1.6 trillion US dol-
+lars by 2025 [43]—the need to secure IoT devices cannot be
+ignored.
+2.1
+The role of ISPs in keeping IoT secure
+To understand ISPs’ roles in keeping IoT secure, understand-
+ing their roles in mitigating botnets, a network of computers
+infected by malware, paves the foundation.
+In one of the earliest works in this area, Van Eeten et al [47]
+analyzed a global set of spam data between 2005–2008 and
+showed that a small number of ISPs accounted for a signif-
+icant percentage of unique IP addresses used for sending
+spam worldwide, demonstrating the ISPs’ unique position as
+intermediaries in botnet mitigation. Their subsequent work
+evaluating the role and performance of ISPs in botnet miti-
+gation across 60 countries found that although the ISPs’ per-
+formances varied, the ISPs can and do make a difference,
+especially in identifying, notifying, and quarantining the in-
+fected customer [4].
+Pijpker and Vranken [37] established a reference model of
+the ISPs roles in the anti-botnet life cycle from prevention
+to detection, notiﬁcation, remediation, and recovery. They
+validated the model with a representative sample of Dutch
+ISPs and showed that ISPs spent most effort on the preven-
+tion and notiﬁcation but less so on other activities [37]. The
+OECD also reported various initiatives by the ISPs in the ﬁght
+against botnets in Australia, Germany, Ireland, Japan, Korea,
+the Netherlands, the UK, and the US [34].
+A large part of the role of ISPs in keeping the IoT ecosys-
+tem secure is similar to their role in combating botnets; indeed,
+many botnets comprise IoT devices. A prime example of such
+an endeavour is the cleanup of Mirai in the Netherlands. Cetin
+et al [15] examined the ISPs’ uses of walled gardens on Mirai-
+infected IoT devices. Traditionally, this practice is used to
+quarantine and notify customers whose computers were in-
+fected by malware and turned botnet. They found that the
+use of walled garden remediated 92% of the Mirai infections
+within 14 days, and outperformed the uses of email notiﬁ-
+cation. Their ﬁndings provide compelling evidence of the
+prominent role that ISPs play in keeping IoT secure, particu-
+larly in the after-fact events (i.e., after customers’ IoT devices
+were infected by malware).
+ISPs can also play an important role in preventing the
+spreading of customers’ infected IoT hosted in their network.
+One approach is for the ISPs to scan for vulnerable IoT de-
+vices and isolate them from the Internet before they are com-
+promised [20]. Another approach is a wide scan of vulnerable
+or infected IoT devices by central government agencies and
+asked the ISPs to notify the owner of these vulnerable/infected
+devices and ask them to take actions to remediate. This ap-
+proach is being undertaken in Japan, under the ongoing ﬁve-
+year NOTICE initiative [33]. In NOTICE, the National Insti-
+tute of Information and Communications Technology (NICT)
+identiﬁes vulnerable or compromised IoT devices; partici-
+pating ISPs are informed and assume the responsibility of
+identifying and notifying their customers who own the de-
+vices. While the effectiveness of this approach is yet to be
+evaluated, one key lesson learned from the previous Japanese
+government’s effort to clean up malware and botnet on end
+users’ computers (under the CCC and ACTIVE initiative, see
+Appendix A.1) suggested that participating ISPs in NOTICE
+are likely to lack the incentives to actively involve and invest
+in the effort.
+The lack of incentives also deters ISPs from keeping IoT
+secure in general [16]. Therefore, working together with the
+ISPs to identify their attitudes in securing IoT, the barriers they
+face, and identify incentives to encourage them to overcome
+these obstacles is imperative.
+2.2
+The role of individuals
+Individuals who own and use IoT devices are another key
+stakeholder in keeping IoT secure. In an ideal world, they
+would conﬁgure appropriate security and privacy settings and
+maintain good security hygiene until these devices reached
+their end of life. However, the reality is rather different.
+The ﬁeld of human factors in security has long posited that
+security is a secondary, not primary, task [39,48,49]. Simply
+put, security tasks such as changing the default password on
+IoT devices are less important than the primary task: getting
+the new device up and running. Security and privacy is not
+the most important factor in IoT device purchase behaviour
+either: Emami-Naeini et al [23] showed that they were ranked
+below features and price.
+Individuals also have different levels of experience and
+skill when it comes to ﬁxing compromised devices. A study
+of ISP customers asked to identify and remediate compro-
+mised devices on their home networks found that, while the
+participants were motivated, many could not complete all the
+recommended steps [8]. Relying less on individuals to se-
+cure IoT and more on device makers to make IoT devices
+secure by design is a better solution. A study investigating
+responsibilities for smart device security and privacy found
+that users largely viewed the responsibility for security as
+shared between themselves and device manufacturers [25].
+Although progress has been made and governments some
+countries (e.g. the UK [19], Australia [24], and Japan [35])
+have mandated or recommended device makers to do so, there
+are still a large number of devices that are not secure [2].
+Therefore, individuals still have a role to play in securing the
+IoT ecosystem.
+Scope and methodology
+In this study, we examine two key stakeholders in the IoT
+ecosystem: ISPs and individuals. For ISPs, we sought their
+views on their customers’ IoT devices (hosted in the ISPs’
+networks), not the IoT devices used by the ISPs. For individ-
+uals, the scope was limited to ordinary users of IoT and in
+personal context only (i.e., in the household).
+We aimed to answer three research questions:
+Q1—What are ISPs’ and individuals’ attitudes towards the
+security and privacy of IoT?
+Attitudes toward the security and privacy of IoT are fun-
+damental to the ISPs’ and individuals’ course of action on
+securing IoT. Understanding their attitudes is key to why they
+do or do not keep IoT secure. Speciﬁcally in this study, we
+sought to understand their concerns about IoT, perceived like-
+lihood that IoT can be compromised, their commitment to
+keep IoT secure, and their perception of the contribution made
+by other stakeholders to secure IoT.
+Q2—What are the barriers that prevent ISPs and individuals
+to keep IoT secure?
+For individuals, we sought to identify the barriers that pre-
+vent them from securing or remediating IoT devices. For ISPs,
+we focused on identifying the barriers that prevent them from
+investing and/or committing to keeping IoT devices on their
+networks secure.
+Q3—What are the incentives to encourage ISPs and individu-
+als to keep IoT secure?
+Incentives are key to encourage ISPs and individuals to
+keep IoT secure. We sought to identify internal and external
+incentives. We deﬁned internal incentives as those that need to
+be applied to ISPs and individuals to motivate them to secure
+IoT. External incentives, on the other hand, are those that need
+to be applied to other relevant stakeholders (to encourage or
+make it easier for ISPs and individuals to keep IoT secure).
+3.1
+Methodology
+We divided the research into studies of both ISPs and individ-
+uals. Based on the complex interactions between the stake-
+holders when trying to secure the IOT, we decided to adapt an
+iterative participatory action research based approach for our
+research [36]. Participatory action research has been success-
+fully used in studying complex information systems [5,21].
+The ISPs study consisted of a survey and two workshops. The
+individuals study consisted of user interviews and a survey.
+Each study is discussed in turn. An overview of the relation-
+ships between the different studies is shown in Fig. 1. The
+ISP survey was conducted initially, and the ﬁrst ISP workshop
+was held after this to get feedback and clariﬁcation about sur-
+vey ﬁndings. Both the survey and workshop then fed into the
+design of the individuals interviews and subsequent survey.
+Finally, a ﬁnal ISP workshop was held to discuss the ﬁndings
+from the earlier studies.
+3.1.1
+ISPs study
+Recruitment and demographic of ISPs
+We advertised
+and recruited ISPs through the ICT Information Sharing and
+Analysis Centre Japan (ICT-ISAC)1. ICT-ISAC regularly
+1Established in 2016, the centre is responsible for promoting a safe ICT
+society in Japan. Its members consist of organisations related to ICT, e.g.
+ISPs questionnaire
+(n = 27)
+1st ISPs workshop
+(n = 5)
+User interviews
+(n = 20)
+Individual survey
+(n = 328)
+2nd ISPs workshop
+(n = 7)
+Consolidated results
+Direct input
+Partial input
+Figure 1: Overview of the methodology
+holds information exchange opportunities among ISPs, and
+participating ISPs are incentivized to exchange information
+on the status of security measures, issues, and knowledge of
+other ISPs. We requested that the ideal representative from the
+ISPs be in a position that can inﬂuence new policies or strate-
+gies in their organisation and have a sound understanding of
+the roles, responsibilities, and abilities of ISPs in keeping the
+Internet secure.
+A total of 27 ISPs took part in the survey, 5 in the 1st work-
+shop, and 7 in the 2nd workshop (4 of them also took part
+in the 1st workshop). Participating ISPs encompassed mixed
+demographics with varied customers sizes, service coverage,
+and experiences with previous and current government’s ini-
+tiatives to promote safe ICT (Table 6). Representatives from
+various government were also present, although primarily in
+an observatory role. All ISPs participated voluntarily and no
+monetary reward was given.
+ISP survey
+The online (LimeSurvey) survey was designed
+to collect data about the ISPs’ attitudes, barriers, and incen-
+tives to keep IoT secure. It took approximately one hour to
+complete. We tested the questions with experienced mem-
+bers of the ICT-ISAC before launching the survey to ensure
+that the questions were sound and the survey’s length was
+appropriate.
+The survey has three parts (shown in Appendix A.4). Part 1
+asks about demographic details of the ISPs. Part 2 asks about
+the attitudes and barriers. Speciﬁcally, it asks about concerns
+about their networks hosting infected/vulnerable IoT devices,
+perceived likelihood of their networks being attacked, roles
+and responsibilities of ISPs in securing IoT activities (and
+their current level of commitment to them), the priority of
+ISPs, security companies, and equipment manufacturers. www.ict-isac.jp
+keeping the IoT ecosystem secure, and their perception of
+how other stakeholders have acted to secure IoT.
+For barriers, we ask about the barriers which ISPs face
+internally within their organisation and externally—in terms
+of law and regulation, and in aiding NOTICE. Part 3 asked
+about initiatives that ISPs viewed as incentives to motivate
+them to keep IoT secure in general and in aiding NOTICE.
+We collected quantitative and qualitative data. Quantitative
+data were responses from rating, ranking, and multiple choices
+(single and multiple answers) questions. Qualitative data were
+from free-text questions. All questions asked for quantitative
+data, except for those about the barriers in NOTICE.
+For quantitative data, we performed statistical tests to deter-
+mine the statistical signiﬁcance of the ﬁndings. The Shapiro-
+Wilk test for normality was done ﬁrst to determine whether
+the data being analyzed was normally distributed. For rating
+questions, the mean (µ) was used to describe the central ten-
+dency of the responses if data were normally distributed and
+the median ( ˜X) and the mode (Mo) were used if data were not
+normally distributed [44]. McDonald’s Omega was also used
+as a measure for internal consistency2 and was found to be re-
+liable (ωmin =0.72). For ranking questions, the Friedman test
+was used to determine the signiﬁcance of the ranking scores.
+For multiple choices questions, the proportion test was used
+to determine whether the observed proportions of the selected
+answer choices were statistically signiﬁcantly different. To
+compare responses between multiple sub-groups (mainly ISP
+sizes), we performed Mann-Whitney U tests. Where neces-
+sary, the signiﬁcance boundaries of the statistical tests were
+Bonferroni adjusted to account for multiple comparisons.
+The small number of qualitative responses from the survey
+were thematically grouped by two researchers to identify
+common barriers that ISPs faced in the NOTICE project. This
+grouping was reviewed by other team members and iteratively
+reﬁned until consensus was reached. The grouping can be
+seen in Table 9.
+ISP workshops
+We held two ISP online workshops (due
+to COVID-19 travel restriction) at two different stages in the
+study (Figure 1). Each of them served a different purpose.
+The 1st workshop took place after the ISP survey. The aim
+was to obtain feedback and clariﬁcation about the ﬁndings
+from the survey. Feedback relevant to individuals was also
+used to inform the design of the individuals’ study. In the
+workshop, one researcher chaired the session, two took de-
+tailed notes and facilitated when required, and one of them
+presented a summary of key points at the end of the workshop.
+The 2nd workshop took place after the individuals’ study.
+The objectives were to share preliminary ﬁndings from the
+individuals study with ISPs and seek their feedback where
+relevant. This was run in the same way as the 1st workshop.
+2Cronbach’s Alpha does not suit small sample size (n<30)
+3.1.2
+Individuals study
+Recruitment and demographic of participants
+We ad-
+vertised and recruited participants in Japan for both user in-
+terviews and survey through NTT Com Research3. Eligible
+participants must be living in Japan, are at least 18 years
+old, and were required to possess one IoT device besides a
+smartphone, tablet, or Wi-Fi router.
+A total of 20 participants took part in the user interviews
+and 328 in the survey. Participants encompassed a mixed de-
+mographic: gender, age, and IoT devices they have (Table 5).
+User interviews
+The interviews aimed to gain a prelim-
+inary understanding of individuals’ attitudes, barriers, and
+incentives to keep IoT secure. Findings from the interviews
+were primarily used to inform the design of the survey but
+some of the ﬁndings were also used to interpret the ﬁndings
+from the survey where appropriate.
+A one-to-one, semi-structured one-hour online interview
+took place with each participant. The interview consisted of
+three parts (see Appendix A.5 for the interview guide). Part 1
+asked about the uses of IoT devices and factors affecting the
+uptake decisions. Part 2 asked about the security and privacy
+of IoT. This included the extent and the nature of concerns and
+supporting rationale, priority to keep IoT secure, the security
+hygiene practice on IoT devices and any problems they en-
+countered, the perceived likelihood of their IoT devices being
+compromised and the rationale supporting their perception,
+and their experiences of remediating compromised IoT de-
+vices. Part 3 asked about possible initiatives that individuals
+viewed as incentives to motivate them to keep IoT secure.
+Interviews were recorded and manually transcribed. Each
+participant was then assigned a non-identiﬁable ID (P1–P20).
+We followed an established methodology for iterative the-
+matic analysis [10,31]. After familiarising ourselves with the
+transcripts, two researchers generated initial codes that repre-
+sented reoccurring aspects in the data. These codes (and their
+associated quotations) were discussed and deﬁned with the
+larger researcher team, before repeating the coding process
+on all of the transcripts. After four rounds of this process the
+codebook was stable: we reached consensus on the meaning
+of the codes and their occurrences in the transcripts. At this
+point codes were grouped into themes. This process was sup-
+ported by a review of prior literature, allowing us to identify
+reoccurring themes as well as new, divergent ideas in our
+data. These resulting themes were used to inform the survey
+structure and answer options, and the ﬁndings are discussed
+in Sections 5 and 6. The codebook and coding matrix can be
+seen in Table 10.
+3The company provides various data collection services in Japan, includ-
+ing Internet surveys, and has about 2.17 million registered users from all over
+the country as of March 2021 (https://research.nttcoms.com).
+Survey
+The design of the survey is based on the ﬁndings
+from the interviews. It has three parts (see Appendix A.6
+for an English translation) and follows the same topics and
+subjects as the interview. The original surveys uses a number
+of common Likert scales which have been translated with
+matching English ones.
+In examining incentives, we also examined participants’
+willingness to pay (WTP) for IoT security services. A contin-
+gent valuation (CV) method was used by asking participants
+to specify the amount they were willing to pay for four IoT
+security services: trafﬁc monitoring, remote assistance, home
+visit, and a bundled service including all of these. CV is used
+widely in economic studies to determine the stated preference
+of the WTP for a product or service (e.g. [7,18,40]).
+We applied the same statistical tests used in the ISP survey
+(Section 3.1.1) for the rating, ranking, and multiple-choice
+questions. Cronbach’s alpha was used to determine the inter-
+nal consistency of rating responses (αmin =0.94, suggesting
+that they were reliable).
+The online survey took about 20-25 minutes to complete.
+Prior to its launch, we iterated on the questions with four
+researchers.
+3.2
+Ethics consideration
+The study was conducted after having been approved by the
+institutional review board. Permission was granted provided
+that we informed participants about the study, obtain their
+consent before data collection, and complied with Japan’s Act
+on the Protection of Personal Information (APPI). Individual
+participants gave informed consent to participate in the study,
+and no personally identifying information was collected. The
+ISP participants were aware of the time commitments, and
+results of this research are provided to the ISPs, which is
+an incentive for them. Each individual participant received
+¥5500 and ¥1000 yen to participate in the interview and online
+survey, respectively.
+Results: ISPs
+We begin with the results from the ISPs’ perspective. ISPs
+with more than 10,000 and less than 1 million customers were
+classed as ‘medium’, with ‘small’ and ‘large’ ISPs on either
+side of this range. See Table 6 for full ISP demographics.
+4.1
+Attitudes toward IoT security and privacy
+ISPs had varying concerns about the potential impact of IoT
+security risks, the perceived likelihood that the risks will be-
+come materialized, and their priority to securing IoT ecosys-
+tem.
+4.1.1
+Nature of concern
+Overall, ISPs in Japan are most concerned about service dis-
+ruption to customers as a result of their network hosting in-
+fected/vulnerable IoT devices (1st), followed by the need to
+take social responsibilities as a result of IoT attacks occurred
+in their network (2nd), and reputation damage (3rd). The loss
+of customers and market share, incurred ﬁnancial cost and
+warning from relevant authorities are less of the concern, rank-
+ing as the bottom three. The ranking varies slightly by the
+size of ISPs. While service disruption ranks ﬁrst for large and
+medium ISPs, social responsibilities ranks ﬁrst for small ISPs.
+Incurring ﬁnancial cost also ranks highly (3rd) in small ISPs,
+suggesting they are constrained by ﬁnancial resources. The
+full ranking can be found in Table 8 in the Appendix.
+The ﬁnding that service disruption to customers ranks ﬁrst
+makes logical sense as it can be considered a trigger of all
+other consequences: it can lead to the need to take social
+responsibilities and reputation damage.
+The ﬁnding that social responsibilities ranked highly is
+rather intriguing. It is likely to have a deep root in the long-
+standing corporate culture in Japan called “kyosei”, the con-
+cept of living and working together for the common good
+which emphasised taking care of the society and being part
+of the community [26].
+Feedback from the 1st ISP workshop shed some light on
+why ISPs felt strongly about social responsibilities. One small
+ISP rationalised that the lack of known information about the
+potential impact on customers as a result of vulnerable IoT de-
+vices present in their network made them feel that they need to
+take more social responsibility than customers would [ISP5].
+Another ISP, large in size, added that to them taking social
+responsibilities was also about being responsible for customer
+service delivery and for any inconvenience they may have
+caused to other ISPs if their network were infected/attacked
+by IoT botnet such as Mirai [ISP2].
+4.1.2
+IoT attacks on ISPs’ network
+Overall, most ISPs felt indecisive about the likelihood of the
+IoT attacks happening, either to or from their networks to
+other ISPs. On the scale of “mostly unlikely” to “unlikely”,
+“neutral”, “likely”, and “mostly likely”, the median ( ˜X) and
+mode (Mo) are “neutral”. The same ˜X and Mo were also
+observed in small, medium, and large ISPs.
+Feedback from the 1st ISP workshop helped us to under-
+stand some of the rationale supporting the ISPs’ ratings. One
+ISP rating “unlikely” based their rationale on past network
+statistics which have been pretty stable [ISP4]. Another, also
+rating “unlikely” was conﬁdent in their ability to control traf-
+ﬁc volume and so did not think the attacks would be likely
+[ISP5]. One of the largest ISPs in Japan simply admitted not
+having enough information to make a prediction [ISP1].
+8%
+4%
+19%
+23%
+4%
+12%
+15%
+4%
+12%
+50%
+69%
+69%
+69%
+50%
+19%
+31%
+27%
+12%
+4%
+Prevention
+Detection
+Notification
+Remediation
+Recovery
+Strongly disagree
+Somewhat disagree
+I'm not sure
+Somewhat agree
+Strongly agree
+19%
+12%
+15%
+26%
+15%
+8%
+12%
+41%
+15%
+11%
+8%
+15%
+11%
+26%
+67%
+62%
+54%
+26%
+15%
+7%
+23%
+8%
+7%
+Prevention
+Detection
+Notification
+Remediation
+Recovery
+Not contributing at all
+Not contributing much
+I'm not sure
+Contributes to a certain extent
+Full contribution
+A. Perceived responsibility
+B. Current level of commitment
+*, **
+*, **
+*, **
+*, **
+*, **
+*, **
+*, **
+*, **
+*, **
+** 
+*
+* Median 
+** Mode
+Figure 2: ISPs’ perceived responsibilities on key activities to
+keep IoT secure and their current level of commitment
+4.1.3
+Priority, perceived responsibilities, and commit-
+ment
+Overall, most ISPs rated the priority for keeping IoT secure
+as “medium” (desired task) ( ˜X = Mo). The rating for large
+and medium ISPs were also “medium” but for small ISPs
+was “low” (tasked to be done if there is room) ( ˜X = Mo,
+with p=0.016 when comparing small against medium ISP,
+U =10.5).
+In examining the perceived responsibilities of ISPs on key
+activities to keep IoT secure, most ISPs agreed that they are
+responsible for all ﬁve key activities: prevention, detection,
+notiﬁcation, remediation, and recovery ( ˜X = Mo = “some-
+what agree”) (Fig. 2). By ISP size, the same rating was also
+observed for most of the key activities, although there were a
+number of statistically signiﬁcant variations: large ISPs view
+detection as less of a duty than medium ones, who in turn
+view it as less of a duty than small ones (U =40 and U =21,
+both p<0.05). Large ISPs also viewed remediation actions
+as less of their responsibility than medium and small ones
+(U =43.5, p<0.05).
+Their current commitment to these ﬁve activities was fairly
+consistent with their perceived responsibilities. Overall, most
+ISPs made some contributions to all these activities ( ˜X =
+Mo= “contributed to a certain extent”), except for prevention
+activities ( ˜X = “not sure”, Mo = “Not contributing much”)
+and recovery activities ( ˜X =Mo= “Not contributing much”).
+These ﬁndings suggested that although ISPs felt that they
+were responsible for key activities in keeping IoT secure. One
+medium ISP explained in the 1st ISP workshop that part of
+the reasons was the view that the government’s NOTICE ini-
+tiative would reduce the cost associated with the recovery
+activities because NOTICE would reduce the likelihood of
+IoT attacks from happening [ISP3]. Like large and medium
+ISPs, small ISPs also perceived the likelihood of IoT attacks
+as medium (Section 4.1.2). However, unlike the two counter-
+parts, small ISPs rated the priority of keeping IoT secure as
+low. They were also unsure about their commitment to half of
+the key activities to keep IoT secure. One possible root cause
+is the lack of knowledge and information to make informed
+decisions about investing in keeping IoT secure, discussed
+below.
+4.2
+Obstacles to keeping IoT secure
+4.2.1
+Internal barriers
+Overall, a shortage of skilled staff to keep IoT secure was
+chosen most (human resource, 44%) (Table 7). About four in
+ten ISPs identiﬁed convincing executives in the organisation
+to buy into the idea of securing IoT as a barrier (executive
+buy-in, 44%). Budget constraints (ﬁnancial, 37%) and lack of
+technology without new investment (technology, 37%) were
+also identiﬁed but by fewer ISPs. These barriers varied consid-
+erably by ISP size. The distribution of internal barriers were
+statistically signiﬁcantly different from chance for the overall
+data as well as large ISPs and medium ISPs (see Table 7).
+Feedback from the 1st ISP workshop clariﬁed the nature
+of these barriers. One small ISP explained that although the
+ﬁnancial budget is not the barrier itself, allocating the budget
+to secure IoT is hard because it is difﬁcult to determine the
+effort needed [ISP5]. The nature of this feedback suggested
+that the small ISP lacked the knowledge to make informed
+decisions about planning and investing in securing IoT. Re-
+garding executive buy-in, one large ISP explained that trying
+to convince executives to see the point of keeping IoT secured
+and its beneﬁts was more difﬁcult than for other types of
+threats [ISP1]. For example, in the case of spamming, it was
+easier to explain the clear beneﬁt of reducing the number of
+abuses which led to cost savings. Attempting to do the same
+in the context of IoT was difﬁcult.
+4.2.2
+External barriers
+To understand external barriers, we ﬁrst examined ISPs’ views
+on how other stakeholders have sufﬁciently keep IoT secure.
+Most ISPs had a mixed, but overall neutral opinion on how
+IoT corporate users, other ISPs, government, and research in-
+stitutes have sufﬁciently done their part in keeping IoT secure
+( ˜X = Mo = “neutral”). However, they were less optimistic
+about individual IoT users and IoT device makers ( ˜X =Mo=
+“somewhat disagree”) (Fig. 3). There were no statistically
+signiﬁcant variations by ISP size.
+33%
+8%
+12%
+12%
+4%
+44%
+23%
+8%
+42%
+19%
+19%
+19%
+42%
+73%
+19%
+50%
+58%
+4%
+27%
+23%
+27%
+15%
+12%
+4%
+8%
+IoTs users – individuals 
+IoTs users – corporates
+Other ISPs
+IoTs device makers
+Government
+Research institutions
+Strongly disagree
+Somewhat disagree
+Neutral
+Somewhat agree
+Strongly agree
+*,**
+*,**
+*,**
+*,**
+*,**
+*,**
+* Median  ** Mode
+Figure 3: ISPs’ views of how other stakeholders sufﬁciently
+keep IoT secure
+Feedback from the ISP workshop shed light on why: ISPs
+felt that individual users were less likely to manage the de-
+vices properly and more likely to have problems with IoT
+security because these users make careless conﬁguration set-
+tings on routers. These points agreed with individual users’
+perceptions: lack of knowledge and skills to keep IoT secure
+was one of the barriers that individuals reported they faced
+(Section 5.2). Regarding IoT device makers, even though the
+new regulation in Japan mandates all IoT devices to be secure
+by default, there were a large number of devices released to
+the market before the new regulation came into effect, which
+remain a problem.
+In examining regulatory barriers, Telecommunication Busi-
+ness Law Article 4 (Protection of “secret of communica-
+tion”) was the biggest barrier ( ˜X = “somewhat agree”, Mo=
+“strongly agree”). In a nutshell, this law does not allow ISPs
+to monitor/inspect customers’ Internet trafﬁc, even if some of
+them are malicious, and prohibits ISPs in Japan from imple-
+menting a walled garden even though Cetin et al [13] showed
+that it was an effective practice to mitigate the risks from
+IoT botnets. ISPs viewed other law and regulation less of a
+barrier (Japan APPI) ( ˜X = “neutral”, Mo = “somewhat dis-
+agree”), the EU General Data Protection Regulation (GDPR)
+( ˜X = Mo = “neutral”), and Net neutrality ( ˜X = Mo = “neu-
+tral”).
+4.2.3
+Barriers to notiﬁcation
+These barriers were identiﬁed from the qualitative responses
+in the ISP survey and then discussed in the workshops. In
+identifying customers whose IoT devices were identiﬁed as
+vulnerable/infected, two issues emerged. First, the dynamic
+nature of IP addresses made it difﬁcult, or often not possible,
+to match the list of IP addresses received from NOTICE and
+the customer’s IP address. Second, trafﬁc logs were not al-
+ways available. Even if they are available, the sheer volume
+of logs made the race to ﬁnd a needle in the haystack against
+time very challenging.
+In notifying customers whom ISPs identiﬁed as the “real”
+owner of the IP addresses behind the infected/vulnerable de-
+vices, there were three issues. First, ISPs did not always have
+customers’ up-to-date contact details, especially their per-
+sonal e-mail addresses. Currently, ISPs notiﬁed customers via
+carrier email, an email that ISPs created for customers when
+they signed up, but most customers rarely (or never) check it.
+Feedback from the ISP workshop indicated that this issue is a
+major bottleneck. Some small ISPs tried to reach customers
+by phone or home visit but did not always succeed. Hence,
+most ISPs relied largely on carrier email to notify customers.
+Second, in many cases, ISPs were not able to notify the
+owner of the infected/vulnerable devices. The owner of the
+device and the owner of the internet connection were not
+always the same. For example, it is not uncommon for parents
+to sign a contract with ISPs on behalf of their children, or for
+a landlord to sign the contract but the tenants own the IoT
+devices.
+Finally, even when the ISPs managed to notify customers
+successfully, many customers did not understand or were
+not convinced about the risks this process aimed to mitigate.
+Many of them ignored the problem and did not remediate their
+devices. Feedback from the ﬁrst ISP workshop shed light on
+the likely root causes. The risks from “vulnerable” devices
+is future risk; it is hard for customers to imagine how or if
+the risks will be materialised. The general public was also
+perceived by ISPs to lack awareness about the consequences
+of not ﬁxing IoT devices, meaning that some customers might
+not recognise it as an issue or see the beneﬁts from protecting
+or remediating these devices.
+4.3
+Enabling a secure IoT
+4.3.1
+Internal measures
+When asked which measures may help motivate their organ-
+isation to invest more in securing the IoT ecosystem, most
+chosen by ISPs was acquiring technology to detect infected
+and/or vulnerable IoT devices (50%), followed by executive
+and staff buy-in to the idea of securing IoT (33%) (Table 1).
+This is in contrast with the ranking of barriers (Table 7), where
+executive buy-in was ranked higher than a lack of technology.
+Only a few ISPs (12%) chose monetizing IoT (such as
+by offering IoT security services to customers), and none
+wanted to transfer costs associated with keeping IoT secure
+to customers. In the workshop, the ISPs expanded on this.
+The ﬁrst concern was that an extremely diverse range of IoT
+devices made it difﬁcult to design a security service package
+that covers all or a reasonable fraction of IoT devices. Further,
+the ISPs were afraid of a large gap between the service that
+ISPs can offer and that customers expect from ISPs, and of
+over-promising to customers if the ISPs fail to detect and
+block IoT malware. Moreover, convincing executives in the
+organisation to approve any new services is usually hard in
+general, even harder for a security service because it is not
+ISPs’ core service.
+Table 1: % of ISPs per general incentives to secure IoT
+Overall
+Large
+Medium
+Small
+Incentives
+n
+%
+n
+%
+n
+%
+n
+%
+Internal
+Tech to detect infected IoT
+50
+50
+50
+50
+Executive & staff buy-in
+33
+50
+27
+25
+Offer IoT security service
+12
+25
+7
+0
+Transfer cost to customer
+0
+0
+0
+0
+External
+(M) Device makers secure IoT
+70
+88
+57
+100
+(G) Amend law to restrict trafﬁc
+58
+63
+60
+25
+(G) Public recognition for ISPs
+52
+50
+50
+75
+(G) Government subsidy
+50
+50
+53
+25
+(U) Individuals keep IoT secure
+33
+13
+40
+50
+(U) Corporate keep IoT secure
+33
+13
+43
+50
+(G) Amend law to monitor trafﬁc
+31
+13
+50
+0
+(G) Public-private sector partnership
+22
+38
+13
+25
+(G) Make net neutrality optional
+11
+13
+7
+25
+(R) Input from research community
+12
+0
+13
+25
+(I) Equal responsibilities for ISPs
+4
+0
+7
+0
+(I) ISPs performance dashboard
+4
+0
+7
+0
+Other
+4
+13
+0
+0
+Not sure
+0
+0
+0
+0
+χ2(17)
+115.70**
+48.76**
+66.28**
+29.53*
+(M) = device maker, (U) = end users, (G) = government, (I) = ISPs community, (R) =
+research community, *, ** p<0.05, and p<0.001, respectively.
+4.3.2
+External measures
+A large proportion of ISPs wanted device makers to secure
+IoT devices (70%) (Table 1). This is consistent with ISPs
+views on obstacles (Section 4.2.2). Fewer ISPs wanted users,
+individual or corporate, to secure IoT devices (33%), despite
+ISPs stating that end users have insufﬁciently kept IoT secure
+(Section 4.2.2).
+Some incentives from governments appealed to ISPs, with
+“amending the law to allow ISPs to restrict customer trafﬁc”
+being ranked highest (58%). Essentially, this would allow
+ISPs to block malicious IoT trafﬁc and set up a walled garden.
+About half of ISPs also viewed public recognition of ISPs
+for keeping IoT secure as an incentive (58%), which may be
+related to the “kyosei” principle. Government subsidy also
+appealed to half of ISPs, suggesting that in the context of
+securing IoT in general, one in two ISPs would rather seek
+ﬁnancial support from the government than making money
+from or transfer costs to customers. Some ISPs (22%) consid-
+ered a public-private sector partnership such as NOTICE an
+incentive.
+4.3.3
+Notiﬁcation measures
+With the NOTICE initiative, the government detects vulner-
+able and compromised IoT devices, and passes a list of IP
+addresses to ISPs. To help with this, ﬁrst and foremost ISPs
+wanted the risks and impacts of leaving IoT devices vulner-
+able/infected known to the public so that the users under-
+stood the importance of remediating these devices (69%)
+(Table 2). This made sense given that ISPs identiﬁed users
+ignoring the problem when the ISPs notiﬁed them about vul-
+Table 2: % of ISPs per incentives for NOTICE
+Overall
+Large
+Medium
+Small
+Incentives
+n
+%
+n
+%
+n
+%
+n
+%
+(M) Public awareness of risks
+69
+63
+79
+50
+(R) Effective notiﬁcation method
+38
+38
+43
+25
+(N) Tech to authenticate notiﬁcation
+33
+13
+40
+50
+(N) Tech to track notiﬁcation
+33
+50
+33
+0
+(R) Support from academia to iden-
+tify effective notiﬁcation method
+31
+0
+43
+50
+(G) Government subsidy
+27
+50
+14
+25
+(N) More data from NOTICE to iden-
+tify owners of vulnerable devices
+15
+50
+13
+25
+χ2(7)
+31.42**
+15.81*
+24.01**
+6.03
+(M) = non speciﬁed party, (G) = government, (R) = research community, (N) = NO-
+TICE project, *, ** p<0.05, and p<0.001, respectively.
+nerable/infected IoT devices as a barrier (Section 4.2.3).
+The next most selected incentive was published data on
+effective notiﬁcation methods to notify customers about the
+infected/vulnerable IoT devices (38%), most likely due to
+ISPs identifying the use of carrier email as a bottleneck in the
+notiﬁcation process. About a third wanted technology that al-
+lows the notiﬁed customers to authenticate the notiﬁcation (to
+ensure it is from the ISP and not from a scammer or spammer)
+(33%), the ISPs to track the status of notiﬁcations sent to the
+customers (33%), and support from the research community
+to identify effective channels to notify customers (31%), the
+latter of which we examined in this study (Section 5.3.1).
+Results: Individuals
+Now we consider the individuals’ perspective. These results
+are based on our analysis of 20 interviews and 328 survey
+participants as described in Section 3.1.2. Throughout this
+section we use quotations from the interviews to help contex-
+tualise the qualitative results of the survey.
+5.1
+Attitudes toward IoT security and privacy
+5.1.1
+Concerns by types of IoT
+Overall, participants mostly feel unconcerned about the secu-
+rity and privacy of the different types of IoT. The ˜X and Mo
+are “not concerned” or “Neutral” for most devices excepted
+for smartphone/tablets, smart security devices, smart gadgets
+for kids and home assistants ( ˜X =Mo= “somewhat worry”).
+The observed “somewhat not worry” on smart health de-
+vices was puzzling; these devices tend to collect and process
+data about the users’ health. The ﬁnding suggested that par-
+ticipants may not view this data as sensitive enough to worry
+about.
+5.1.2
+Nature of concerns
+Participants in the survey were most concerned about the ﬁ-
+nancial loss (e.g. leakage of credit card details linked to IoT
+Home assistant 
+Smart TV
+Smart gadgets for kids 
+Smart garden appliances 
+Smart health appliances 
+Smart home office equipment 
+Smart kitchen appliances 
+Smart leisure gadgets 
+Smart remote controls 
+Smart security devices 
+Smart utility meter 
+Smartphone / tablet
+Wi-Fi router
+33
+20
+11
+26
+7
+38
+19
+22
+22
+6
+40
+19
+11
+25
+9
+40
+11
+11
+27
+8
+41
+14
+5 21
+28
+12
+23
+11
+5 16
+34
+7
+29
+12
+Not concerned at all
+Not concerned
+Neutral
+Concerned
+Very concerned
+Figure 4: Proportion of participants and their concerns about
+security and privacy of IoT by types of IoT.
+devices), unsurprising given the importance of ﬁnancial re-
+sources. Invasion of privacy (e.g. data leakage from smart
+CCTV or TV) ranked second, and participants ranked incon-
+venience of disruption to daily activities (e.g. being locked
+out from home as a result of unauthorised locking of the door)
+third. Physical effect, and harms to household assets were
+of the lowest concern. There were virtually no differences
+between the age groups and genders throughout this analysis.
+All rankings are statistically signiﬁcant (χ2(5) at p<0.001).
+5.1.3
+Perceived likelihood of devices being compro-
+mised
+Participants are uncertain about the likelihood of their IoT
+devices being compromised. Those that consider it unlikely
+that their devices had been compromised have varying rea-
+sons for believing so. The ﬁnancial angle was predominant,
+with 53% selecting “no suspicious activities on ﬁnancial ser-
+vices”. It suggested that participants were protective of ﬁnan-
+cial resources and resort to them as a means to determine the
+likelihood of IoT risks becoming materialised.
+These options highlight incorrect mental models about the
+activity of IoT malware and anti-virus as if it is a panacea to
+all cyber threats. In the user interviews, 9 participants (9/20,
+45%) also turned to anti-virus report to determine whether
+their IoT devices have been compromised; as an example, P13
+explained, “Since the monthly report of the security software
+shows that there have been zero detection so far, I believe
+that I am safe even to the extent that I am not fully aware
+of in my PC. Based on this, I assume that IoT devices con-
+nected to the same environment are also safe.” Cetin et al [13]
+observed a similar mental model concerning anti-virus and
+IoT among users in the Netherlands; their participants ran
+anti-virus software on PCs to solve the infection of an IoT
+device. Theirs and ours ﬁndings suggested that, despite cul-
+tural differences between both countries, their residents have
+similar misconceptions about anti-virus and IoT.
+5.2
+IoT security hygiene and barriers
+Participants in the survey indicated conﬁguring various secu-
+rity and privacy settings as part of IoT device setup. The three
+most selected features were two-factor authentication (2FA,
+38%), despite only one participant mentioning 2FA in the
+user interviews (1/20, 5%), setting up account and password
+to restrict access (37%), and updating software and ﬁrmware
+(36%). Participants touched other features less: changing de-
+fault password (31%), setting mode of software update (to
+auto or manual) (30%), deleting any old data that may still be
+on the device (19%), and restricting data sharing (15%).
+Barriers to remediating compromised IoT
+We asked par-
+ticipants who suspected that their IoT devices may have
+been infected (“Maybe/I don’t know”, “Probably”, and “Deﬁ-
+nitely”) (n=169) if they had tried to remediate the devices.
+The majority of them did not (74%). The most frequently
+selected reason was “not knowing where to start” (56/125,
+45%), followed by “easier to replaced it with new device”
+(36/125, 28%) and “ﬁxing it did not worth the stress and
+time” (36/125, 28%).
+For those trying to remediate the devices (44/169, 26%), a
+small proportion did not experience any problem at all (21%).
+These ﬁgures are in line with those found by Bouwmeester et
+al [8]. For those facing some difﬁculties, the main problem
+was too much technical knowledge and skill requiring them to
+understand (20/44, 46%), resonating with the earlier ﬁnding
+of the participants’ lack of skill and knowledge to ﬁx the
+devices. The remaining reasons were “insufﬁcient support
+from ISP” (31%), “friends and family” (30%), and “device
+makers” (25%).
+5.3
+Keeping IoT secure
+5.3.1
+Individual triggers
+We ask participants about triggers that would make them
+aware of IoT security and privacy or that would want them
+to keep their devices secure. The largest proportion selected
+“watching/reading news/stories about past attacks on IoT de-
+vices” (53%) followed by “direct experiences of IoT attacks”
+(47%). Subsequent triggers on “seeing advertisements that
+educate people about the dangers of IoT devices” (37%),
+“hearing a close friend or family member talking about the
+dangers of IoT” (34%), “being told about the dangers of IoT
+at school or work” (23%), and “watching TV shows or celebri-
+ties talk about the dangers of IoT” (20%). The proportion test
+determined that the observed proportions were statistically
+signiﬁcant (χ2 =409.02, d f =7, p<0.001).
+Findings from the interviews also helped us to understand
+how media exerted inﬂuence on participants. From one partic-
+ipant: “Well, I am concerned about X [home assistant device].
+I’ve heard on the Internet news that people have had their
+credit card details stolen, so I think we have to be very careful
+about security. I had never been concerned about security
+before, but when I heard about such security cases, I started
+to feel scared little by little [P8].”
+5.3.2
+Views of other stakeholders
+We examine how individuals perceived how other stakehold-
+ers are doing their jobs in securing IoT. Overall, participants
+in the survey feel ambivalent about how other stakeholders
+are taking sufﬁcient responsibility in keeping IoT secure. The
+( ˜X) and (Mo) for the rating of all stakeholders are “Neutral”
+(Figure 5).
+Businesses who use IoT devices
+Government
+ISPs
+Individuals who use IoT devices
+IoT device manufacturers
+Research institutions 
+18
+32
+14
+35
+4
+14
+41
+6
+39
+3
+12
+38
+6
+43
+7
+Strongly disagree
+Disagree
+Neutral
+Agree
+Strong agree
+Figure 5: Participants’ view on to what extent stakeholders
+have taken a sufﬁcient role in keeping IoT secure.
+5.3.3
+Consumer view on ISP initiatives
+Participants in the survey wanted ISPs to establish various ini-
+tiatives to help customers keep IoT secure. The most selected
+initiatives concerned “ISPs monitoring suspicious trafﬁc to-
+and-from IoT devices”, “notifying customers before blocking”
+(55%) and “automatically block the trafﬁc” (54%), demon-
+strating a strong desire for ISPs to take a proactive approach
+to keep network supporting IoT secure (Table 3).
+More than half of the participants in the user interviews
+(13/20, 65%) were also keen on having ISPs monitor IoT
+trafﬁc. For example “I am not familiar with the Internet, so if
+I were asked ‘is it okay to block malicious trafﬁc?’, I would
+answer ‘If it is dangerous, yes, please’[. . .] I don’t know how
+to conﬁrm if the trafﬁc is dangerous or not, so I am grateful if
+ISPs do that” [P6].
+However, monitoring trafﬁc and notify or block suspicious
+trafﬁc faces two major challenges. First, the legal framework
+in Japan makes it difﬁcult for ISPs to monitor trafﬁc on a
+large scale. The second challenge lies in the task of notifying
+customers; the difﬁculties in reaching customers is one major
+bottleneck for the ISPs participating in the NOTICE initiative
+(Section 4.2.3).
+Table 3: Participant support for ISP incentives
+Incentive
+n
+%
+1. Monitor suspicious com. from IoT devices and notify customers.
+55
+2. Monitor suspicious com. from IoT devices and automatically block
+it.
+54
+3. Notify users about important software/ﬁrmware router updates.
+43
+4. Set appropriate security settings on devices before shipping.
+36
+5. Have a call center where users can easily consult about security.
+35
+6. Be transparent about how ISPs protect users’ communication and
+personal data.
+35
+7. Provide online service to help users repair compromised devices.
+32
+8. Provide home visit service to repair compromised devices.
+22
+9. Educate users about the potential risks of using IoT.
+22
+328 participants total. The observed proportions among the incentives were statistically
+signiﬁcant (x2 =344.21, d f =9, p<0.001).
+5.3.4
+Willingness to pay (WTP) ISPs for IoT security
+ISPs have an opportunity to offer services to consumers to
+help them secure their IoT devices. Based on the interviews
+and further discussions, we explore four different potential
+services: Monitoring IoT and notifying consumers of suspi-
+cious activity, providing remote support for IoT devices, home
+visits for technical assistance, and a bundle services of all the
+previous options. Table 4 summarises our analysis, breaking
+it down by age groups and gender.
+Table 4: Willingness to pay ISPs for IoT Security services
+Monitor & notify Remote assistance
+Home visit
+Bundle service
+%̸=0
+µ
+σ
+%̸=0
+µ
+σ
+%̸=0
+µ
+σ %̸=0 µ
+σ
+overall** 69
+1094 61 665**
+58 1085** 1802 73 1226 1976
+18–24** 74 1106* 1617 66 931*
+59 1220* 1820 74 1259 1753
+25–34** 67
+1070 56
+1180
+682** 1187 67 1044 1737
+35–60** 64
+818
+59 569**
+60 1194* 1855 70 1332 2179
+>60**
+385*
+65 520**
+61 1235* 2140 81 1264 2172
+r=−0.16**
+r=−0.092*
+r=0.029
+r=−0.0053
+Male**
+599
+1062 58 568**
+53
+992** 1795 71 1175 1919
+Female** 70
+1125 64 754**
+63 1171** 1809 75 1273 2032
+All numbers in Yen per month. %̸=0 is the percentage of people willing to pay >0.
+The colors show the order of the mean (µ) for each of the services. The smallest mean
+is given the lightest color, and the colors darken if there is a statistically signiﬁcant
+difference between the current mean and the next largest mean, based on a one-sided
+paired Wilcoxon rank test. This statistical test is further shown by **/* at the value of
+the lower cell, showing p < 0.01/p < 0.05 conﬁdence respectively. If more than one
+cell contains the same color, there is no statistical signiﬁcant variation between the
+means for these services. For the analysis by age, Pearson’s r indicates the correlation
+between age and willingness to pay. As before, **/* indicates statistical signiﬁcance
+with p<0.01/p<0.05.
+Overall, almost all participants would be willing to pay for
+some service. WTP is decreasing with age in Japan; however,
+this appears to be ’U’ shaped, where the 60+ group is con-
+sistently the least willing group. Women are willing to pay
+statistically signiﬁcantly more than men for most services.
+The proportion of customers willing to pay anything as
+well as the absolute amounts participants are willing to pay
+are promising. They support the ﬁndings from Rowe and
+Wood [38] who found customers in the US were willing to
+pay ISPs to improve cybersecurity. However, feedback from
+the 2nd Japan ISP workshop indicates that the amount that
+participants are willing to pay is too low for ISPs to cover the
+costs of providing the service (Section 4.3.2). This perhaps
+then hints at a lack of commodiﬁcation of IoT monitoring and
+remediation services in Japan.
+5.3.5
+Consumer view on IoT device makers
+Participants ﬁrst and foremost want IoT device makers to
+make secure devices (59%), supporting the ﬁndings from user
+interviews where half of the participants wanted “secure by
+default” IoT devices (10/20, 50%). The second most selected
+choice was regular software/ﬁrmware updates (53%) which
+is similar to securing IoT devices.
+These top-ranked measures clearly indicate that consumers
+believe IoT security is the manufacture’s responsibility. More
+user-centered incentives such as “providing a repair service”,
+“call center support” and “help in stores” rank bottom (32%,
+38% and 31%).
+5.3.6
+Consumer view on government
+We explore with the participants several possible measures by
+governments to secure IoT. Here “changes to the law to allow
+ISPs to monitor and block suspicious Internet trafﬁc” ranked
+top with 62%. “More stringent IoT regulations” ranked 2nd,
+“arresting cybercriminals” 3rd, and “raising awareness about
+the dangers of IoT” ranked 4th.
+The proportion test determined that the observed pro-
+portions among the measures were statistically signiﬁcant
+(χ2 =339.67, d f =5, p<0.001).
+User interviews allowed us to understand some of the ra-
+tionales for individuals’ keen interest for the government to
+tighten the law and regulation around IoT; over half of par-
+ticipants want governments to undertake such initiatives. For
+example: “I am concerned about regulation. If we don’t have
+any regulation, people do as they like, and personal informa-
+tion may be leaked, so I want them [government] to make
+proper regulation” [P5]. It should be noted, however, that
+users may not be aware of all of the implications of a new
+law and that these results may overestimate support for such
+changes as the questions were focused primarily on the bene-
+ﬁts.
+Discussion: Lessons learned
+Our study provides several useful insights to various stake-
+holders keen to promote the safety of the IoT ecosystem.
+These insights are based on our analysis of our ISPs question-
+naire, both ISPs workshops, the user interviews and the user
+survey.
+6.1
+Macro socio-technical challenges
+Our multi-stage methodology has made it obvious that indi-
+vidual actors are almost powerless to improve IoT security by
+themselves, as the following challenges demonstrate.
+6.1.1
+Keeping IoT secure is not a priority for ISPs and
+individuals
+The ﬁrst important lesson is that despite ISPs and individuals’
+concerns about the security and privacy risks of IoT, they
+do not prioritise the need to secure IoT. For individuals, this
+lesson supports the view from research in human factors
+in security which posits that security is not a primary but
+a secondary task [39, 48]. For ISPs, their core business is
+providing Internet service and so it is understandable that
+securing the IoT ecosystem is not their priority, although
+doing so has its merits. This lesson is crucial; it highlights
+the importance of implementing appropriate incentives to
+encourage ISPs and individuals to act to keep IoT secure.
+6.1.2
+Stakeholders in the IoT ecosystem need to work in
+tandem to secure IoT
+Our study shows that an effort to keep the IoT ecosystem
+secure is profoundly complex. Although ISPs and individuals
+are key in securing IoT, it is evident that they cannot do this
+alone. Other stakeholders, particularly device-makers and
+government, also have an important role to play and need to
+take their shares of responsibilities.
+This is certainly easier said than done, as stakeholders like
+to blame others for existing issues, at least among the ISPs
+and individuals examined in this study. For example, ISPs feel
+that device makers and individuals do not sufﬁciently secure
+IoT devices. Individuals want ISPs to take some initiatives to
+secure IoT. They want their trafﬁc to be monitored and have
+malicious trafﬁc from IoT devices blocked, but the ISPs in
+Japan are not able to do so unless the government amends the
+current law. To tackle these entangling problems, a collabora-
+tive effort from relevant parties is a sound approach. It will
+not be easy for it requires commitments and enormous effort.
+To a certain extent, NOTICE in Japan has set an example of
+this approach. The initiative is not perfect; it faces numer-
+ous obstacles as shown in this study. However, the initiative
+demonstrates that a collaborative effort from key stakeholders
+in the IoT ecosystem is not impossible.
+6.1.3
+ISPs play an important role in keeping IoT secure
+but it is an uphill battle
+ISPs mostly agree that they are responsible for various ac-
+tivities in keeping IoT secure and feel that they have made
+contributions, especially in detection, notiﬁcation, and reme-
+diation activities. This endeavor is not without challenges
+considering the many internal and external barriers the ISPs
+are facing. Asking ISPs to do more, such as establishing var-
+ious initiatives that individuals want from ISPs will be an
+uphill battle.
+Implementing incentives is key to encouraging ISPs to
+act. Internally, most ISPs believe that acquiring technology
+to identify compromised IoT devices in their network and
+obtaining executive and staff buy-in are key. Convincing exec-
+utive is often not easy, especially if IoT risks (or cybersecurity
+risks in general) are not well understood at the board level.
+Proactive management of cybersecurity risks at this level is
+one idea to overcome this difﬁculty [12].
+Externally, ISPs want several incentives from other stake-
+holders. Implementing these external incentives are largely
+beyond the ISPs’ control but the ISPs, as a community, can
+take a proactive approach and inﬂuencing it to happen. For
+example, starting a conversation with lawmakers about the
+possibility of changing the law to allow ISPs to monitor and
+block malicious IoT trafﬁc, and essentially set up a walled
+garden. The more challenging issue is that even if ISPs are
+allowed to offer this service, there is little economic incen-
+tive from customers. Their willingness to pay ISPs for IoT
+security services is too low for the ISPs to offer the service
+and increasing individuals’ WTP is hard as we discuss in the
+next lesson. This is where government subsidies could be
+tremendously helpful, until ISPs can achieve economies of
+scale from offering such service.
+6.1.4
+Individuals expect more and should be asked to
+do less to secure IoT
+Like ISPs, individuals also wanted several other stakeholders
+to act to keep IoT secure. The majority of them in both coun-
+tries want ISPs to monitor and block malicious trafﬁc to and
+from IoT devices and want IoT device makers to make IoT
+devices secure.
+However, individuals are not willing to pay much for in-
+creased security. The amount that participants in Japan are
+willing to pay ISPs for IoT security service is not enough to
+convince ISPs to want to offer the service. A large proportion
+of participants do not want to pay to enhance security service
+on IoT devices either, suggesting device makers have to ab-
+sorb the cost of implementing security on IoT devices. This
+suggests that individuals do not see these services as having a
+great value to them.
+Therefore, solutions relying less on individuals to keep IoT
+secure are more promising. This does not mean we should
+completely take individuals out of the equation; they do have
+their fair share of responsibility—for example, acting to re-
+mediate when notiﬁed that a device has been compromised.
+But the conditions must be correct for them to act. They must
+have motivation, knowledge, and support to do so.
+Participants in this study identiﬁed being exposed to stories
+about past attacks on IoT devices as a source of awareness
+of IoT risks and motivation for keeping their devices secure.
+It is in the interest of ISPs and governments to help make
+individuals more aware of these incidents.
+6.2
+Government is at the heart of securing IoT
+Although this study focuses on ISPs and individuals, our ﬁnd-
+ings strongly suggest that government is at the core of driving
+an effort to secure the IoT ecosystem. A long list of bar-
+riers and incentives revolve around the government’s role
+and responsibilities. Understandably, governments cannot im-
+plement all of the identiﬁed measures. We propose that the
+following incentives be prioritised as they were identiﬁed as
+desirable by a large proportion of ISPs and individuals:
+6.2.1
+Allow ISPs to lawfully monitor and block suspi-
+cious IoT trafﬁc.
+Our study provided evidence that ISPs and individuals in
+Japan want the Telecommunications Business Law Article 4
+to change to allow ISPs to monitor and block suspicious IoT
+trafﬁc.
+This is in direct conﬂict with Japan’s strong emphasis on
+data privacy, although privacy-preserving implementations
+may be possible. However, the amendment of law to specif-
+ically allow NOTICE to scan and identify vulnerable IoT
+devices nationwide demonstrated that changing the law for
+the purpose of cybersecurity is indeed possible. Further work
+could explore support for such laws among individuals when
+the wider implications (e.g., on privacy) are better understood.
+6.2.2
+Provide subsidy to ISPs.
+Government subsidy is another item on the ISPs’ wish list.
+A previous study suggested that this form of incentive is ef-
+fective in encouraging ISPs to clean up malware infection on
+computers [17]. Therefore, considering offering the subsidy
+to keep IoT secure can also be a good idea. The advantages
+and disadvantages of doing so need to be analyzed in greater
+depth. This goes beyond the scope of this study but evidence
+from our study is useful to demonstrate the advantage of this
+incentive.
+6.2.3
+Increase the visibility of regulation around IoT.
+ISPs and individuals want IoT device makers to design and
+make secure IoT devices. Tightening the law and regulations
+around IoT is one way to achieve this (e.g. the UK [19],
+Australia [24]). Japan has also made some signiﬁcant progress.
+Effective from 1st April 2020, all devices must be equipped
+with sufﬁcient access control, the ability to prompt users to
+change default passwords, software/ﬁrmware updates, and
+security settings resilient to device rebooting [35].
+Yet, many ISPs and participants in our study still want
+device makers to make secure devices. Public perception will
+take time to change if the new laws and regulations are indeed
+sufﬁcient. Increasing the visibility of these changes will also
+give some assurance to individuals about the safety of IoT
+and boost the conﬁdence in the government’s handling of IoT
+security.
+6.2.4
+Give public recognition to ISPs.
+ISPs want public recognition for the contribution they make to
+keeping IoT secure. This classic form of economic incentive
+is not uncommon. However, it is rather surprising that one
+in two ISPs in our study want it, considering praising and
+giving recognition for good work is rare in Japanese culture.
+The government needs to consider carefully the appropriate
+forms of public recognition to be given to ISPs to avoid a
+possible culture clash. A more subtle approach is likely to be
+preferable.
+6.3
+Limitations
+In the ISPs study, participants may not be fully engaged in
+the pre-workshop survey or experience survey fatigue, though
+we did not experience this during our pilot study. The number
+of ISPs was also relatively small but we consider their mixed
+demographic and statistically signiﬁcant results reasonably
+sufﬁcient to represent the opinion of the ISP community in
+Japan.
+Our studies relied heavily on self-reporting. We iterated on
+the surveys and interview guides to encourage accurate re-
+porting by the participants and attempted to minimise leading
+questions. Interviews were conducted online but took place
+nearly a year after the pandemic started. Hence, we believe
+that this method did not considerably affect the quality of the
+interviews.
+The CV method used to evaluate the WTP is also subjected
+to criticism [9], but it is still being used in economic literature
+today. For the econometric and statistical analysis, unravel-
+ling correlation and causation is problematic and some of
+the results may reﬂect inﬂuences from underlying variables.
+Some ﬁndings can be hard to generalise, particularly those
+concerning law and regulation which can vary vastly from
+one country to another.
+Conclusion
+We examined the attitudes, barriers, and incentives for ISPs
+and individuals to keep IoT secure, drawing on evidence from
+Japan. Our ﬁndings show that although ISPs and individuals
+have some concern about the security and privacy risks of
+IoT, they do not prioritise the need to keep IoT secure. A
+large number of the incentives and measures we identiﬁed are
+external to ISPs and individuals; our study demonstrates that
+improving the security of IoT will require support from other
+key stakeholders in the IoT ecosystem.
+The complexity of the effort to secure the IoT ecosystem
+means that there are still many follow-on questions, such as
+“What is the best approach for ISPs to increase executive
+and staff buy-in to invest in keeping IoT secure?” and “What
+interventions can increase participants’ ability and motivation
+to remediate their devices?” Like the other stakeholders, the
+research community has a role to play in this effort.

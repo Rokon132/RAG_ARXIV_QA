@@ -1,0 +1,3956 @@
+1
+Securing Automated Insulin Delivery Systems: A
+Review of Security Threats and Protective Strategies
+Yuchen Niu and Siew-Kei Lam
+Abstract—Automated Insulin Delivery (AID) systems represent
+a significant advancement in diabetes care and wearable physi-
+ological closed-loop control technologies, integrating continuous
+glucose monitoring, control algorithms, and insulin pumps to
+improve blood glucose level control and reduce the burden of
+patient self-management. However, their increasing dependence
+on wireless communication and automatic control introduces
+security risks that may compromise patient privacy or result
+in life-threatening treatment errors. This paper presents a com-
+prehensive survey of the AID system security landscape, covering
+technical vulnerabilities, regulatory frameworks, and commercial
+security measures. In addition, we conduct a systematic review of
+attack vectors and defence mechanisms proposed in the literature,
+following the PRISMA framework. Our findings highlight critical
+gaps, including the lack of specific security evaluation frame-
+works, insufficient protections in real-world deployments, and
+the need for comprehensive, lightweight, and adaptive defence
+mechanisms. We further investigate available research resources
+and outline open research challenges and future directions to
+guide the development of more secure and reliable AID systems.
+By focusing on AID systems, this review offers a representative
+case study for examining and improving the cybersecurity of
+safety-critical medical wearable systems.
+Index Terms—automated insulin delivery systems, artificial
+pancreas systems, security, cybersecurity, attack vectors, defence,
+physiologic closed-loop control system
+I. INTRODUCTION
+The management of Type 1 Diabetes (T1D), a chronic
+condition where pancreatic beta cells produce insufficient
+insulin for regulating blood glucose (BG) levels, remains a
+significant challenge for millions of individuals worldwide [1].
+As there is no realistic biological cure in the near future,
+the treatment primarily involves intensive insulin therapy to
+maintain BG levels within a safe range, thereby mitigating
+the risk of serious complications caused by hyperglycemia
+or hypoglycemia [2]. However, this regimen of frequent BG
+measurement and insulin adjustments is time-consuming and
+error-prone for patient self-management. To address these
+challenges, automated insulin delivery (AID) systems, also
+known as artificial pancreas, have emerged as a promising
+“technical” solution [3].
+AID system integrates a continuous glucose monitor
+(CGM), a control algorithm, and an insulin pump to auto-
+matically adjust insulin delivery based on real-time glucose
+measurements. With recent technological advancements, these
+Yuchen Niu and Siew-Kei Lam are with the College of Computing and Data
+Science, Nanyang Technological University, Singapore 639798, Singapore (e-
+mail: yuchen017@e.ntu.edu.sg (corresponding author); assklam@ntu.edu.sg).
+This is the authors’ accepted manuscript of a paper accepted for publication
+in Computers & Security (Elsevier). The final version of record is available
+at: https://doi.org/10.1016/j.cose.2025.104733
+systems have evolved into networked and intelligent medi-
+cal wearables that improve glycemic outcomes and quality
+of life for individuals with diabetes [4] [5]. Nevertheless,
+the increasing device complexity, coupled with their reliance
+on wireless connectivity and automated control, introduces
+significant safety and security concerns [6]. Ensuring the
+trustworthiness and resilience of AID systems against a broad
+spectrum of threats is essential for safeguarding patient health
+and enabling wider clinical adoption.
+Threats to the reliability of AID systems primarily arise
+from two sources: unintended failures and malicious attacks.
+Unintended failures result from system limitations [3] and
+malfunctions [7]. For example, physiological constraints on
+delayed insulin absorption and postprandial rapid glucose
+fluctuations can limit the effectiveness of insulin delivery.
+Technological and behavioural limitations, such as sensor
+noise, signal dropouts, miscalibration, or pressure-induced
+sensor attenuation (e.g., lying on the sensor during sleep), may
+lead to inaccurate glucose readings and inappropriate dosing.
+Additionally, malfunctions with CGM and insulin pumps (e.g.,
+early sensor failure, occlusion of insulin infusion sets, and
+cartridge errors) can further compromise system performance.
+Malicious attacks, on the other hand, involve adversaries
+exploiting vulnerabilities in AID systems to intercept sensitive
+patient data or manipulate insulin delivery. These risks have
+escalated with the adoption of wireless communication in
+AID systems [8]. Demonstrated attacks include unauthorised
+remote control [9] and false CGM reading injection [10].
+Early experiments have shown the feasibility of intercepting
+communication and launching lethal insulin doses through
+unencrypted wireless channels at least 20 meters away [11]
+[12]. Recognising these risks, the U.S. Food & Drug Adminis-
+tration (FDA) issued warnings in 2019 regarding cybersecurity
+weaknesses in AID systems [13], and several commercial
+products have been recalled due to security concerns [14].
+Strengthening the reliability of AID systems requires a
+thorough understanding of existing and emerging threats, a
+critical evaluation of defence mechanisms, and the identifica-
+tion of gaps that must be addressed. Review papers on the
+reliability of AID systems published in the past decade, as
+summarized in Table I, most primarily focused on discussing
+unintended failures [17] [18] [24] or discussing threats from
+malicious attacks without analysing specific attack vectors and
+defence mechanisms [3] [19] [20]. While several studies pro-
+vided general overviews of cyber vulnerabilities and potential
+countermeasures, they lack in-depth examinations of related
+studies [15] [16] [21] [22]. Nazzal et al. [23] conducted a
+thorough literature review of software verification methods
+for AID systems; however, broader security defence strategies
+arXiv:2503.14006v2  [cs.CR]  19 Jan 2026
+TABLE I
+COMPARISON OF REVIEW PAPERS ADDRESSING AID SYSTEM SECURITY OVER THE PAST DECADE.
+(SYMBOLS:✓= COVERED,
+= MENTIONED BUT LACKS LITERATURE REVIEW AND/OR COMPREHENSIVE COVERAGE, × = NOT COVERED)
+Review Paper
+Focus
+Discussion on
+Unintended Failures
+Discussion on
+Malicious Attacks
+Analysis of Attack
+Vectors
+Analysis of
+Protective
+Mechanisms
+Klonoff, 2015 [15]
+Cybersecurity for Connected Diabetes
+Devices
+×
+✓
+×
+(No literature
+review)
+O’Keeffe et al,. 2015 [16]
+Cybersecurity in AID systems
+×
+✓
+×
+(No literature
+review)
+Blauw et al., 2016 [17]
+Safety and design requirements of the
+AID systems
+✓
+×
+×
+(Only for
+unintended failures)
+Ramkissoon et al., 2017
+[18]
+Specific hazards applicable to the AID
+systems
+✓
+×
+×
+(Only for
+unintended failures)
+Thompson et al., 2018 [19]
+Safety issues in outpatient settings
+✓
+✓
+×
+×
+Quintal er al., 2019 [20]
+Ethical issues associated with AID
+systems
+✓
+✓
+×
+×
+Singh and Rahman, 2020
+[21]
+The security of Open AID systems
+system
+×
+✓
+(No literature
+review)
+(No literature
+review)
+Sherr et al., 2022 [3]
+Current landscape and safety challenges
+of AID systems
+✓
+✓
+×
+×
+Wirth, 2022 [22]
+The states and tendency of cybersecurity
+in the diabetes ecosystem
+×
+✓
+×
+×
+Nazzal et al., 2024 [23]
+Software safety and security verification
+and validation on AID systems
+×
+×
+×
+(Only formal
+verification methods)
+Kapadia, 2024 [24]
+Limitations and malfunctions
+✓
+×
+×
+×
+This paper
+The cybersecurity status, attack vectors,
+and proposed defence strategies of AID
+systems
+×
+✓
+✓
+✓
+remain unexplored. Besides, while some existing reviews on
+Internet of Medical Things (IoMT) security briefly discuss
+AID systems, they do not adequately address their distinctive
+risks [25] [26] [27].
+Compared to most other safety-critical IoMT systems, AID
+systems present unique security challenges. First, the physio-
+logical closed-loop control introduces substantial interpatient
+variability and unpredictable external factors, complicating
+threat detection and leaving a narrow window for preventing
+attacks from impacting drug delivery. Second, AID wearables
+operate under stringent power, computation, and memory
+constrained, limiting the feasibility of resource-intensive secu-
+rity strategies. These challenges not only amplify the impact
+of potential threats but also complicate the development of
+effective defence mechanisms. Notably, no prior reviews com-
+prehensively examine security threats and protective strategies
+for wearable physiologic closed-loop control systems.
+To address this gap, this study systematically reviews the
+security of AID systems, providing an in-depth analysis of
+attack vectors, existing defence strategies, and open research
+challenges. We introduce a taxonomy that categorises security
+threats and defence mechanisms in AID systems, as illustrated
+in Figure 2. With the growing adoption of AID technologies
+and the expanding body of related research, this review not
+only advances understanding of AID security but also serves as
+a representative case study for strengthening the cybersecurity
+of other medical wearable systems.
+The remaining paper is organised as follows (see Figure
+1). Section II presents the methodology and materials used in
+the review. Section III examines the security status of AID
+systems from technical, legal, and commercial perspectives,
+establishing a foundational understanding of the field. Section
+IV reviews existing and emerging attack vectors, and Sec-
+tion V analyses defence strategies proposed in the literature.
+Section VI discusses current evaluation methods and available
+research resources. Section VII discusses key findings and
+research gaps, and Section VIII outlines future directions for
+strengthening the security of AID systems.
+II. METHODOLOGY AND MATERIALS
+To comprehensively assess the security landscape of AID
+systems, this paper adopts a hybrid methodology, integrating
+elements of both survey and systematic review. The review
+begins with a broad investigation into AID systems cyber-
+security, covering technical vulnerabilities, regulatory frame-
+works, and security measures in commercial products. The
+materials considered extend beyond peer-reviewed journals
+and conference papers to include diverse sources such as
+clinical studies, industry reports, regulatory standards, product
+manuals, and relevant online resources. Following this, the
+PRISMA framework [28] was employed for a systematic
+review of attack vectors and defence mechanisms proposed in
+the literature for AID systems security. To guide this analysis,
+the following research questions (RQs) were formulated:
+• RQ1: What potential attack vectors and risks do AID
+systems face?
+• RQ2: How do existing defence mechanisms address these
+risks?
+• RQ3: How practical and robust are these solutions in
+protecting AID systems from cybersecurity threats?
+A systematic literature search was conducted across mul-
+tiple databases, including Scopus, Google Scholar, Web of
+Science, IEEE Xplore, and PubMed. Boolean operators and
+keyword variations were applied, as summarized in Table II.
+The review focused on publications from 2010 to the collection
+Attack Vectors
+Status Overview
+Open Research Challenges and Future Directions
+Defence Strategies 
+Securing AID systems in the Future
+Technical
+Vulnerability
+Regulation and
+Standards
+Cybersecurity in
+Commercial Products
+Literature Review
+Confidentiality
+-
+Eavesdropping
+-
+Do-it-yourself hacking
+Integrity
+-
+Replay attacks
+-
+Bias/False injection attacks
+-
+ML/DL model attacks
+-
+Computational code attacks
+-
+Malicious pump driver 
+Availability
+-
+DoS, DDoS
+-
+Ransomware Attacks 
+…
+Protected communication
+-
+Proximity communication
+channels
+-
+Secure communication protocols
+Intrusion detection systems
+-
+Signature-based IDS
+-
+Specification-based IDS
+-
+Anomaly-based IDS
+Control strategies assessment
+Redundant hardware or
+software components
+Research Challenges and Future Directions
+-
+Resource constraints
+-
+Variability across patients
+-
+Escalating complexity of cyberattacks
+-
+Insulin Infusion patterns modelling
+-
+Standardization of frameworks
+-
+Trustworthy and privacy saving
+Evaluation and Resources
+-
+Hardware simulation
+-
+Software simulation
+-
+Datasets
+Fig. 1.
+Overview of the paper.
+date (February 11, 2025), with studies outside this range
+filtered out during the initial search.
+All
+retrieved
+papers
+underwent
+a
+screening
+process
+(PRISMA diagram in Figure 3) based on predefined inclusion
+and exclusion criteria.
+Inclusion criteria:
+• Peer-reviewed journal articles, conference papers, or book
+chapters;
+• Published between 2010 and 2025;
+• Studies proposing attack vectors, defence mechanisms, or
+risk evaluations for AID systems
+Exclusion criteria:
+• Papers not written in English
+• Review papers;
+• Irrelevant articles;
+• Duplicate articles
+From the initial database search, 53 relevant papers were
+identified. To ensure comprehensive coverage, backward and
+forward citation tracking was conducted, yielding 23 addi-
+tional studies. These were initially missed due to: (1) Broad
+scope—studies focusing on medical devices, IoT-based health-
+care systems, or cyber-physical systems that take AID systems
+as a case study; and (2) Terminology differences—studies
+referring to AID systems under alternative terms such as
+wireless insulin pump systems or sensor-augmented pumps.
+Finally, 76 papers met the inclusion criteria for analysing
+attack vectors and defence mechanisms in AID systems. The
+publication trends over the past 15 years are visualized in
+Figure 4. Notably, a significant rise in proposed defence
+mechanisms has been observed in the past five years.
+III. BACKGROUND
+A. Technical Description and Vulnerabilities
+AID combines a CGM, an insulin pump, and a controller
+algorithm to calculate and deliver suitable insulin doses,
+helping to maintain blood glucose levels within the target
+range. Figure 5 shows the workflow of a hybrid AID system,
+the paradigm common among current available products. In
+this system, the CGM periodically (e.g., every 5 minutes)
+transmits the measured glucose levels to the control algorithm
+device, which calculates basal insulin and corrective boluses
+in response to sensor glucose values and meal registration,
+and then directs the subcutaneous insulin pump to deliver the
+specified dose into the body [30]. Unlike full AID systems
+that automate all insulin delivery, hybrid systems require the
+user to administer prandial insulin before or at the time
+of meals to control post-meal blood glucose spikes [31].
+Full AID systems, though promising, still face challenges
+in managing postprandial hyperglycemia and exercise-related
+glycemic fluctuations [32]. Despite different automation levels,
+both hybrid and full AID systems share core modules and rely
+on wireless connectivity and software control, exposing them
+to similar cybersecurity vulnerabilities.
+Cybersecurity concerns the protection of digital assets. In
+the context of AID systems, these assets include physiological
+and treatment data transmitted wirelessly between system
+components, the software controlling processes, and patient
+information stored on the device. Vulnerabilities may arise in
+both wireless communication channels and individual system
+modules, as detailed in the following subsections.
+1) Wireless communication: Communication among the
+three core components of AID systems primarily relies on
+wireless transmissions for wearable convenience, making it
+possible for attackers to intercept, disrupt, or manipulate
+signals from a distance. Secure information exchange requires
+Fig. 2.
+Taxonomy of security threats and defence strategies in AID systems.
+TABLE II
+KEYWORDS USED IN SEARCH ENGINES.
+Search Engine
+Keywords
+Google Scholar
+(intitle:”artificial pancreas” OR intitle:”closed-loop insulin pump” OR intitle:”automated insulin delivery” OR intitle:”hybrid closed loop
+systems”) AND (attack OR cyberattack OR hijack OR cybersecurity OR security OR ”intrusion detection” OR secure)
+Scopus
+TITLE-ABS-KEY ( (”artificial pancreas” OR ”closed-loop insulin pump” OR ”automated insulin delivery” OR ”hybrid closed loop systems”)
+AND (attack OR cyberattack OR hijack OR cybersecurity OR security OR ”intrusion detection” OR secure))
+IEEE Xplore
+(”artificial pancreas” OR ”closed-loop insulin pump” OR ”automated insulin delivery” OR ”hybrid closed-loop systems”) AND (attack OR
+cyberattack OR hijack OR cybersecurity OR security OR ”intrusion detection” OR secure)
+Web of Science
+(”artificial pancreas” OR ”closed-loop insulin pump” OR ”automated insulin delivery” OR ”hybrid closed-loop systems”) AND (attack OR
+cyberattack OR hijack OR cybersecurity OR security OR ”intrusion detection” OR secure)
+PubMed
+(”artificial pancreas” OR ”closed-loop insulin pump” OR ”automated insulin delivery” OR ”hybrid closed-loop systems”) AND (attack OR
+cyberattack OR hijack OR cybersecurity OR security OR ”intrusion detection” or secure)
+communication protocols that provide robust encryption, au-
+thentication, and resilience under emergencies. However, as
+examined in [33], protocols commonly applied in AID sys-
+tems are often lightweight but fail to meet these security
+requirements. For example, the widely used Bluetooth Low
+Energy (BLE) protocol is vulnerable to replay and man-in-
+the-middle attacks, allowing adversaries to eavesdrop or inject
+faulty glucose readings and control commands [34].
+2) CGM: A CGM system continuously tracks BG levels in
+the patient’s body and transmits the collected physiological
+data to the controller every few minutes. It consists of a
+disposable glucose sensor, placed under the skin to measure
+glucose levels, and a transmitter attached to the sensor that
+sends the data to the control algorithm platform. Accurate BG
+readings are crucial for safe insulin delivery, as any incorrect
+values can potentially result in harmful dosing decisions. How-
+ever, a compromised CGM system may operate maliciously by
+providing inaccurate BG levels, either due to device tampering
+or data manipulation during wireless transmission [11] [12]
+[30].
+3) Control Algorithms: The controller computes the recom-
+mended insulin doses and transmits infusion commands to the
+insulin pump. It incorporates patient physiological models to
+estimate glucose-insulin dynamics and control algorithms to
+determine optimal insulin doses. These computations rely on
+real-time sensor data, historical records, and estimated patient
+status (e.g., eventual BG, Insulin on Board (IOB)). Control
+algorithms may be deployed on smartphones, tablets, personal
+computers, or integrated into insulin pumps, which are often
+the platforms for user monitoring device activities. Three main
+security threats are associated with the controller:
+• Data Manipulation: The stored records, received sensor
+Fig. 3.
+PRISMA diagram for the screening process.
+2023
+2021
+2019
+2017
+2015
+2013
+Year
+2
+6
+10
+Number of Papers
+Publication Trend of Attack and Defence Literature
+Attack Literature
+Defence Literature
+Fig. 4.
+Publication trend of attack and defence literature.
+data, or meal and activities inputs could be tampered
+with or falsely registered, compromising the accuracy of
+the controller’s calculations [35] [36]. Additionally, alerts
+on the display screen could be maliciously triggered or
+disabled, prompting users to turn off or ignore the security
+monitoring system, thus heightening system vulnerability.
+• Compromising controller algorithms: The core logic and
+configuration of control algorithms may be altered, re-
+sulting in incorrect insulin dosing [37].
+• Platform Vulnerabilities: The device running the control
+algorithm could be compromised by malware, such as
+viruses or worms, which may interfere with the proper
+functioning of the AID systems [38].
+4) Subcutaneous Insulin Pump: A subcutaneous insulin
+pump includes a reservoir, which stores insulin and supplies
+it to the delivery system, an infusion set consisting of a thin
+tube and a subcutaneous cannula for insulin delivery, and a
+microcontroller unit that orchestrates the pump’s functions by
+executing programmed commands based on input from the
+Fig. 5.
+An overview of a hybrid closed-loop insulin delivery system, illus-
+trating core components, workflow, and potential functional vulnerabilities.
+Dotted lines indicate wireless communication links between modules, while
+solid lines represent direct attachments to the patient’s body or integrated
+elements - adapted from [29].
+control platform. Security concerns associated with the pump
+arise from device malfunctions (e.g., infusion site failures) [39]
+[40] and malicious control I/O operations of the pump [12].
+B. Regulation Standards and Guidelines
+The regulatory landscape governing the cybersecurity of
+AID systems is evolving, with growing recognition of cyber-
+security as a critical component of patient safety. This section
+examines the regulatory frameworks of the United States (US)
+and the European Union (EU). Given the global nature of
+medical device markets, many other countries have adopted
+regulations that closely align with these standards. Appendix
+A summarises the core regulatory standards and guidelines
+relevant to AID system cybersecurity in these regions.
+In the US, the FDA oversees regulatory compliance for med-
+ical devices. Existing legislation and FDA guidance documents
+highlight cybersecurity as a key consideration in approval and
+inspection processes. Notably, the FDA has issued guidance
+for premarket submissions titled ”Cybersecurity in Medical
+Devices: Quality System Considerations and Content of Pre-
+market Submissions” [41], and for postmarket submissions
+titled ”Postmarket Management of Cybersecurity in Medical
+Devices” [42]. These documents provide prescriptive and
+structured approaches for manufacturers to conduct risk man-
+agement and implement cybersecurity controls. In addition,
+the NIST’s cybersecurity framework [43] provides a structured
+catalogue of typical cybersecurity activities and controls that
+enterprises should consider.
+In the EU, the Medical Devices Regulation (MDR) [44]
+serves as the primary legislative framework, supplemented by
+other cybersecurity standards. Annexe I of the MDR, General
+Safety and Performance Requirements (GSPR), requires that
+medical devices must not fail due to security attacks and
+that necessary cybersecurity protections must be in place.
+To facilitate implementation, the Medical Device Coordina-
+tion Group (MDCG) issued the guidance document “MDCG
+201916: Guidance on Cybersecurity for medical devices”
+[45], which provides recommendations to manufacturers on
+fulfilling MDR cybersecurity requirements. Compared with
+FDA guidance, MDCG offers relatively high-level principles
+on how to operationalise these activities [46].
+While cybersecurity regulations in the US and EU both
+require manufacturers to identify, assess, and mitigate cy-
+bersecurity risks across the product lifecycle, responsibility
+for comprehensive threat modelling and protective measures
+implementation rests with the manufacturer. So the approach
+and depth are determined by the manufacturer and subject
+to regulatory review. This creates challenges in mapping the
+broad landscape of security requirements to specific devices
+and maintaining up-to-date threat models. Moreover, current
+guidelines lack formal mechanisms for establishing confidence
+in a product or system’s capacity to defend against or recover
+from cyber attacks through independent assessment [47].
+To address these limitations, independent organisations and
+researchers have proposed complementary approaches. For ex-
+ample, the nonprofit organisation Diabetes Technology Society
+(DTS) introduced the DTSec (DTS Cybersecurity Standard for
+Connected Diabetes Devices) to define AID-specific security
+requirements and enable independent compliance assessment
+[48]. In addition, to assess the cyber risk against the up-to-date
+threat landscape, Shen [49] proposed a cyber risk assessment
+method that evaluates Manufacturers Disclosure Statement for
+Medical Device Security (MDS2) data sheets against updated
+cyber threat intelligence using MITRE ATT&CK. These ini-
+tiatives highlight potential directions for evolving regulation
+toward more comprehensive and concrete cybersecurity com-
+pliance regulations.
+C. Commercial Products
+With the rising prevalence of diabetes and continued tech-
+nological advancement, global demand for AID systems is
+rapidly increasing, with the market valued at US$2.34 billion
+in 2023 and projected to reach US$5.80 billion by 2032
+[50]. Nevertheless, safety and security challenges persist. For
+example, by 2023, 24 device failures and recalls were docu-
+mented for a single AID system manufacturer [24]. A cross-
+sectional survey [6] revealed that concerns regarding privacy
+and reliability are one of the major factors that hinder broader
+adoption of AID systems. Appendix B summarises the core
+components, functions, and security measures of representative
+products. Although the cybersecurity capabilities of leading
+products have improved, they remain limited in terms of
+security protection, risk management, and monitoring.
+Experimental studies have demonstrated that two early-
+generation AID products lack standard cryptographic mech-
+anisms, allowing full reverse-engineering of their wireless
+protocols and exposing them to eavesdropping, replay, and
+data manipulation attacks [11] [51]. These vulnerabilities
+resulted in official warnings of use [52] and product recalls
+[9]. Although more recent products employ encryption and
+authentication to protect wireless communication, the level of
+security depends on factors such as method strength, key man-
+agement, and system integration. Even with strong encryption
+and authentication, vulnerabilities remain to advanced threats
+like side-channel attacks, denial-of-service (DoS) attacks, and
+physical tampering.
+To address advanced or unknown threats that may bypass
+safeguards, robust risk management is essential for ensuring
+device reliability under attack. However, risk management
+functions in current products are limited. Insulin pumps incor-
+porate preset minimum and maximum dosage and infusion rate
+limits, while systems like the Medtronic 780G suspend insulin
+delivery when glucose levels drop below a predefined thresh-
+old. Yet, these threshold-based approaches are ineffective
+against more sophisticated attacks. Research has demonstrated
+that personalised insulin dose manipulation attacks can subtly
+alter insulin delivery in ways that are harmful to specific
+patients at particular times while remaining within general
+safety constraints [53]. In addition, false data injection attacks
+can falsify glucose readings to suppress alarm activation,
+and computational attacks can modify algorithm logic [12].
+Detecting these attacks requires identifying abnormal patterns
+rather than comparing with predefined thresholds.
+Meanwhile, the main responsibility for monitoring and
+securing devices is explicitly assigned to patients themselves
+as indicated in user manuals [54]. However, this expectation
+is often unrealistic, especially during sleep or other daily
+activities. Besides, the absence of real-time displays in CGM
+systems further limits patients’ ability to detect discrepancies
+between glucose readings and data relayed to the control
+platform.
+Given these limitations, there is a pressing need for man-
+ufacturers to establish sufficient security measures to prevent,
+detect, and respond to security threats in real time without
+relying solely on patient intervention. Strengthening security
+in this manner is essential to improving system reliability and
+fostering user trust.
+IV. ATTACK VECTORS IN AID SYSTEMS
+Building on the discussion of security vulnerabilities in AID
+systems, it is crucial to examine the specific attack vectors that
+target these systems. Table III presents a reverse chronological
+overview of real-world attacks and emerging threats identified
+in the literature, detailing their causes, impacts on device
+functionality, and the adversarial capabilities required.
+As illustrated in the taxonomy (Figure 2), malicious attacks
+on AID systems can be broadly categorised into cyber-physical
+attacks and process-aware attacks, based on whether they
+exploit knowledge of the system’s dynamic control processes
+[55]. Cyber-physical attacks, which are common across var-
+ious IoMT devices, compromise system functionality by tar-
+geting software, hardware, or communication channels without
+requiring an in-depth understanding of the underlying control
+mechanisms. In contrast, process-aware attacks specifically
+target semi- or closed-loop control like AID systems. By
+making subtle manipulations within the operational bounds,
+these attacks can significantly impact system behaviours to
+threat patient safety [36]. Since cyber-physical attacks align
+with broader IoMT security concerns, threats and potential
+countermeasures have been detailed in existing surveys [25]
+[26] [27]. This section focuses on analysing attack vectors and
+technical details that are specific to AID systems.
+For systematic analysis, the attack vectors are grouped into
+three categories corresponding to the fundamental principles of
+cybersecurity: confidentiality, integrity, and availability. Table
+IV provides this classification and links the attacks identified in
+Table III with feasible countermeasures summarised in Table
+V. The following discussion focuses on these attack vectors
+and outlines potential countermeasures, whereas Section V
+reviews research contributions on implementing such defences
+in AID systems.
+A. Threats to Confidentiality
+Ensuring the confidentiality of diabetes devices aims to
+guarantee that sensitive information is accessible only to
+authorised users or systems. Threats to this security aspect can
+originate from unauthorised individuals or even from patients
+themselves.
+1) Eavesdropping: This refers to the unauthorised intercep-
+tion of wireless communication, which can expose personal
+patient information related to therapy and physical condition,
+device information, and the device’s personal identification
+number (PIN). Laboratory experiments have shown that data
+transmitted by a commercial insulin delivery system without
+cryptography can be intercepted using off-the-shelf Universal
+Software Radio Peripheral (USRP) and free software [11] [51].
+By capturing its identification number, attackers could then
+gain full control of the pump. At a 2012 security conference,
+an engineer showed that a fatal dose of insulin could be
+delivered from 300 feet away [108]. These attacks exploit
+wireless communication vulnerabilities, such as wide trans-
+mission range and inadequate encryption. To mitigate these
+risks, countermeasures proposed in the literature mainly focus
+on (1) enhancing data protection through cryptography and
+secure communication protocols, and (2) limiting transmission
+range by employing proximity communication channels.
+2) Do-it-yourself (DIY) hacking: This refers to unautho-
+rised access or modification of commercial diabetes devices
+by patients themselves, driven by the desire for better data
+visualisation and more advanced control with shorter official
+censor and approval time [15]. For instance, Nightscout is
+an open-source project that helps patients hack their Dex-
+com CGMs for remote glucose level monitoring on mobile
+devices. Projects such as #DIYPS enable patients to control
+insulin delivery. While these initiatives empower patients, they
+introduce risks due to vulnerabilities in unauthorised software
+and users’ potential lack of expertise. Compared to FDA-
+regulated medical devices, these systems lack rigorous testing
+and responsible parties to support them in case of problems.
+To balance the need for patients to have greater control with
+secure AID systems against malicious exploitation, it is crucial
+to implement robust authentication strategies.
+B. Threats to Integrity
+The integrity of AID systems ensures that their data,
+algorithms, and operations remain accurate and consistent.
+Integrity can be compromised through two key aspects: data
+manipulation and algorithm manipulation.
+1) Manipulation of Data: Attackers can manipulate wire-
+lessly transmitted data, such as CGM readings or controller
+commands, to mislead the control algorithm or insulin pumps
+into issuing incorrect insulin delivery. Data manipulation can
+occur through the following attack vectors:
+• Replay attacks: These attacks involve intercepting and
+replaying legitimate data packets to manipulate insulin
+delivery [61] [52]. This type of attack is possible when
+systems lack freshness checks or authentication, and
+attackers can observe and record communications. It does
+not require device access or message decryption.
+Once the attacker gains access to the device (e.g., by
+accessing the PIN) and decrypts the message, they can craft
+forged data packets to be accepted by the device [11], enabling
+bias injection and false data injection attacks.
+• Bias Injection Attacks: In this attack, the attacker skews
+sensor readings by injecting a bias [35]. By making
+subtle, consistent changes, the attacker can cause the
+system to under- or over-deliver insulin without needing
+extensive knowledge of the patient model or system
+operations. They can be difficult to detect due to their
+subtlety and correlation with the original data [109].
+• False Data Injection Attacks (FDIA): FDIA refers to
+an adversary deliberately manipulating measurement or
+communication data to affect system state estimation or
+control decisions. They can be broadly categorised into
+random and targeted types, depending on how the data is
+forged. Random FDIA introduces arbitrary perturbations
+into input data. Experiments in [59] showed that such
+attacks can shift the outputs of deep learning (DL)
+based glucose prediction models by 10-20 mg/dL under
+different scenarios. These attacks are generally easier to
+detect using sequential change detection techniques.
+In contrast, targeted FDIA carefully crafts input values
+to evade alarms and cause deliberate harm. This belongs
+to process-aware attacks that require knowledge of the
+control algorithm, which is often detailed in documenta-
+tion. These attacks can be divided into model-specific
+and patient-specific variants. Model-specific FDIA ex-
+ploit vulnerabilities in the target model; for example,
+Elnawawy et al. [57] used URET to craft semantically and
+functionally plausible adversarial data points for interfer-
+ence AI models, while Kashyap et al. [59] formulated
+this attack as an optimisation problem, showing that
+minimal, hard-to-detect perturbations against DL-based
+models can be computed within 60 milliseconds. Patient-
+specific FDIA endangers selected individuals, such as
+personalised insulin dose manipulation attacks craft at-
+tacks that harmful for target patients and within safety
+constraints [53], register false states (e.g., meal intake) to
+covertly mislead the control logic [36], or remote control
+insulin delivery [11] [12] [51].
+Defence strategies for these data manipulation attacks typi-
+cally include developing intrusion detection systems to detect
+abnormal patterns in sensor data and assessing controller
+activities. Another defensive measure involves using additional
+sensors or software monitors to cross-check data sources for
+TABLE III
+DOCUMENTED MALICIOUS ATTACKS ON AID SYSTEMS.
+Attack Name
+Reference
+Source Type
+Cause of Failure
+Impact
+Adversarial Capabilities
+RL-based control
+model attacks
+Chang et al. [56]
+(10/2024)
+Literature
+(Experimentally
+Validated)
+The control system is vulnerable to
+anomalous inputs.
+A
+maximum
+CGM
+reading
+of
+400mg/dL caused high rates (over
+40%)
+of
+hypoglycaemic
+failure
+within a few hours; a very slight
+perturbation (±1mg/dL) can lead to
+disproportionate patient harm over
+time
+High - Read access to the weights
+of the trained model or estimated
+weights
+AI/ML model at-
+tacks
+Elnawawy et al.
+[57] (01/2024)
+Literature
+(Experimentally
+Validated)
+Introducing adversarial CGM data
+points during inference through a
+known vulnerability in the Bluetooth
+communication channel
+Wrong diagnosis or treatment
+Medium - Can exploit the Blue-
+tooth communication stack to inter-
+cept and manipulate the CGM mea-
+surements
+Unauthorised
+re-
+mote control
+Medtronic
+[9]
+(01/2023)
+Real-world
+(Recall)
+The settings and insulin delivery of
+the pump could be potentially con-
+trolled through a wireless connec-
+tion nearby
+Overdosing or Underdosing
+Medium - Intercept and manipulate
+the communication between devices
+Process-aware at-
+tacks
+Stergiopoulos
+et
+al. [36] (11/2023)
+Literature
+(Experimentally
+Validated)
+Utilising knowledge of the dynamic
+process to alter sensory data or the
+logic inside the controller in an in-
+tended but subtle way
+Overdosing or Underdosing
+High - Prior knowledge of the com-
+ponents’ implementation mechanism
+Replay attacks
+Walenda
+et
+al.
+[58] (11/2023)
+Literature
+(Experimentally
+Validated)
+Sending repeating insulin dosages to
+the insulin pump through a vulnera-
+bility in the wireless protocol
+Replay attacks have the greatest ef-
+fect when the injected insulin doses
+are high
+Low – Intercept the wireless connec-
+tion and report past packets
+DoS attacks
+Walenda
+et
+al.
+[58] (11/2023)
+Literature
+(Experimentally
+Validated)
+Overload the system to stop insulin
+delivery for extended periods
+DoS
+attacks
+are
+most
+effective
+at
+low,
+increasing
+doses,
+caus-
+ing longer out-of-range times and
+greater spikes and dips than replay
+attacks.
+Low - Jam the communication chan-
+nel
+Personalised
+insulin
+dose
+manipulation
+attacks
+Levy-Loboda
+et
+al. [53] (08/2022)
+Literature (Theo-
+retical)
+Craft attacks that only threat target
+patients and are capable of evading
+extreme overdose/underdose detec-
+tion
+Overdosing or Underdosing
+High – Prior knowledge and manip-
+ulation of the insulin dosage
+Bias injection at-
+tacks
+Emre
+Tosunal
+[35] (06/2022)
+Literature (Theo-
+retical)
+A constant bias is injected into the
+compromised sensor readings
+Overdosing or Underdosing
+Medium - Intercept and manipulate
+the communication between devices
+Ripple false data
+injection attacks
+Kashyap
+et
+al.
+[59] (05/2021)
+Literature
+(Experimentally
+Validated)
+Using minimal input perturbations
+to
+stealthily
+change
+the
+DNN-
+predicted insulin dosage
+More allowed perturbations make
+attacks easier to find for targeted
+attacks, with discovery time as short
+as 60ms. Random attacks can easily
+induce 10–20 mg/dL output changes
+across scenarios.
+High - Read access to the weights
+of the trained model or estimated
+weights
+Command manip-
+ulation attacks
+Khan et al. [37]
+(12/2020)
+Literature (Theo-
+retical)
+Change the instructions or data that
+implement the algorithmic steps
+Overdosing or Underdosing
+High - Access to the relevant re-
+sources; modify a command (i.e.,
+instructions that implement the algo-
+rithmic steps)
+Unauthorised
+re-
+mote control
+Cooke et al. [12]
+(04/2020)
+Literature
+(Experimentally
+Validated)
+An adversary can remotely control
+insulin delivery and access unen-
+crypted medical data
+Overdosing or Underdosing
+Medium - Intercept and manipulate
+the communication between devices
+Replay attacks
+Medtronic
+[52]
+(08/2018)
+Real-world (Noti-
+fication)
+Involuntary bolus insulin could be
+delivered to the pump user by copy-
+ing the wireless radio frequency
+(RF) signals from remote controllers
+in proximity
+Overdosing
+Low – Intercept the wireless connec-
+tion and report past packets
+CGM attacks
+Reverberi
+and
+Oswald
+[10]
+(08/2017)
+Literature
+(Experimentally
+Validated)
+The Dexcom G4 protocol does not
+employ cryptographic algorithms
+Enables the tracking of a user,
+the jamming of the communication
+channels and the forging of incorrect
+sensor readings
+Low to medium - Software-defined
+radio and low-cost RF chipsets, re-
+verse engineering
+Saturation-based
+sensor
+spoofing
+attacks
+Park et al. [60]
+(08/2016)
+Literature
+(Experimentally
+Validated)
+Make a sensor ignore legitimate in-
+puts by using an additional infrared
+source to saturate the sensors
+Inject up to 3.33 times the intended
+amount of fluid or 0.65 times for a
+10-minute period
+Low – Saturating sensor from an
+external source
+Reverse engineer-
+ing exploitation
+Marin et al [51]
+(03/2016)
+Literature
+(Experimentally
+Validated)
+Fully reverse-engineered the wire-
+less
+communication
+protocol
+be-
+tween all the peripherals of the in-
+sulin pump system
+Compromise both the security and
+privacy of the patient
+Passive attacks: Low - Radio inter-
+ception and generation device
+Active attacks: Medium - Reverse
+engineering
+Reverse engineer-
+ing exploitation
+Li
+et
+al
+[11]
+(07/2011)
+Literature
+(Experimentally
+Validated)
+No standard cryptographic mecha-
+nisms; the wireless protocol can be
+fully reverse-engineered, enabling
+eavesdropping,
+replay,
+and
+com-
+mand manipulation attacks.
+Compromise both the security and
+privacy of the patient
+Passive attacks: Low - Radio inter-
+ception and generation device
+Active attacks: Medium - Reverse
+engineering
+TABLE IV
+CATEGORISED ATTACK VECTORS AND COMMON COUNTERMEASURES IN AID SYSTEMS.
+Security Aspect
+Attack Vector
+Description
+Countermeasures
+Confidentiality
+Eavesdropping
+[11] [51]
+Theft of information transmitted through a
+network
+Cryptography;
+Secure communication protocols;
+Proximity communication channels;
+Do-it-yourself hacking [15]
+Patients extract data not provided by the prod-
+ucts
+Authentication
+Integrity
+Replay attacks [58] [61]
+Intercept and retransmit valid data or com-
+mands
+Bias injection attacks [35]
+A constant bias was injected into the sensor
+readings
+Intrusion detection systems;
+Control strategies assess;
+Additional sensor for cross-check
+False data injection attacks [53] [59]
+Change transmitted data with random or syn-
+thesised data
+AI/ML model attacks [56] [57]
+Deviate the ML model’s prediction during
+training or inference
+Computational attacks [37]
+Compromise the computational command or
+internal data
+Formal specification
+Malicious pump driver [62]
+Change pump I/O operations
+Availability
+Denial-of-Service
+(DoS)
+/Distributed DoS [62]
+Flooding the target with traffic results in the
+inability to respond timely
+Secure communication protocols;
+Redundant hardware or software components;
+Formal specification;
+Ransomware Attacks [63]
+The malware encrypts the system’s data or
+locks users out, demanding a ransom to re-
+store access
+Jamming Attacks [10]
+Disrupting the wireless communication chan-
+nels that the APS uses to operate
+Firmware/ Software Corruption [63]
+Corrupting the firmware or software that the
+APS relies on to function
+Routing
+protocol
+information
+at-
+tacks [64]
+Attacks on routing protocols to disrupt or
+manipulate the flow of information
+TABLE V
+DEFENCE STRATEGIES PROPOSED FOR AID SYSTEMS.
+Defence type
+Description
+Methods
+Protected
+communication
+Authentication
+Verify the identity of users or de-
+vices
+Fingerprint recognition [65] [66]; Voiceprint analysis [67];
+Physical Unclonable Functions [68] [69]; Blockchain [68] [70]
+Cryptography
+Transform information into an un-
+readable format for unauthorized
+users
+Rolling-code encryption [11]; AES-based encryption [12] [51];
+Asymmetric encryption [65]; Homomorphic encryption [71]
+Secure
+communication
+protocols
+Define rules for secure data trans-
+mission
+RF-Harvested
+energy-based
+protocol
+[63];
+Emergencies-
+resilient protocol [33]; Improved the Dexcom G4 protocol
+[10]; Mutual authentication protocol [72]
+Proximity
+communica-
+tion channels
+Require close physical proximity
+between the communicating de-
+vices
+Body-coupled communication [11]; Visible light communica-
+tion [73]
+Intrusion detection
+systems
+Signature-based
+Compare the real-time behaviour of
+the system against known security
+attacks
+Define computational, data integrity, and communication attacks
+[37]; Define abnormal signal’s physical and content features
+[74]; Define replay and DoS attacks [58]; Infusion site failures
+[75]; Pressure-induced sensor attenuations [76]
+Specification-based
+Define specifications of AID sys-
+tems’ normal operations and deem
+any violation as an intrusion
+Formal specification [77] with personalized thresholds [78]
+[62]; statistical analysis [79]; declarative property [37]; outlier
+detection [30] [80]; specification mining [81]; external and
+internal state [82] [83]; insulin predictive model [62]
+Anomaly-based
+Identify data patterns that have dif-
+ferent data characteristics from nor-
+mal instances
+Model-based methods:
+Physiological [84] [85] [35] [86] [87] [88] [89];
+Data-driven [90] [91] [92] [93] [94] [70] [95] [29] [96] [97]
+[98];
+Model-free methods:
+Supervised [99] [100];
+Unsupervised [39] [101] [102] [103] [104];
+Hybrid methods [105] [30] [80] [62]
+Control strategies assessment
+Compare the dosage with the iden-
+tified patient’s insulin infusion pat-
+tern
+Rule-based [37]; Data-driven [106] [53]; Hybrid [78]
+Redundant hardware or software components
+Use of multiple, often independent,
+components that perform the same
+function
+Hardware: ECG monitor [83]; Universal Software Radio Pe-
+ripheral [74]; Separate computation core [63]
+Software: Replay attack detection filters [61]; Auxiliary safety
+layer for controllers [107]
+inconsistencies.
+2) Manipulation of Algorithms: Algorithm manipulation
+involves tampering with the computational logic or parameter
+settings of AID systems, targeting either control algorithms
+or physiologic models used for patient state prediction [37].
+These include both traditional rule-based algorithms and ma-
+chine learning(ML)-based models.
+• Computational attacks: These attacks may compromise
+instructions or internal data in algorithm execution [37].
+For example, Aliabadi et al. [110] identified that the
+synchronisation between CGM and controller could be
+manipulated by altering the timing function (get-data-
+timer()). This modification allows attackers to delay or
+drop critical messages. Other threats involve tampering
+with essential device settings, such as disabling pump
+alarms, modifying the maximum dosage limits [12] or
+pump I/O operations [62].
+• ML model attacks: ML models are increasingly used in
+AID systems to enhance performance [111]. For instance,
+the FDA-approved One Drop Blood Glucose Monitoring
+System employs a multi-layer perceptron (MLP) model
+for glucose prediction. Deep reinforcement learning (RL)
+approaches have been explored for use in AID systems
+for BG control [112]. However, due to their black-box
+and data-dependent nature, understanding and monitor-
+ing the reasoning behind these models is challenging.
+Attackers may influence the model’s behaviour during
+training or inference phases or reverse-engineer the model
+to extract confidential information [57]. Moreover, ML-
+based algorithms can be severely interfered with by a very
+slight input data perturbation that is hard to detect—an
+attack variant described as ripple FDIA [59]. In [59],
+minimal interference was calculated to misguide the
+ML model into predicting a patient’s glucose level as
+hyperglycaemic, leading the controller to administer an
+excessive dose of insulin. Experiments in [56] show that
+a small perturbation around ±1mg/dL on BG reading can
+lead to severe patient harm over time in an RL controller
+model.
+To defend against algorithm integrity threats, formal verifi-
+cation techniques are often employed to assess the operations
+of rule-based algorithms. For ML-enabled systems, where
+the black-box nature poses challenges for formal verification,
+intrusion detection systems and modelling insulin injection
+patterns can be used to detect abnormalities and inconsisten-
+cies.
+C. Threats to Availability
+Availability in the context of AID systems refers to ensuring
+that the system and its components remain reliably functional
+for data transmission, processing, and regular operations.
+Threats to availability potentially lead to failures in glucose
+monitoring or delays in insulin delivery. Key threats include:
+• Denial-of-Service (DoS) and Distributed DoS (DDoS): In
+these attacks, an adversary floods the system with exces-
+sive traffic, overwhelming AID systems and preventing
+legitimate requests from being processed promptly [62].
+This could lead to delays or complete failure in delivering
+insulin [58].
+• Ransomware Attacks: Ransomware can encrypt data and
+lock critical components of AID systems, demanding
+ransom payments to restore access [63]. This can prevent
+patients or healthcare providers from viewing essential
+data, such as glucose levels or delivery history, rendering
+the system inoperable until resolved.
+• Jamming Attacks: By interfering with the wireless com-
+munication frequency, attackers can interrupt data flow,
+causing the system to fail to deliver insulin as required
+[10].
+• Firmware/Software Corruption: Malicious firmware or
+software corruption can cause AID systems devices to
+malfunction or stop functioning entirely [63]. For ex-
+ample, saturation-based sensor spoofing attacks make a
+sensor ignore legitimate inputs by using an additional
+infrared source to saturate the sensors [60]. Additionally,
+attacks may exploit software vulnerabilities or delivering
+harmful updates can prevent systems from operating as
+intended, leading to a cessation of insulin administration.
+• Routing Protocol Information Attacks: Manipulating data
+transmission pathways in networked AID systems, at-
+tackers can disrupt or delay communication between
+key system components, compromising timely insulin
+delivery and glucose monitoring [64].
+Mitigation strategies for these threats include network traffic
+monitoring, secure communication protocols, authentication
+mechanisms, formal verification, and redundant hardware or
+software components.
+V. DEFENCE STRATEGIES FOR AID SYSTEMS
+Addressing the wide range of potential cyberattacks on AID
+systems requires comprehensive defence strategies that span
+multiple system layers. Defence mechanisms in AID systems
+can be grouped into three primary areas: protected commu-
+nication, intrusion detection systems, and control strategies
+assessment. Besides these internal defences, external strate-
+gies—such as the use of redundant hardware or software
+components—are employed to detect abnormal activities in-
+dependent of AID devices. Table V provides an overview of
+the defence types and corresponding methods proposed in past
+research.
+A. Protected Communication
+Cyberattacks often exploit vulnerabilities in wireless com-
+munication channels. A variety of defence mechanisms have
+been proposed to enhance the security of information trans-
+mission within AID systems, including advanced authentica-
+tion methods, encryption techniques, secure communication
+protocols, and specialized communication channels.
+1) Authentication Methods: Reliable authentication is cru-
+cial for ensuring secure communication within AID systems
+and for only allowing remote control with trusted devices.
+Several authentication methods have been explored to meet the
+high-security and low computational demands of AID systems.
+Biometric authentication methods like fingerprint recogni-
+tion [65] [66] and voiceprint analysis [67] are user-friendly
+and offer strong uniqueness. However, they require active user
+intervention, making them more appropriate for infrequent
+control operations (e.g., bolus injections) rather than con-
+tinuous biosignal transmissions that occur periodically (e.g.,
+every 5 minutes). Moreover, they raise concerns regarding the
+secure storage of sensitive biometric data, which could be
+spoofed by advanced attacks. To enhance system autonomy
+and reduce the risk of key leakage, hardware-based security
+methods such as Physically Unclonable Functions (PUFs)
+exploit inherent and unique physical variations in manufac-
+turing processes, offering low computational overhead and
+an unclonable security mechanism without the need for key
+storage [68] [69]. Additionally, blockchain technology has
+been explored to protect patient data by decentralising data
+storage in central cloud servers [68]. Rahmadika et al. [70]
+further incorporated blockchain with federated learning for
+sharing local parameters for the misbehaviour detection model
+in AID systems without compromising patient privacy.
+2) Encryption Techniques: Following successful authenti-
+cation, establishing encrypted communication between AID
+systems components is vital for maintaining data confidential-
+ity and integrity. A key challenge is the energy and computa-
+tional constraints. High-complexity encryption algorithms can
+introduce excessive computational overhead, reducing trans-
+mission frequency and accelerating battery depletion—which
+could hinder the system’s ability to respond promptly to
+critical scenarios. Another challenge is key distribution. While
+private key encryption enhances security, it may prevent med-
+ical professionals from accessing patient data in emergencies
+[74].
+To address these challenges, several studies have proposed
+encryption methods specifically tailored for AID systems.
+Table VI summarises these approaches, detailing their method-
+ologies, key sizes, security strengths, and limitations.
+Li et al. [11] first demonstrated the vulnerability of wire-
+less communication between glucose monitors and insulin
+delivery systems due to the lack of standard cryptography;
+they proposed using rolling code-based encryption—similar to
+that used in garage door systems—to prevent eavesdropping
+and replay attacks. However, the security of rolling code
+methods does not offer strong authentication and is highly
+dependent on encryption and decryption algorithms. Some
+methods, such as Keeloq, have been successfully compromised
+[113]. To enhance security, Marin et al. [51] employed Ad-
+vanced Encryption Standard (AES), a more robust symmetric
+encryption algorithm. Additionally, they reduced message size
+and transmission frequency to optimize computational effi-
+ciency. Their experiments also revealed that authentication for
+messages consumed more energy than encryption due to the
+need to append a message authentication code (MAC), which
+inevitably increased message length. A more lightweight so-
+lution proposed by ForkAE [12] combined encryption and
+authentication processes to reduce computational overhead.
+Both AES and ForkAE rely on symmetric encryption, where
+a public key is used for both encryption and decryption.
+However, this approach carries the risk of key interception. To
+mitigate this problem, asymmetric encryption was introduced
+in [65], using a private key in every packet. While this ap-
+proach enhances security, it requires larger key sizes, resulting
+in higher computational costs and vulnerable to factorisation
+attacks. To further protect patient privacy during computation,
+Weng et al. [71] proposed using homomorphic encryption
+within a PID-based controller. This approach enables secure
+data processing without key sharing, as it allows computations
+to be performed on encrypted data. However, the CKKS
+homomorphic encryption method used in their study does
+not support division and comparison operations, potentially
+leading to imprecise computational results. Moreover, its high
+computational demands limit its application to more complex
+controller algorithms.
+3) Secure Communication Protocols: A communication
+protocol defines the rules and standards for data exchange be-
+tween devices, including authentication and encryption meth-
+ods, to ensure secure and efficient transmission. Traditional
+high-security communication protocols often fall short in AID
+systems due to their substantial computational and energy
+demands. In contrast, low-power communication protocols like
+Bluetooth Low Energy (BLE), commonly used in IoT devices,
+often lack security robustness.
+When applied in AID systems, the absence of robust
+authentication mechanisms in BLE makes it vulnerable to
+man-in-the-middle and replay attacks. To address this concern
+in AID systems, Kwon et al. [72] proposed a protocol that
+introduces mutual authentication with 35.7% less computa-
+tional overhead compared to BLE. Kim et al. [33] proposed
+a security protocol dedicated to AID systems by establishing
+tripartite authentication and a secure channel which is more
+resilient in emergencies. Except for authentication, the original
+protocol of a CGM (Dexcom G4) has been demonstrated to
+lack encryption [10], leaving it susceptible to eavesdropping
+and integrity attacks. To mitigate these threats, Reverberi
+and Oswald enhanced its protocol by incorporating AES-128
+encryption and authentication, and introduced random keys
+and frequencies to protect against jamming attacks [10]. While
+this approach mitigates simple narrow-band jamming, it re-
+mains susceptible to high-power wide-band or more advanced
+jamming techniques. Strydis et al. [63] introduced an energy-
+efficient protocol that runs on a separate core powered by RF-
+harvested energy until it performs external reader authentica-
+tion. This approach reduces the energy burden and enhances
+the system’s resilience to battery DoS attacks.
+4) Proximity Communication Channels: Besides protecting
+the data transmission process, limiting transmission range
+through proximity-based communication can reduce the risk
+of data interception and manipulation. Li et al. [11] proposed
+hiring body-coupled communication (BCC) that uses the hu-
+man body as the wireless communication medium, which
+reduces wireless interception risks and power consumption.
+Limitations include that BCC can be affected by variations
+in body conductivity and movement. An alternative is visual
+light communication [73], which transmits data over short
+distances using visible light. This approach makes interception
+difficult and prevents remote attacks from hidden locations, but
+is sensitive to obstacles and ambient light, limiting its use to
+TABLE VI
+PROPOSED CRYPTOGRAPHY-BASED APPROACHES IN AID SYSTEMS.
+Encryption Method
+Description
+Key Sizes
+Security Strength
+Limitations
+Rolling code
+en/decoder [11]
+The remote controller encrypts an incrementing
+sequence counter as a shared key which is decrypted
+by the insulin pump to verify the counter within an
+acceptable range
+32–128 bits
+(Keeloq:
+64-bit)
+Provide basic security by
+preventing straightly
+intercepting the device
+series number and replay
+attacks
+Not offer strong
+authentication. Not
+clarifying the management
+of the shared key.
+AES-128 optimized
+for energy
+consumption [51]
+The remote control and the insulin pump share two
+independent symmetric cryptographic keys for
+encryption and authentication. Message size and
+transmission frequency are reduced to lower
+communication costs.
+128 bits
+Strong security and
+relatively lower
+computational cost
+Vulnerable if public keys
+are intercepted
+ForkAE [12]
+Simultaneously performs encryption and authentication
+by creating two copies of ciphertext for the plaintext
+but adds an extra constant to one of the copies and
+encodes both blocks using the same encryption
+algorithm and key
+128 bits
+Strong security and lower
+computational cost than
+AES-128
+Vulnerable if the fork
+pattern is predictable or
+public keys are intercepted
+RSA encryption
+using SHA
+generated 1024 key
+[65]
+An asymmetric cryptographic pattern is applied
+between a smartphone (communicate with sensors and
+actuators) and a control laptop
+1024 bits
+Moderate security. Include
+data signing with the
+private key in every packet
+in case public keys are
+intercepted.
+Higher computational cost.
+Prone to factorization and
+quantum attacks
+A Fully
+Homomorphic
+Encryption scheme
+(CKKS) [71]
+A PID controller was employed to use an encrypted
+glucose signal as an input to produce encrypted control
+signals
+Variable,
+typically in
+the range of
+hundreds of
+KB to MB
+Very strong security and
+preserved privacy.
+Computational cost is very
+high. Lack of division and
+comparison operations.
+controlled environments like hospitals.
+B. Intrusion Detection Systems
+Monitoring and analysing system activity and states is vital
+to detect any intrusion and abnormal behaviours, ensuring
+the proper functioning of AID systems. Intrusion Detec-
+tion Systems (IDS) have emerged as a key defence mech-
+anism to counter threats. These systems are classified into
+three primary types: signature-based, specification-based, and
+anomaly-based approaches. Details of the intrusion detection
+system developed for AID systems—including proposed meth-
+ods, targeted threats, experimental datasets, and performance
+metrics—are summarised in Appendix C.
+1) Signature-based IDS: Signature-based IDS detects ma-
+licious activities by comparing real-time system behaviour
+against a database of known attack patterns. For example,
+Zhang et al. [74] detect malicious data transactions in AID
+systems by defining abnormal physical signal characteristics
+and behaviours of the underlying content. The patterns of
+replay and DoS were defined in [58], and computational, data
+integrity, and communication attacks were defined in [37].
+For unintended failure detection, Howsmon et al. [75] hired
+patient-specific metrics to monitor infusion site failures, and
+Baysal et al. [76] defined sets of rules for detecting pressure-
+induced sensor attenuations.
+One key advantage of signature-based IDS is its lightweight
+computational overhead, making it well-suited for resource-
+constrained medical devices. However, it is ineffective against
+zero-day (unknown) attacks. Besides, updating signature
+databases in AID systems presents a challenge due to the
+stringent regulatory approval processes for medical devices.
+Despite these limitations, signature-based IDS can serve as
+a first-line monitor by rapidly filtering known threats and
+combining with other IDS capable of detecting unknown
+attacks to offer more robust defences.
+2) Specification-based IDS: Specification-based IDS iden-
+tifies malicious activities by comparing system behaviour to
+predefined rules or models that outline the expected operations
+of the device. Several studies have been conducted to improve
+formal specifications for AID systems, aiming to enhance
+precision and efficiency.
+To mitigate the high resource demand of specification-based
+IDS for real-time performance, Chen et al. [77] proposed
+a simplified multi-basal insulin infusion control model for
+verification, which addresses time-triggered jumps and merges
+flow pipes over the same time interval. Alshalalfah et al. [79]
+integrated statistical analysis with formal methods, employing
+statistical model checking to minimize exhaustive state explo-
+ration. Subsequently, they proposed a dynamic specification
+mining approach using Bayesian networks to refine rules,
+reducing computational load while maintaining detection ac-
+curacy [81]. Khan et al. [37] introduced a declarative property-
+based approach, specifying only the initial and final states
+rather than all intermediate states in a runtime monitor.
+Rigid thresholds present another issue, as they may not
+adapt well to individual patient variability. Zhou et al. [78]
+tackled this by personalising thresholds through adversarial
+training on fault-injected data, enabling more precise monitor-
+ing. Beyond internal system states, unsafe AID system opera-
+tions can manifest as external abnormalities, such as repeated
+bolus requests or mismatches between insulin delivery and
+meal intake. Prematilake et al. [82] developed a rule-checking
+mechanism that monitors both extrinsic and internal states.
+An ideal specification-based IDS is effective in defending
+against unknown attacks. However, constructing comprehen-
+sive rule sets to capture the complex and dynamic interactions
+within closed-loop insulin delivery systems, while limiting
+computational overhead, remains a challenge in practice.
+3) Anomaly-based IDS: Anomaly-based IDS identifies de-
+viations from expected data patterns to detect abnormal activ-
+ities. These approaches are generally categorised into model-
+based and model-free methods.
+Model-based approaches consider a T1D patient as a dy-
+namic system, where the glucose concentration g(t) is influ-
+enced by the insulin injection i(t) and process disturbances
+m(t) (e.g., meals and other patient activities). Intrusions are
+detected by comparing model predictions with observations.
+Based on the type of model, these approaches are further split
+into physiological model-based and data-driven model-based
+methods.
+Physiological model-based methods utilise mathematical
+models to represent T1D patient profiles, often integrating
+predictors such as Kalman filters for state estimation. Early
+work by Vega-Hernandez et al. [84] leveraged Hovorka’s non-
+linear predictive model [114], while Avila and Mart´ınez [89]
+combined the Lehmann and Deutsch model with a stochastic
+process to detect insulin pump issues.
+Several studies have focused on improving the prediction
+accuracy of these models. Tosun et al. [86] added sequential
+change detection mechanisms to improve detection speed and
+proposed a KL-divergence bias-sensitive filter to improve
+the detection rate of constant bias injection attacks [88]. To
+distinguish unregistered meals that caused false alerts, they in-
+troduced an online meal estimator using χ2 test with adaptive
+thresholds [35], which was later enhanced by including the
+statistical evaluation of prediction error [87]. A comparison of
+three nonlinear predictive filters for online drift detection in
+BG data was presented in [85].
+The advantages of physiological model-based approaches
+include the use of expert knowledge, explainability, and a
+reduced requirement for extensive patient data. However, their
+accuracy is highly dependent on the fidelity of the underlying
+model and patient parameters, which at most can only partially
+approximate the complex and dynamic physiological processes
+of the human body.
+Data-driven
+model-based
+methods
+rely
+on
+learning
+glucose-insulin dynamics from collected data. Early methods
+primarily employed statistical or linear models to represent
+these dynamics. For example, multivariable statistical mon-
+itoring methods were used in [97] for detecting faults in
+glucose concentration values. Facchinetti et al. [90] proposed
+individualized linear models to improve glucose predictions at
+night, which Del Favero et al. [91] later expanded to cover day-
+long monitoring by incorporating meal effects. To distinguish
+between unannounced meal interference and pump malfunc-
+tions, they introduced two different sets of parameters in a
+personalized autoregressive moving average model [92]. This
+work was further enhanced by incorporating a comprehensive
+analysis of various statistical properties associated with the
+residuals [93].
+In recent years, ML and DL methods have been applied
+to model glucose-insulin dynamics. For instance, Olney et
+al. [94] employed nonlinear autoregressive neural networks
+to detect and correct errors in CGM data, while Mahmud
+et al. [29] individualized this model to enhance prediction
+performance. Rahmadika et al. [70] developed a BiLSTM-
+based two-tier system for anomaly classification based on
+predictive deviations. Beyond modelling glucose-insulin dy-
+namics, Maity et al. [95] proposed to model the system’s
+operational characteristics and detect attacks by periodically
+relearning the model and comparing coefficients.
+Though high detection accuracy is achieved with these
+models, they often lack explainability and may not perform
+well on out-of-distribution data. To address these limitations,
+Venugopalan et al. [62] suggested complementing ML-based
+models with personalised physiological models to enhance
+robustness. Zhou et al. [96] incorporated unsafe action specifi-
+cations into the training process using semantic loss regulari-
+sation. Building on this approach, they later introduced a data-
+driven hazard mitigation method that uses the desired sequence
+of recovery states to generate a corresponding sequence of
+control actions [98].
+A key challenge faced by model-based IDS is that their
+performance depends on the accuracy of the patient model.
+However, the model highly varies between patients and fluc-
+tuates over time [78]. Fixed models that do not account for
+these dynamic changes will struggle to maintain consistent
+performance over time. This underscores the need for person-
+alised models that can continuously adapt to patients’ evolving
+physiological state to ensure reliable and effective anomaly
+detection.
+Model-free anomaly detection methods leverage data-
+driven classification techniques to identify abnormal patterns
+without requiring a patient-specific physiological model. These
+methods are divided into supervised and unsupervised ap-
+proaches based on the need for labelled abnormal data.
+• Supervised Learning: These methods train classifiers on
+labelled datasets to recognise faulty or attacked data. Ro-
+jas et al. [99] mapped labelled data onto a feature map and
+defined boundaries for the “faulty” class, flagging patient
+glucose trends that enter this region. Judith et al. [100]
+employed a multilayer perceptron model for classifying
+biometric data and network flow metrics. Despite their
+effectiveness, supervised methods face challenges due to
+the rarity and difficulty of obtaining labelled faulty or
+attacked data in the real world.
+• Unsupervised Learning: To address the lack of la-
+belled data, Meneghetti et al. [104] used 2 unsupervised
+anomaly detection methods: Local Outlier Factor and
+Connectivity-based Outlier Factor. Then they evaluated
+several unsupervised algorithms with feature selection
+techniques on simulated AID systems malfunction data
+[101]. Later, they extended this work to real patient
+data, enhancing the differentiation between normal and
+abnormal by adjusting the data segmentation [102]. Their
+follow-up study used a larger clinical dataset and adapted
+features for cases without meal announcements [39].
+Herrero et al. [103] demonstrated that training a support
+vector machine to classify CGM data streams could
+accurately identify individual patient data. This method
+potentially aids in the detection of compromised data by
+reidentification.
+While model-free methods bypass the need for profiling a
+physiological model, they still face challenges like managing
+false positives, optimizing feature selection, and handling data
+distribution shifts to maintain effective anomaly detection in
+AID systems.
+4) Hybrid methods: Hybrid methods combine various IDS
+approaches to enhance detection accuracy and robustness.
+For instance, Astillo et al. [105] merged model-based and
+model-free approaches, using deep learning models to forecast
+glucose levels and classify anomalies. They also incorporated
+outlier detection into specification rules to capture deviations
+in glucose data [30] [80]. Venugopalan et al. [62] combined
+formal verification of critical system components with ma-
+chine learning for insulin prediction, applying patient-specific
+safety thresholds. These approaches leverage the precision of
+specification-based or model-based methods and the adaptabil-
+ity of machine learning for more robust AID systems security.
+C. Control Strategies Assessment
+To prevent abnormal insulin delivery resulting from com-
+promised CGM data, controller algorithms, or insulin admin-
+istration, various defence strategies have been developed to
+evaluate and verify insulin dose control mechanisms. These
+strategies can be categorized into rule-based, data-driven, and
+hybrid approaches.
+1) Rule-based methods: Rule-based methods compare in-
+sulin doses against predefined thresholds or patterns for
+anomaly detection. Khan et al. [37] used static threshold
+ranges to detect overdoses or underdoses, which, while ef-
+fective for extreme deviations, fail to capture sophisticated
+attacks that account for patient variability. To improve this,
+Zhou et al. [78] introduced personalised thresholds and specific
+abnormal behaviours to align control actions with patient
+needs. However, this method detects anomalies after the pa-
+tient’s physiological response to the attack becomes apparent,
+leaving less time to prevent harm, especially in the case of
+underdosing, where adverse effects manifest more subtly.
+2) Data-driven
+methods:
+Data-driven
+methods
+detect
+anomalies by predicting insulin doses using historical data,
+aiming to enhance timeliness and accuracy. Hei et al. [106]
+employed supervised learning to model normal infusion
+dosages and rates against time. However, their approach as-
+sumes rigid patient routines, limiting applicability, especially
+in pediatric cases. Levy-Loboda et al. [53] exploited more
+data sources such as the logs of the insulin pump, CGM,
+and relevant medical information. They simulated insulin
+dose manipulation attacks and mined temporal patterns to
+identify anomalies using Logistic Regression and Random
+Forest. However, their study focused only on nighttime basal
+injections, neglecting other activities like meals and bolus
+doses.
+A significant gap remains in the development of comprehen-
+sive models that integrate patient activities, meal intake, and
+physiological dynamics to enable accurate and robust profiling
+of insulin delivery patterns.
+D. Redundant Hardware or Software Components
+External defences employ redundant hardware or software
+components to detect abnormalities without adding computa-
+tional strain to AID systems, allowing for independent updates
+without recertification for the medical device. For hardware
+auxiliary components, Strydis et al. [63] designed an energy-
+efficient communication protocol that runs security functions
+separately from core medical operations, minimising interfer-
+ence with the primary system. MedMon [74] utilised a USRP
+device to intercept and analyse the signal and content features
+of remote controller commands. user authentication was re-
+quired if abnormalities were detected, thereby enhancing secu-
+rity. This approach demands fast computation speed and may
+require frequent user interaction. Panda et al. [83] integrated
+a wearable ECG sensor to detect anomalies by correlating
+ECG intervals with blood glucose levels, improving system
+robustness but facing challenges in accurately correlating
+data across varied patient conditions. For software auxiliary
+components, an additional safety layer for control algorithms
+has been proposed to prevent the controller from violating
+constraints with medical criteria [107]. A virtual auxiliary
+system with detection filters was introduced to identify replay
+cyberattacks [61].
+While these external defences provide added protection
+without affecting device performance, they may be vulnerable
+to initial compromise and can be combined with internal
+security measures for comprehensive AID systems protection.
+VI. EXPERIMENT SETTINGS AND AVAILABLE RESOURCES
+Evaluating security systems for AID systems requires
+datasets that capture both the effects of cyberattacks on de-
+vice functionality and the resulting physiological changes in
+patients. However, collecting such data through experiments
+is impractical due to safety concerns. Besides, clinical data
+involving suspicious behaviour linked to cyberattacks is rare
+and difficult to label. These limitations often necessitate the
+use of simulation tools for testing and validating defence
+mechanisms. This section reviews evaluation methods and
+key experiment resources, including hardware, simulators,
+and datasets used in AID systems security research. Table
+in Appendix D summarises the key experimental resources,
+detailing their descriptions, available sources, and relevant
+applications.
+A. Hardware Simulation
+Hardware simulations offer detailed insights into physical
+aspects such as communication, energy consumption, and heat
+dissipation, which are crucial for assessing the real-world
+application of security measures. These simulations focus on
+evaluating system-level vulnerabilities and performance for
+defence at the communication and external levels.
+Commercialised connected diabetes devices are key re-
+sources for hardware simulation. These devices serve a dual
+purpose: demonstrating cybersecurity weaknesses and validat-
+ing defence mechanisms. For example, Li et al. [11] and Marin
+et al. [51] showed that radio communications in commercial
+AID systems can be intercepted and compromised using a
+USRP. Conversely, Zhang et al. [74] used a USRP as the safety
+monitor for wireless communication, and Lazaro et al. [65]
+tested a communication protocol by combining a commercial
+CGM, insulin pump, and control algorithm.
+Some studies focus on improving the hardware or soft-
+ware of AID systems to enhance security and validate the
+efficiency of their methods. These studies often use more
+general and flexible hardware boards to replicate the system.
+For instance, Strydis et al. [63] used Biostator II, an ultra-low-
+power ASIC controller, to evaluate the energy efficiency in the
+proposed security communication protocol. Zhao et al. [73]
+simulated on an Arduino Uno-R3 microcontroller to assess
+a visible light access control channel. The Arduino platform
+was also employed for hardware-in-the-loop simulation to
+test controller algorithms [115] and simulate the responses of
+cyber-attacks [116] in AID systems. Prematilake et al. [82]
+implemented a safety-enhanced insulin pump system on the
+EFM32WG to monitor both external and internal states. Kim et
+al. [33] tested an AID systems-specific secure communication
+protocol using an Arduino Nano 33 for the insulin pump,
+an nRF52840 kit for the CGM, and a Galaxy S20 for the
+controller. Ahmed et al. [117] developed a hardware emulation
+platform using an ESP8266 kit to emulate faults, attacks,
+and test countermeasures for evaluating closed-loop control
+systems.
+In summary, by leveraging commercial medical devices and
+custom hardware setups, researchers can identify cybersecu-
+rity weaknesses and assess the real-world impact of security
+measures on AID systems’ performance.
+B. Software Simulation
+Software simulation, also known as in silico trials, plays
+a crucial role in evaluating closed-loop insulin delivery sys-
+tems by mimicking patient responses to various controller
+strategies and potential cyberattacks. This approach enables
+researchers to simulate how attacks targeting CGM readings
+or insulin delivery commands affect the human body and
+assess the effectiveness of defence mechanisms at the intrusion
+detection and control strategies evaluation level. Closed-loop
+AID testbeds typically integrate T1D patient simulators that
+combine pharmacokinetic models with meal and activity sim-
+ulations, and controller algorithms.
+Pharmacokinetic models are mathematical representations
+that describe the absorption, distribution, metabolism, and
+elimination of drugs (e.g., insulin or glucagon) in the body.
+They are primarily used to predict drug concentration-time
+profiles and optimise dosing regimens. For example, Bagade
+et al. [118] utilise a hybrid physiologically-based pharmacoki-
+netic model [119] to assess the computational overhead of
+controller algorithms running as Android services and Vega-
+Hernandez et al. [84] leveraged Hovorka’s nonlinear predictive
+model (i.e., Cambridge model) [114] for state estimation.
+Beyond simulation, these models have also been incorporated
+into physiologic model-based intrusion detection systems to
+support prediction and anomaly detection [85] [35].
+T1D patient simulators are integrated platforms that model
+the entire glucose-insulin regulatory system, often incorpo-
+rating physiological variability and patient behaviours (e.g.,
+meal timing, insulin dosing decisions). They are used for in
+silico clinical trials, testing new therapies, and simulating real-
+life scenarios. One widely used model is the Padova/UVA
+T1D simulator, an FDA-approved nonlinear simulator for pre-
+clinical testing [90] [91] [30] [105] [62]. This simulator
+captures interpatient variability by simulating 100 virtual sub-
+jects covering children, adolescents, and adults with varying
+physiological profiles. Since its initial release in 2008 [120], it
+has evolved to model patient physiology changes over time in
+2013 [121] and included intraday insulin sensitivity variations,
+time-varying therapy parameters, and a ”dawn phenomenon”
+model in 2018 [122]. Another simulator named Glucosym
+supports online simulations with 10 real patient profiles, used
+for attack simulations and defence evaluations in [58].
+Controller algorithms automatically calculate and adjust
+insulin delivery to maintain the patient’s glucose level within a
+target range. These algorithms can be integrated with patient
+simulators to model and evaluate AID systems’ functional-
+ity. Common control strategies include Proportional-Integral-
+Derivative (PID) controllers, Model Predictive Controllers
+(MPC), fuzzy logic controllers, and other nonlinear control
+approaches. Notably, open-source algorithms such as Ope-
+nAPS [123] enable T1D patients to connect commercial CGMs
+and insulin pumps, creating a hybrid closed-loop system for
+more automated self-management. A comprehensive review
+of patient models and control strategies for AID systems is
+provided in [124].
+To further streamline simulation, some studies integrate
+T1D patient simulators with controller algorithms to create
+closed-loop AID systems testbeds. For example, LoopIn-
+sightT1 [125] provides an in-browser simulation platform for
+modelling closed-loop interactions between individuals with
+T1D and AID systems. It integrates multiple physiological
+models, such as the UVA/Padova [121] and the Cambridge
+model [114], with several control algorithms, and offers in-
+teractive visualisations to analyse diverse scenarios (e.g., the
+impact of meal announcements). Zhou et al. [126] developed 2
+closed-loop testbeds incorporating the UVA/Padova simulator
+with Basal-Bolus controller and Glucosym simulator with
+OpenAPS controller. They also provide a fault injection engine
+and a labelled dataset of simulated faulty records. Another
+available source is a MATLAB Simulink model testbed, which
+simulates and integrates a continuous glucose monitor, an
+insulin pump, and a PID controller [127]. These integrated
+testbeds facilitate a more convenient and thorough evaluation
+of AID security.
+C. Real-world datasets
+Real-world datasets are important resources for evaluating
+the effectiveness of cyberattack defence systems. Although
+they often lack explicit attack data, they are valuable for
+assessing patient models and predictions, as well as the
+performance of proposed security mechanisms in real world.
+Several datasets provide rich data for continuous glucose
+monitoring, both from free-living settings and clinical tri-
+als. Datasets like JCHR-DCLP3 [128], REPLACE-BG [129],
+D1NAMO [130], and OhioT1DM Dataset [131] provide CGM
+data that could be utilised for experiments involving glucose
+level prediction [94] [132] and re-identification [103]. JCHR-
+DCLP3 dataset [128] was employed by Zhou et al. [126] to
+test the performance of their proposed AID systems simulation
+testbeds, while Elnawawy et al. [57] used the OhioT1DM
+Dataset [131] to assess the impact of adversarial inputs on
+machine learning model predictions.
+In addition to glucose monitoring data, some datasets pro-
+vide supplementary biometric and context information. For
+example, the DICARDIA dataset [133] contains ECG data,
+which Panda et al. [83] utilised to develop safety moni-
+tors by analysing the correlation between ECG intervals and
+blood glucose levels. The WUSTL-EHMS-2020 dataset [134],
+though not diabetes-specific, offers network flow metrics and
+biometric data, proving useful for evaluating defence systems
+that monitor both biometrics and network anomalies, such as
+detecting man-in-the-middle attacks by Judith et al. [100]. The
+OpenHumans dataset [135], collected and shared by a diabetes
+community, includes patient profiles, glucose levels, infusion
+doses, and ample activity records. Additionally, AID systems-
+faulty data, generated by the testbed described by Zhou et al.
+[126], comprises synthetic data from closed-loop simulations,
+including both safe and hazardous data traces from 20 patient
+profiles, providing a useful source for evaluating fault detec-
+tion and risk management.
+VII. KEY FINDINGS
+A. RQ1: What potential attack vectors and risks do AID
+systems face?
+As summarised in Table III, the attack vectors targeting AID
+systems primarily threaten three core security dimensions:
+confidentiality, by intercepting sensitive patient data; integrity,
+by altering system data, commands, or logic; and availability,
+by disrupting the normal functions.
+Confidentiality attacks often utilise vulnerabilities in the
+wireless communication links, such as weak or absent en-
+cryption protocols, between system components, enabling ad-
+versaries to eavesdrop using off-the-shelf radio interception
+and generation devices. In some cases, such breaches may be
+initiated by patients seeking greater visibility or control over
+their treatment data. Availability attacks impair the system’s
+ability to function properly. DoS attacks, for instance, can in-
+terrupt the transmission of CGM readings and controller com-
+mands or deplete system resources by continuously sending
+malicious requests. These threats typically require moderate
+technical knowledge—communication protocols and device
+function—without necessitating a deep understanding of the
+system’s control process.
+As physiological closed-loop control systems, AID devices
+are especially susceptible to integrity attacks, which can result
+in incorrect insulin dosing within a short time frame. These
+attacks may target any component in the loop, including
+CGM readings, food registration, control algorithms, controller
+commands, or the insulin pump driver. One of the relatively
+direct forms is the replay attack, where previously intercepted
+data is resent to the system. More advanced attacks involve
+injecting crafted false values— such as randomly generated
+or biased—to influence insulin delivery. These attacks require
+reverse-engineering the communication protocol to produce
+valid data packages [11] [51]. A particularly sophisticated
+class of threats, known as process-aware attacks, involves
+leveraging the knowledge of the system’s control process and
+states to manipulate the system into a harmful but acceptable
+state. Such as personalised insulin dose manipulation attacks
+that only threaten target patients in a specific condition, and
+ripple false data injection attacks that use minimal input per-
+turbations to stealthily change the prediction of deep learning
+models in the controller [56].
+B. RQ2: How do existing defence mechanisms address these
+risks?
+Existing defence mechanisms proposed for AID systems
+operate across multiple layers, as summarised in Table V,
+targeting different stages of potential attack.
+The first layer focuses on preventing wireless communica-
+tion channels from interception and manipulation. Techniques
+such as authentication, cryptography, and secure communi-
+cation protocols are employed to protect wireless transmis-
+sions between system components. Alternative communication
+approaches, such as body-coupled communication or visible-
+light communication, have also been proposed to minimise
+exposure to in-the-air communication threats. In addition,
+hardware-based measures, including wireless traffic monitors
+or dedicated computation cores, can be integrated to protect
+devices against availability attacks and ensure resilient com-
+munication.
+The second layer involves deploying intrusion detection
+systems to identify breaches that may have already occurred.
+These systems are designed to continuously monitor system
+activity for signs of compromise by analysing signatures of
+attacks, deviations from expected system operations, physio-
+logical states, or control behaviour patterns. This layer plays a
+crucial role in identifying emergent risks and enabling early-
+stage mitigation before any harmful operations occur.
+The third layer aims to assess control strategies. In cases
+where attackers have successfully launched attacks to impact
+insulin delivery, this layer serves as a final checkpoint to
+identify hazards. It verifies whether the insulin delivery activity
+aligns with predefined safety constraints or conforms to the
+patient’s historical dosage patterns. By validating outputs at
+the control level, this layer mitigates the risk of incorrect or
+unsafe insulin administration.
+An additional layer of protection involves redundant hard-
+ware or software components that operate independently of
+the main AID system. These auxiliary protections offer two
+key benefits. First, they avoid placing additional strain on
+the AID system’s internal resources, such as battery life,
+memory, or processing capacity. Second, because they function
+externally, they can be updated or patched more rapidly in
+response to evolving threats without requiring full medical
+device recertification. Examples include external monitoring
+modules for inspecting communication traffic and system data,
+or supplementary biosensors that provide physiological cross-
+verification.
+C. RQ3: How practical and robust are these solutions in
+protecting AID systems from cybersecurity threats?
+As outlined in Table IV, most known threats map to
+corresponding defence strategies developed for AID systems.
+Yet, their robustness and real-world applicability vary with
+implementation constraints. The following discussion consid-
+ers risks from primary categories to more nuanced threats,
+together with the defence strategies and requirements for
+practical deployment.
+The most critical threats arise from weak wireless com-
+munication protocols that lack robust encryption and authen-
+tication, leaving systems vulnerable to eavesdropping and
+manipulation of transmitted data and commands. Early AID
+products’ protocol lacks encryption and authentication, and
+multiple studies have demonstrated that they could be easily
+compromised. More recent systems now incorporate crypto-
+graphic and authentication mechanisms to protect wireless
+communication; however, their robustness depends on the
+strength of algorithms and key management practices. An
+implementation challenge is that highly secure protocols de-
+mand significant computational resources, which may impair
+system performance and reduce battery life. To address this,
+research has proposed adaptations such as reducing mes-
+sage size, lowering communication frequency, or encrypting
+critical modules (e.g., the controller) to increase security
+without adding much computation overhead. Authentication
+methods such as biometrics and hardware-based PUFs can be
+incorporated to further protect critical controller commands
+and biosignal transmissions from trusted sources. To defend
+against availability threats such as DoS attacks, additional
+hardware components—for example, dedicated traffic moni-
+tors or separate computation cores—can be integrated. These
+measures can be incrementally incorporated to strengthen ex-
+isting wireless protections. While for highly security-sensitive
+or fixed environments (e.g., in-hospital use), proximity-based
+channels such as body-coupled communication or visible-light
+communication offer promising alternatives to avoid over-the-
+air exposure.
+Even the strongest secure communication protocol can-
+not guarantee complete protection. If adversaries manage
+to compromise the closed-loop control process, monitoring
+both physiological and system states becomes essential for
+detecting integrity attacks and preventing hazards. Security
+monitoring in current commercial products is relatively ba-
+sic, relying primarily on threshold-based mechanisms to flag
+extreme values for BG, insulin delivery dosage, and injection
+rate. While effective at identifying attacks that cause extreme
+deviations (e.g., delivering a maximum insulin dose) under
+the assumption that monitored values are uncompromised,
+these mechanisms fall short in addressing more subtle and
+covert threats. For instance, replay attacks or targeted false
+data injection attacks, which alter glucose readings or com-
+mands within limits, may evade threshold-based detection.
+Sequential change detection techniques can help identify dis-
+continuities in BG readings. For attacks that craft gradual
+changes, signature-based IDS can rapidly filter known attack
+patterns, while specification-based IDS can validate controller
+behaviour against system specifications to ensure compliance
+with expected operation. Collectively, these defence strategies
+are broadly applicable for effectively detecting many known
+threats and activities that deviate markedly from normal device
+operation.
+More nuanced threats, such as process-aware and person-
+alised attacks, can manipulate data in ways that cause targeted
+harm without violating system specifications or matching
+known attack patterns. Detecting such threats requires more
+sensitive monitoring approaches that model the patient’s phys-
+iological state and insulin delivery patterns. By identifying
+deviations from an individual’s normal glucose or insulin
+profiles, these potential attacks could be detected. Another
+method is the use of multiple biometric sensors worn by
+the patient, where correlations across signals (e.g., ECG and
+BG measurements) are modelled to reveal anomalies. How-
+ever, accurate modelling is difficult due to the inter-patient
+variability and changing physical conditions. Insulin delivery
+patterns also shift with context, lifestyle, and activity, meaning
+that models based solely on historical data are prone to false
+alarms once deployed. While advances in hardware, battery
+efficiency, and tiny ML will enable more capable models in the
+future, achieving a high-performance security monitor requires
+online, continuous learning without catastrophic forgetting,
+which remains an open challenge. Frequent offline retraining
+and updating may mitigate this issue, but are subject to medical
+device censor and unstable performance.
+Importantly, although launching such attacks requires a
+very high level of expertise for adversaries (i.e., break the
+communication protocol and possess a deep understanding of
+the control process and target patients’ unique characteristics),
+these advanced monitoring functions offer dual benefits: not
+only enhancing security by detecting data manipulations, but
+also capable of identifying device degrading performance or
+changes in patient physiological states. This dual capability
+holds significant potential for strengthening medical device
+reliability and enabling personalised healthcare (e.g., early
+detection of disease), shedding light on the development of
+future intelligent healthcare systems.
+VIII. OPEN RESEARCH CHALLENGES AND FUTURE
+DIRECTIONS
+While the defence strategies discussed above potentially
+offer multiple layers of protection and monitoring, their real-
+world effectiveness depends on several critical factors that
+must be addressed when developing a comprehensive security
+framework for AID systems.
+A. Overall Security
+Although individual defence mechanisms target certain
+threats at different layers, a robust AID system needs to miti-
+gate a broad range of attacks while ensuring timely responses
+to emergencies. This necessitates an integrated security ar-
+chitecture that combines diverse protective measures into a
+cohesive strategy. Key research directions include balancing
+security strength with the computational overhead of combined
+mechanisms and designing methods that complement one
+another to reduce computation redundancy while enhancing
+overall resilience.
+B. Resource Constraints
+As wearable medical devices, AID systems are constrained
+by limited computational power, memory, and battery life,
+which makes the deployment of resource-intensive secu-
+rity mechanisms particularly challenging. While specification-
+based and data-driven defences offer advanced security moni-
+toring, implementing them without impacting device function-
+ality remains an open problem. Future research should explore
+model optimisation, computation offloading, and hardware
+innovations to balance strong security with the operational
+constraints of AID systems.
+C. Variability Across Patients
+For monitoring of system and physiological states, a major
+challenge is distinguishing abnormal patterns from a patient’s
+normal behaviour, which requires accounting for both intra-
+and inter-patient variability. Each patient’s physiological re-
+sponses, lifestyle, and treatment regimen are unique, making
+it difficult to develop universal monitoring models that adapt
+to these personalised characteristics. Future security monitors
+for AID systems need to dynamically accommodate patient
+heterogeneity while maintaining detection performance across
+the device lifecycle.
+D. Comprehensive Modelling of Insulin Infusion Patterns
+Accurately predicting insulin needs remains a challenge,
+particularly in response to dynamic contexts such as meal
+intake, physical activity, and stress. Current insulin infusion
+models struggle to account for the full range of variables
+affecting glucose levels. There is a need for comprehensive
+models that integrate multisource data to predict and adapt to
+patient-specific insulin requirements. Improving the accuracy
+of these models not only facilitates the development of fully
+closed-loop insulin control systems but also plays a critical
+role in defending against cyberattacks that manipulate injected
+doses within insulin delivery systems.
+E. Trustworthy Defense Mechanisms
+While securing AID systems is essential, it is equally
+important to ensure that defence mechanisms are reliable and
+preserve patient privacy. Many recent data-driven cybersecu-
+rity solutions operate as black boxes, providing little insight
+into decision-making, which complicates interpretation and
+intervention by users or healthcare professionals. Additionally,
+sharing data between devices to improve model accuracy
+introduces privacy concerns. Achieving effective knowledge
+sharing without compromising sensitive patient information
+remains a critical challenge, for which approaches such as
+federated learning may offer promising solutions.
+F. Standardisation of AID systems Cybersecurity Frameworks
+Current medical device cybersecurity standards and guid-
+ance leave the responsibility for comprehensive threat mod-
+elling and protective measures implementation with manu-
+facturers, creating a gap between broad regulatory compli-
+ance and the satisfaction of the specific security needs of
+medical devices. AID systems, as physiological closed-loop
+medical wearables, face distinctive security and safety risks
+that directly affect drug delivery in real-time. Addressing this
+challenge requires complementary security frameworks that
+specify existing and emerging threats faced by AID systems
+and recommend appropriate countermeasures and emergency
+responses to ensure system performance. Independent confor-
+mity assessments are also needed to build confidence among
+users and stakeholders. Ultimately, developing device-specific
+security requirements and assessment mechanisms will be
+essential for establishing more comprehensive and concrete
+regulations for medical device security.
+IX. CONCLUSION
+This review provides a comprehensive analysis of the se-
+curity landscape of AID systems, encompassing technical,
+regulatory, and commercial aspects. We examined existing
+attack vectors, defence mechanisms, and security assessment
+approaches in the literature, alongside available research re-
+sources. The priority of these threats and the practicality of
+corresponding countermeasures were evaluated, highlighting
+several critical challenges for future research. While sub-
+stantial progress has been made, continued innovation and
+practical implementation are needed to develop thorough,
+resource-efficient, and patient-centric defence mechanisms.
+Establishing effective security measures to prevent, detect, and
+respond to threats in real time requires coordinated efforts
+among researchers, manufacturers, regulators, and healthcare
+providers. Successfully addressing these challenges is crucial
+for enhancing system reliability, building user trust, and fully
+realising the transformative potential of AID systems in im-
+proving diabetes care.
+APPENDIX A
+TABLE OF REGULATION STANDARDS AND GUIDELINES OF
+CYBERSECURITY IN MEDICAL DEVICES
+APPENDIX B
+TABLE OF CYBERSECURITY IN REPRESENTATIVE AID
+SYSTEM PRODUCTS
+APPENDIX C
+TABLE OF INTRUSION DETECTION SYSTEMS DEVELOPED
+FOR AID SYSTEMS
+TABLE VII
+REGULATION STANDARDS AND GUIDELINES OF CYBERSECURITY IN MEDICAL DEVICES.
+Applied Area
+Regulation Standards and Guidelines
+Cybersecurity
+Note
+US
+Policy for Device Software Functions and
+Mobile Medical Applications
+Require adequate cybersecurity to secure the correct
+functioning of medical devices
+Provide specific cybersecurity considerations
+Section 3060 and 3060(a) of the 21st Cen-
+tury Cure Acts
+EO 14019 on America’s Supply Chains
+Require detailed technical cybersecurity measures used
+by the product and related services
+Not mandated for medical devices yet
+NIST’s cybersecurity framework
+Provides a catalogue and categorisation of typical cyber-
+security activities and controls that should be considered
+by an enterprise
+Encourage the private sector to determine its conformity
+needs, and then develop appropriate conformity assess-
+ment programs
+FDA’s premarket and postmarket guid-
+ances for cybersecurity of medical devices
+Provides a prescriptive and structured approach to cyber-
+security risk management
+Emphasise transparency in threat modelling and device
+labelling, but no conformity assessment program
+EU
+Medical Devices Regulation (MDR)
+No provisions specifically labeled ‘cybersecurity’
+Highest priority
+MDRAnnexex 1: General Safety and Per-
+formance Requirements (GSPR)
+Require that medical devices do not fail due to any type
+of adversary attacking them
+Imply minimum levels of encryption, access control, and
+physical cybersecurity
+Network and Information Systems (NIS 2)
+Directive
+Cybersecurity requirements of the general critical IT
+infrastructure
+Integrated into Member States in various ways
+Cyber Resilience Act and the Cyber Soli-
+darity Act
+Regulate the cybersecurity of any network-enabled de-
+vices
+Supposed to entail more resilience (greater recovery from
+failure) than MDR
+Security standards: ISO 14155:2011
+Mostly developed by private actors and does not neces-
+sarily reflect best practices.
+Allow usage of the standard for a fee, which becomes a
+barrier to adoption
+General
+Data
+Protection
+Regulation
+(GDPR)
+Protecting the fundamental right to privacy
+Only considering cybersecurity requirements related to
+personal data
+MDCG 201916: Guidance on Cybersecu-
+rity for medical devices
+Offering recommendations to manufacturers, integrators,
+and operators on how to satisfy the cybersecurity require-
+ments of the MDR
+Provides broader, principle-based guidance on integrat-
+ing cybersecurity into safety risk analysis
+TABLE VIII
+CYBERSECURITY IN REPRESENTATIVE AID SYSTEM PRODUCTS.
+Product
+Components
+Main Functions
+Cybersecurity Measures
+CamAPS FX
+User’s smartphone (controller);
+DANA/Ypsomed insulin pump;
+Dexcom/Libre 3 CGM
+Automated basal insulin delivery;
+Manual bolusing for meals
+Employs
+encryption,
+pseudonymisation,
+and
+anonymisation; [136]
+Medtronic 780G
+MiniMed Insulin pump (controller inte-
+grated);
+MiniMed CGM
+Automated basal insulin delivery;
+Automatic correction bolus delivery
+No detail disclosure; aims to enable the highest
+levels of security and usability [137]
+Control IQ
+User’s smartphone (controller);
+Tandem t:slim insulin pump;
+Dexcom G6/G7 CGM;
+Automated basal insulin delivery;
+Automatic correction bolus delivery
+Employs device authentication, message encryp-
+tion, and message validation [138]
+Omnipod 5
+User’s smartphone (controller);
+Omnipod insulin pumps;
+Dexcom G6 CGM
+Automatic basal insulin adjustments;
+Manual bolusing for meals
+Employs authentication, encrypted communica-
+tion, and a verification system [139]
+DBLG1 System
+DBLG1 controller;
+Kaleido pump;
+Dexcom G6 CGM
+Automated basal insulin delivery;
+Automatic correction bolus delivery
+Employs data encryption, secured Bluetooth pro-
+tocol and dedicated handset [140]
+TABLE IX: Intrusion detection systems developed for AID systems.
+Reference
+Category
+Detection method
+Threats Evaluated
+Dataset
+Performance metric
+Zhang
+et
+al.
+(2013) [74]
+Signature-
+based
+Monitor all the RF wireless commu-
+nication. Identify and jam potentially
+malicious transactions
+Unauthorized
+remote
+control
+Simulated with glucose
+sensor and insulin de-
+livery system
+Detection rate: 100%;FNR: 0%
+Detection time: about 2.5 ms
+Khan
+et
+al.
+(2020) [37]
+Signature-
+based
+Specify each attack as a one big step
+relation between the initial and final
+state
+Controller
+command
+manipulation attacks
+Software simulation on
+a 2.6-GHz Intel Core i7
+processor
+CPU Time: 7.50 ± 0.3 * 10-4 s;
+Run time: 7.60 ± 0.3* 10-4 s
+Walenda et al.
+(2023) [58]
+Signature-
+based
+For replay attacks, detect consecutive
+repeated values. For DoS attacks, detect
+consecutive 0.
+Replay attacks; DoS at-
+tacks
+T1D patient simulator -
+GlucoSym Simulator
+Qualitative illustration of detec-
+tion
+Howsmon et al.
+(2018) [75]
+Specification-
+based
+Patient-specific metrics are calculated
+and compared to sliding window av-
+erages. Alarm when thresholds are ex-
+ceeded.
+Infusion site failure
+19 participants, 2 weeks
+Sensitivity: 88.0% (n = 25)
+FPR: 0.22 per day
+Continued on next page
+Reference
+Category
+Detection method
+Threats Evaluated
+Dataset
+Performance metric
+Alshalalfah
+et
+al. (2019) [79]
+Specification-
+based
+Combine formal methods with statisti-
+cal analysis to evaluate the safety of
+control algorithms
+Replay attacks
+T1D patient simulator -
+UVA/PADOVA 2013 (5
+patients, 24 hours)
+Qualitative evaluation
+Aliabadi et al.
+(2021) [81]
+Specification-
+based
+Dynamically
+mining
+specifications
+based on their contribution to detecting
+every arbitrary attack
+CGM spoofing attack;
+Stop
+basal
+injection;
+Resume basal injection
+OpenAPS simulator
+FPR: 13.5%; FNR: 2%
+Astillo
+et
+al.
+(2021) [30]
+Specification-
+based
+Incorporated specification with an out-
+lier detection method
+Manipulate
+random
+points of the glucose
+data within 1% to 10%
+deviation
+UVa/Padova
+simulator
+(2008) + Raspberry-Pis
+AUROC: Attack rate 50%-90%:
+99.94% ± 0.04%; Attack rate
+10%-30%: 54.09%± 2.5%
+Astillo
+et
+al.
+(2021) [80]
+Specification
+and anomaly-
+based
+Extend SMDAps with timing-based ma-
+licious transmission detection and trust-
+worthiness evaluation
+Manipulate
+random
+points of the glucose
+data within 0% to 50%
+deviation
+UvA/Padova simulator
+(2008) + Raspberry-Pis
+(2 virtual patients, 24
+hours)
+Accuracy under the hidden at-
+tack mode: 99.1% ± 0.7%
+Prematilake
+et
+al. (2021) [82]
+Specification-
+based
+Combined state transition rules, I/O ac-
+cess rules, and physiological rules to
+monitor both extrinsic state and internal
+state
+Recurring bolus dose;
+Bolus unmatched with
+meal
+taking;
+Buffer
+overflow
+Simulated
+with
+a
+safety-enhanced
+controller
+board
+and
+glucose-insulin model
+Delay time: 253 ms; Energy
+overhead: 3% (a 2500 mAh
+AA-sized battery)
+Zhou
+et
+al.
+(2021) [78]
+Specification-
+based
+Formal specified unsafe system context
+(physiological) and personalized thresh-
+olds using reinforcement learning
+Availability
+attack;
+DoS
+attack;
+Integrity
+attack/memory fault
+Simulated
+with
+Glucosym
+and
+UVA-
+Padova Simulator 2013
+F1-Score: 0.975 ± 0.005
+Venugopalan et
+al. (2024) [62]
+Specification
+and anomaly-
+based
+Combined formal methods (prove cor-
+rect the most critical parts) and dictated
+safe bounds of insulin amounts to en-
+able DL/ML to control the insulin pump
+safely.
+Malicious
+ML;
+Mali-
+cious pump drivers
+Real-world
+(1
+individual, 6 months);
+UvA/Padova simulator
+(2008)
+(21
+virtual
+humans)
+Time
+In
+Range
+(TIR):
+Adults:92.88%
+Adolescents:
+82.38%; Children: 85.42%
+Vega-
+Hernandez
+et
+al.
+(2009)
+[84]
+Anomaly-
+based
+(physiological
+model)
+Incorporated the effect of the interstitial
+glucose measurements and the meal in-
+take dynamics into the glucose-insulin
+metabolism model
+Over- and sub-dosing
+MATLAB SIMULINK
+simulation,
+days
+with a normal patient
+routine
+Qualitative evaluation
+Facchinetti
+et
+al. (2013) [90]
+Anomaly-
+based
+(Data-
+driven model)
+An individualized state-space model
+and a Kalman predictor
+1) spike on CGM 2) a
+loss of sensitivity of the
+CGM sensor 3) stop in-
+sulin delivery
+UVA/Padova 2008, 100
+simulated
+patients;
+real T1DM subjects
+CGM failure: FNs: ¡ 5%, FPs:
+¡ 10%, CSII pump failure: De-
+tection rate: 75% within average
+60 min, FPs: 10%
+Favero
+et
+al.
+(2014) [91]
+Anomaly-
+based
+(Data-
+driven model)
+Extend [90] for whole-day use by taking
+meals into account
+1) spike on CGM 2)
+consecutive large errors
+3) meal*(1+e%) 4) bias
+meal
+bolus
+5)
+basal
+faults
+UVA/Padova 2008, 100
+simulated patients
+Sensitivity: CGM faults:
+85%
+Meal faults:
+90% Bolus faults:
+90% Basal failure: 50%
+Meneghetti
+et
+al. (2020) [92]
+Anomaly-
+based
+(Data-
+driven model)
+Distinguish insulin pump faults and
+missed meal announcements by intro-
+ducing 2 sets of parameters of model
+Night-time
+pump
+oc-
+clusion ; missed meal
+announcement ; meal-
+time pump occlusion
+UVA/Padova
+Type
+Diabetic
+Simulator
+Pump faults: sensitivity: 81.3%
+FPR:
+0.15/day missed meals:
+sensitivity:
+86.8%
+FPR:
+0.15/day
+Meneghetti
+et
+al. (2023) [93]
+Anomaly-
+based
+(Data-
+driven model)
+Extend [92] with analyse various statis-
+tical properties
+Insulin
+suspension;
+CGM missed samples
+and
+pressure-
+induced
+sensitivity
+losses;
+missed
+meal
+announcements
+UVA/Padova
+Type
+Diabetic
+Simulator
+Recall: 91.3% FP: 1 every 10
+days
+Tosun
+et
+al.
+(2022) [141]
+Anomaly-
+based
+(physiological
+model)
+Kalman filter and a χ2 test. Identify
+meal disturbance by an online meal
+estimator and a time-varying threshold
+Bias injection attack on
+glucose sensor
+Medtronic Virtual Pa-
+tient (MVP) model (1
+virtual subject) + PID
+controller
+Qualitative evaluation
+Tosun and Teix-
+eira (2023) [86]
+Anomaly-
+based
+(physiological
+model)
+Kalman filtering and sequential change
+detection (detecting an abrupt change)
+Deterministic
+sensor
+deception
+attacks
+(a
+slowly increasing bias
+injection attack
+Bequette
+model
+(glu-
+cose)
+Qualitative evaluation (the χ2
+test maximizes the best-case
+detection
+delay,
+while
+the
+CUSUM
+test
+minimizes
+the
+worst-case delay)
+Tosun
+et
+al.
+(2024) [87]
+Anomaly-
+based
+(physiological
+model)
+The prediction error of a time-varying
+Kalman filter is statistically evaluated
+to detect anomalies under meal distur-
+bances with known time
+Sensor bias injection at-
+tack
+Medtronic Virtual Pa-
+tient (MVP) model (1
+virtual subject) + PID
+controller
+Qualitative evaluation
+Continued on next page
+Reference
+Category
+Detection method
+Threats Evaluated
+Dataset
+Performance metric
+Turksoy et al.
+(2016) [97]
+Anomaly-
+based
+(Data-
+driven model)
+Non-linear
+first
+principle
+dynamic
+model with an unscented Kalmen filter.
+PCA and K-means clustering hired for
+fault detection
+Faulty CGM measure-
+ments
+Data from 51 subjects
+Sensitivity: 84.2 %; Average de-
+tection time: 2.8 min
+Olney
+et
+al.
+(2022) [94]
+Anomaly-
+based
+(Data-
+driven model)
+Non-linear autoregressive neural net-
+works
+Incorrect sampling of
+the
+target
+biosignal
+(sensor data)
+D1NAMO
+CGM
+dataset
+(9
+human
+subjects) + FPGA
+Average
+RMSE:
+Software:
+0.428 Hardware: 0.455
+Maity
+et
+al.
+(2023) [95]
+Anomaly-
+based
+(Data-
+driven model)
+Learn
+surrogate
+model
+for
+safety-
+certified actions using RNN, then pe-
+riodically relearn model coefficients to
+check deviation
+Insulin cartridge prob-
+lem
+UVA/Padova 2018
+Difference in model coefficient
+values: > 0.27
+Rahmadika
+et
+al. (2023) [70]
+Anomaly-
+based
+(Data-
+driven model)
+BiLSTM and augments the security
+through integrating blockchain technol-
+ogy
+Arbitrarily changing a
+feature value (increase
+or decrease 10% - 50%)
+UVA/Padova 2008
+Average
+RMSE:
+1.3482
+(5
+timesteps),
+1.9959
+(7
+timesteps), 2.6099 (9 timesteps)
+Zhou
+et
+al.
+(2022) [96]
+Anomaly-
+based
+(Data-
+driven model)
+Extract the specification of unsafe con-
+trol actions and add them as regulariza-
+tion terms in a semantic loss function
+Designed small but ma-
+licious input perturba-
+tions for both sensor
+and commands
+Glucosym
+simulator;
+UVA-Padova Simulator
+Robustness error: Reduce on
+average up to 54.2%
+Meneghetti
+et
+al. (2018) [104]
+Anomaly-
+based (Model
+free)
+Local outlier factor and connectivity-
+based outlier factor AD methods
+insulin
+pump
+failure(suspensions
+occurring at night for 6
+hours)
+UVA/Padova
+Type
+Diabetic
+Simulator
+Precision: 75%; Recall 60%
+Meneghetti
+et
+al. (2019) [101]
+Anomaly-
+based (Model
+free)
+Unsupervised anomaly detection with
+optimum feature set selection
+Insulin pump faults
+Padova/UVA T1D sim-
+ulator 2018, 100 adults,
+30 days
+Histogram-based outline score:
+Sensitivity: 0.87 FPR: 0.08/day
+Isolation
+forest:
+Sensitivity:
+0.85 FPR: 0.06/day
+Meneghetti
+et
+al. (2022) [39]
+Anomaly-
+based (Model
+free)
+Unsupervised anomaly detection
+Infusion site failure
+Clinical dataset (N=20)
+Sensitivity: 0.75 (15 out of 20);
+FPR: 0.08/day
+Meneghetti
+et
+al. (2020) [57]
+Anomaly-
+based (Model
+free)
+Unsupervised multi-dimensional data-
+driven anomaly detection. Cut several
+start and end points to enlarge the differ-
+ence between normal and abnormality
+Suspension of insulin
+delivery
+UVA/Padova T1D Sim-
+ulator 2013; 7 patients,
+1 month in free-living
+conditions
+Recall: 80% Precision: >90%
+Herrero
+et
+al.
+(2022) [103]
+Anomaly-
+based (Model-
+free)
+Detect whether CGM data belong to the
+individual using SVM binary classifier
+with 12 standard glycemic metrics at
+24h, day, night, breakfast, lunch, and
+dinner
+Reidentification
+REPLACE-BG
+(NCT02258373),
+226 adult, 6 month
+Accuracy: 86.8% ± 0.16; F1-
+score: 0.86 ± 0.16 (window
+length: 15 days)
+Astillo
+et
+al.
+(2022) [71]
+Anomaly-
+based
+(Data-
+driven
+and
+Model-free)
+Deep learning-based anomaly detection
+system with federated learning
+False sensor data
+UVa/Padova
+simulator
+(2008)
+Accuracy:
+99.17%;
+F1-score:
+99.16%
+Judith
+et
+al.
+(2023) [100]
+Anomaly-
+based (Model
+free)
+PCA for feature reduction and multi-
+layer perceptron (MLP) for classifica-
+tion
+Man-in-the-middle
+attacks
+WUSTL-EHMS-2020
+dataset
+Sensitivity: 95.4% Specificity:
+100%
+APPENDIX D
+TABLE OF AVAILABLE RESOURCES AND UTILISATION IN
+AID CYBERSECURITY RESEARCH.
+ACKNOWLEDGMENT
+This work was supported in part by the Ministry of Edu-
+cation, Singapore, under its Academic Research Fund Tier 2,
+under Grant MOE-T2EP20121-0008.
+DECLARATION OF GENERATIVE AI AND AI-ASSISTED
+TECHNOLOGIES IN THE WRITING PROCESS
+During the preparation of this work the authors used Chat-
+GPT in order to improve the readability and language of the
+manuscript. After using this tool/service, the authors reviewed
+and edited the content as needed and take full responsibility
+for the content of the published article.
+REFERENCES
+[1] I. D. Federation, “Type 1 diabetes,” Available at https://idf.org/
+about-diabetes/type-1-diabetes/ (2024/10/21).
+[2] G. I. f. Q. InformedHealth.org [Internet]. Cologne and E. in Health
+Care (IQWiG), “Type 1 diabetes: Learn more – hyperglycemia and
+hypoglycemia in type 1 diabetes. [updated 2021 dec 8],” Available at
+https://www.ncbi.nlm.nih.gov/books/NBK279340/ (2024/11/06).
+[3] J. L. Sherr, L. Heinemann, G. A. Fleming, R. M. Bergenstal, D. Brut-
+tomesso, H. Hanaire, R. W. Holl, J. R. Petrie, A. L. Peters, and
+M. Evans, “Automated insulin delivery: benefits, challenges, and rec-
+ommendations. a consensus report of the joint diabetes technology
+working group of the european association for the study of diabetes
+and the american diabetes association,” Diabetes Care, vol. 45, no. 12,
+pp. 3058–3074, 2022.
+[4] O. J. Collyns, R. A. Meier, Z. L. Betts, D. S. Chan, C. Frampton, C. M.
+Frewen, N. M. Hewapathirana, S. D. Jones, A. Roy, B. Grosman et al.,
+“Improved glycemic outcomes with medtronic minimed advanced
+hybrid closed-loop delivery: results from a randomized crossover trial
+comparing automated insulin delivery with predictive low glucose
+suspend in people with type 1 diabetes,” Diabetes Care, vol. 44, no. 4,
+pp. 969–975, 2021.
+[5] A. Godoi, I. R. Marques, E. M. H. Padr˜ao, A. Mahesh, L. Hespanhol,
+J. E. R. L. J´unior, I. A. F. D. Souza, V. Moreira, C. H. Silva,
+I. Miyawaki, C. Oommen, C. Gomes, A. C. Silva, K. Advani, and J. R.
+de S´a, “Glucose control and psychosocial outcomes with use of auto-
+mated insulin delivery for 12 to 96 weeks in type 1 diabetes: a meta-
+analysis of randomised controlled trials,” Diabetology & Metabolic
+Syndrome, vol. 15, 2023.
+[6] T. M. Alanzi, W. Alzahrani, M. Almoraikhi, A. Algannas, M. Al-
+ghamdi, L. Alzahrani, R. Abutaleb, R. B. Dughaish, N. Alotibi,
+S. Alkhalifah et al., “Adoption of wearable insulin biosensors for
+diabetes management: A cross-sectional study,” Cureus, vol. 15, no. 12,
+2023.
+[7] K. K¨olle, A. L. Fougner, M. A. Lundteigen, S. M. Carlsen, R. Ellingsen,
+and Ø. Stavdahl, “Risk analysis for the design of a safe artificial
+pancreas control system,” Health and Technology, vol. 9, pp. 311–328,
+2019.
+[8] R. Kaur, S. Shahrestani, and C. Ruan, “Security and privacy of wear-
+able wireless sensors in healthcare: A systematic review,” Computer
+Networks and Communications, pp. 24–48, 2024.
+[9] I.
+Medtronic,
+“Minimed™
+insulin
+pump
+and
+minimed™
+paradigm™
+series
+insulin
+pumps
+-
+cybersecurity
+concerns,”
+Available
+at
+https://www.medtronicdiabetes.com/customer-support/
+product-and-service-updates/notice20-letter (2025/2/24).
+[10] L. Reverberi and D. Oswald, “Breaking (and fixing) a widely used
+continuous glucose monitoring system,” in 11th USENIX Workshop on
+Offensive Technologies (WOOT 17), 2017.
+[11] C. Li, A. Raghunathan, and N. K. Jha, “Hijacking an insulin pump:
+Security attacks and defenses for a diabetes therapy system,” in 2011
+IEEE 13th international conference on e-health networking, applica-
+tions and services.
+IEEE, 2011, pp. 150–156.
+[12] D. Cooke, K. Garcia, A. Guzman, L. Kim, B. Mesia, J. Palmer,
+S. Shields, M. Zanussi, L. Babinkostova, M. Scheepers et al., “Vulner-
+abilities of the artificial pancreas system and proposed cryptographic
+solutions,” 2020.
+[13] U. F. . D. Administration, “Fda warns patients and health care providers
+about potential cybersecurity concerns with certain medtronic insulin
+pumps,”
+Available
+at
+https://www.prnewswire.com/news-releases/
+fda-warns-patients-and-health-care-providers-about-potential-cybersecurity-concerns-
+html (2024/11/07).
+[14] J.
+Salwen,
+“Minimed™
+insulin
+pump
+and
+minimed™
+paradigm™
+series
+insulin
+pumps
+-
+cybersecurity
+concerns,”
+Available
+at
+https://www.medtronicdiabetes.com/customer-support/
+product-and-service-updates/notice20-letter (2024/11/07).
+[15] D. C. Klonoff, “Cybersecurity for connected diabetes devices,” Journal
+of diabetes science and technology, vol. 9, no. 5, pp. 1143–1147, 2015.
+[16] D. T. O’Keeffe, S. Maraka, A. Basu, P. Keith-Hynes, and Y. C. Kudva,
+“Cybersecurity in artificial pancreas experiments,” Diabetes technology
+& therapeutics, vol. 17, no. 9, pp. 664–666, 2015.
+[17] H. Blauw, P. Keith-Hynes, R. Koops, and J. H. DeVries, “A review
+of safety and design requirements of the artificial pancreas,” Annals of
+biomedical engineering, vol. 44, no. 11, pp. 3158–3172, 2016.
+[18] C. M. Ramkissoon, B. Aufderheide, B. W. Bequette, and J. Veh´ı, “A
+review of safety and hazards associated with the artificial pancreas,”
+IEEE reviews in biomedical engineering, vol. 10, pp. 44–62, 2017.
+[19] B. Thompson, M. Leighton, M. Korytkowski, and C. B. Cook, “An
+overview of safety issues on use of insulin pumps and continuous
+glucose monitoring systems in the hospital,” Current Diabetes Reports,
+vol. 18, pp. 1–8, 2018.
+[20] A. Quintal, V. Messier, R. Rabasa-Lhoret, and E. Racine, “A critical
+review and analysis of ethical issues associated with the artificial
+pancreas,” Diabetes & metabolism, vol. 45, no. 1, pp. 1–10, 2019.
+[21] J. Singh and N. Abd Rahman, “Iomt: A review of open aps system
+security for type 1 diabetes mellitus,” Int. J. Curr. Res. Rev, vol. 12,
+p. 17, 2020.
+[22] A. Wirth, “Cybersecurity in the diabetes care ecosystem,” in Diabetes
+Digital Health and Telehealth.
+Elsevier, 2022, pp. 51–60.
+[23] M. H. Alalfi, J. R. Cordy et al., “A survey on the verification and
+validation of artificial pancreas software systems,” in 2024 IEEE Inter-
+national Conference on Software Testing, Verification and Validation
+Workshops (ICSTW).
+IEEE, 2024, pp. 1–9.
+[24] J. Kapadia, “The failure of automated insulin delivery system,” Ph.D.
+dissertation, University of Illinois at Chicago, 2024.
+[25] S. B. Weber, S. Stein, M. Pilgermann, and T. Schrader, “Attack
+detection for medical cyber-physical systems–a systematic literature
+review,” IEEE Access, vol. 11, pp. 41 796–41 815, 2023.
+[26] M. L. Hernandez-Jaimes, A. Martinez-Cruz, K. A. Ram´ırez-Guti´errez,
+and C. Feregrino-Uribe, “Artificial intelligence for iomt security: A
+review of intrusion detection systems, attacks, datasets and cloud-fog-
+edge architectures,” Internet of Things, p. 100887, 2023.
+[27] B. Kale, S. Aworo, and C. Anyangwu, “Cyber-attacks on digital
+infrastructures in healthcare: The secured approach,” 12 2022.
+[28] M. J. Page, J. E. McKenzie, P. M. Bossuyt, I. Boutron, T. C.
+Hoffmann, C. D. Mulrow, L. Shamseer, J. M. Tetzlaff, E. A. Akl, S. E.
+Brennan, R. Chou, J. Glanville, J. M. Grimshaw, A. Hr´objartsson,
+M. M. Lalu, T. Li, E. W. Loder, E. Mayo-Wilson, S. McDonald,
+L. A. McGuinness, L. A. Stewart, J. Thomas, A. C. Tricco, V. A.
+Welch, P. Whiting, and D. Moher, “The prisma 2020 statement: an
+updated guideline for reporting systematic reviews,” BMJ, vol. 372,
+2021. [Online]. Available: https://www.bmj.com/content/372/bmj.n71
+[29] S. Mahmud, F. Zareen, B. Olney, and R. Karam, “Enhancing the
+reliability of closed-loop medical systems with real-time biosignal
+modeling,” Journal of Hardware and Systems Security, pp. 1–13, 2024.
+[30] P. V. Astillo, J. Jeong, W.-C. Chien, B. Kim, J. Jang, and I. You,
+“Smdaps: A specification-based misbehavior detection system for im-
+plantable devices in artificial pancreas system,” Journal of Internet
+Technology, vol. 22, no. 1, pp. 1–11, 2021.
+[31] R. Hovorka, “Closed-loop insulin delivery: from bench to clinical
+practice,” Nature Reviews Endocrinology, vol. 7, no. 7, pp. 385–395,
+2011.
+[32] S. Templer, “Closed-loop insulin delivery systems: past, present, and
+future directions,” Frontiers in Endocrinology, vol. 13, p. 919942, 2022.
+[33] J. Kim, J. Oh, D. Son, H. Kwon, P. V. Astillo, and I. You, “Apsec1.
+0: innovative security protocol design with formal security analysis for
+the artificial pancreas system,” Sensors, vol. 23, no. 12, p. 5501, 2023.
+[34] D. G. Duguma, P. V. Astillo, Y. E. Gebremariam, B. Kim, and I. You,
+“Comparative analysis of bluetooth le and edhoc for potential security
+TABLE X
+AVAILABLE RESOURCES AND UTILISATION IN AID CYBERSECURITY RESEARCH.
+Type
+Resource Name
+Description
+Focus area
+Availability
+Usage in Research
+Hardware
+simulation
+Commercial diabetes
+medical products
+Widely used hybrid closed-loop insulin delivery
+system or its components
+Device functionality
+off-the-shelf
+Identify cyber vulnerabilities in APS [11]
+[51];
+Evaluate cryptography and authentication
+[65]
+Universal
+Software
+Radio
+Peripheral
+(USRP)
+A software radio board that can intercept radio
+communications and generate wireless signals
+Wireless communica-
+tion
+off-the-shelf
+Hijack APS [11] [51];
+Monitor wireless transactions [74]
+Biostator II [142]
+An ultra-low-power ASIC implementation of an
+AP controller
+Implant functionality
+Open source
+Evaluate the energy efficiency of security
+communication protocol [63]
+Microcontroller board
+Simulate controller algorithms on board (e.g., Ar-
+duino Uno-R3 [73] [116] [115]; EFM32WG [82],
+Arduino Nano 33 kit , nRF52840 development kit,
+and Galaxy S20 with Android 13 [33]; ESP8266
+development kit [117]
+Integrated function
+off-the-shelf
+Incorporated visible light access control
+channel [73];
+Implement rule check mechanisms [82]
+T1D patient
+simulator
+UVA/Padova
+[120]
+An FDA-approved nonlinear simulator captures
+interpatient variability [143]
+In silico trials
+Open source
+Simulate attacked monitoring data and eval-
+uate intrusion detection systems [90] [91]
+[30] [105] [62]
+UVA/Padova
+[121]
+Changes patient’s physiology over time
+In silico trials
+Licensed
+Evaluated control algorithms [79];
+Unsupervised anomaly detection [102];
+Homomorphic encryption [71];
+Supervised anomaly detection [117]
+UVA/Padova
+[122]
+Introduce intraday variability of insulin sensitivity,
+time-varying distributions of the patients’ therapy
+parameters, and a “dawn” phenomenon model
+In silico trials
+Not
+public
+open
+Feature selection and evaluate unsuper-
+vised anomaly detection algorithms [144];
+Early detection of unknown-unknowns at-
+tacks [95]
+Glucosym [145]
+Online simulator that allows different control algo-
+rithms to be integrated to test their efficiency with
+10 real-world patient profiles
+In silico trials
+Open source
+Simulate attack and evaluate defence meth-
+ods [58]
+Pharmaco-
+kinetic
+model
+Hybrid
+physiologically-based
+pharmacokinetic
+model [119]
+Simulate the physiological response of a T1D pa-
+tient considering recirculation dynamics
+Closed-loop
+insulin
+delivery algorithms
+Equations and
+parameters
+available
+Evaluate the overhead of runtime as an
+Android service [118]
+Medtronic Virtual Pa-
+tient
+(MVP)
+model
+[146]
+Explicitly describe intraday variation in metabolic
+parameters
+Closed-loop
+insulin
+delivery algorithms
+Equations
+available
+Compare the performance of nonlinear fil-
+ters in online drift detection of CGM [85]
+[141] [35]
+Ackerman’s
+Linear
+model [147]
+Simulate glucose regulation system which is an
+abstraction of reality
+Simulate blood glu-
+cose control
+Equations
+available
+[148]
+Simulate and detect replay attack [61]
+Bergman
+Minimal
+Model [148]
+Describes the dynamics of the glucose uptake after
+an external stimulus in humans with a simplistic
+structure
+Simulate blood glu-
+cose control
+Equations
+available
+Evaluate homomorphic encryption [71]
+Other
+Mathematical
+models
+for
+T1D
+[124]
+Providing a comprehensive overview of the mod-
+elling of the biological processes of APS
+Controller
+algorithm
+OpenAPS [123]
+Implements a controller component of APS in
+JavaScript
+Controller’s function
+Open source
+Evaluate
+specification
+mining
+technique
+[81]
+Other control strate-
+gies [124]
+Providing a comprehensive overview of available
+control strategies of APS
+Closed-
+loop
+testbed
+Closed-loop
+APS
+testbed [126]
+Made up of two APS simulators, UVA/Padova and
+Glucosym, and a fault injection engine
+APS simulation and
+faults data generation
+Open-source
+Evaluate runtime monitoring unsafe control
+commands [96] [149]
+MATLAB
+Simulink
+model [127]
+Simulate a CGMS infusion pump for blood glucose
+regulation
+APS simulation
+Open-source
+Design attacks to compromise sensors or
+controllers [36]
+Hardware-in-the-
+Loop
+Simulation
+[116]
+Simulation of AP using the Bergman Minimal
+Model (BMM)
+APS simulation
+Open-source
+Simulated the responses of template attack
+and DoS attack
+Hardware-in-the-
+Loop
+Simulation
+[115]
+An low-cost HIL platform for testing control strate-
+gies for AP
+APS simulation
+Open-source
+Simulated the PID and linear quadratic reg-
+ulator (LQR) controllers
+LoopInsightT1 [125]
+An in-browser simulation platform for modelling
+closed-loop interactions between individuals with
+T1D and AID systems
+APS simulation
+Open-source
+Integrated multiple physiological models,
+such as the UVA/Padova and the Cambridge
+model, with several control algorithms, and
+offers interactive visualisations
+Datasets
+OpenHumans [135]
+Collected by #OpenAPS project, donated by its
+users
+BG
+reading,
+device
+function, patient ac-
+tivity
+Apply for ac-
+cess
+JCHR - DCLP3 [128]
+An international diabetes closed-loop trial dataset
+recorded 6-months from clinical trials with 168
+patients
+BG readings, insulin
+doses, and other rele-
+vant data
+Publicly-
+available
+Test the simulation performance of APS
+testbed [126]
+D1NAMO [130]
+20 healthy subjects and 9 patients with type-1
+diabetes in real-life conditions.
+ECG, breathing, glu-
+cose level and anno-
+tated food pictures
+Publicly-
+available
+Evaluating glucose prediction model [132]
+[94]
+DICARDIA diabetic
+dataset [133]
+A diabetic patient database to study cardiovascular
+autonomic neuropathy (CAN)
+stress ECG is pre-
+sented
+Publicly-
+available
+Study the correlation of ECG intervals with
+blood glucose levels [83]
+REPLACE-BG
+dataset [129]
+CGM data and self-monitoring blood glucose of
+226 adult participants with T1D for 26 weeks
+BG data
+Publicly-
+available
+Re-identify CGM data [103]
+OhioT1DM
+Dataset
+[131]
+8 weeks’ worth of continuous glucose monitoring,
+insulin, physiological sensor, and self-reported life
+event data for each of 12 people with type 1
+diabetes
+BG level prediction
+Publicly-
+available
+Demonstrate the impact of adversarial in-
+puts on the predictions of the targeted ML
+model [57]
+protocol in artificial pancreas system,” in International Symposium on
+Mobile Internet Security.
+Springer, 2021, pp. 30–43.
+[35] F. E. Tosun, A. Teixeira, A. Ahl´en, and S. Dey, “Detection of bias
+injection attacks on the glucose sensor in the artificial pancreas under
+meal disturbance,” in 2022 American Control Conference (ACC).
+IEEE, 2022, pp. 1398–1405.
+[36] G. Stergiopoulos, P. Kotzanikolaou, C. Konstantinou, and A. Tsoukalis,
+“Process-aware attacks on medication control of type-i diabetics using
+infusion pumps,” IEEE Systems Journal, vol. 17, no. 2, pp. 1831–1842,
+2023.
+[37] M. T. Khan, M. Pinzger, D. Serpanos, and H. Shrobe, “Runtime
+protection of real-time critical control applications against known
+threats,” IEEE Design & Test, vol. 37, no. 6, pp. 88–95, 2020.
+[38] A. Darki and M. Faloutsos, “Riotman: a systematic analysis of iot
+malware behavior,” in Proceedings of the 16th International Conference
+on emerging Networking EXperiments and Technologies, 2020, pp.
+169–182.
+[39] L. Meneghetti, E. Dassau, F. J. Doyle III, and S. Del Favero, “Machine
+learning-based anomaly detection algorithms to alert patients using
+sensor augmented pump of infusion site failures,” Journal of Diabetes
+Science and Technology, vol. 16, no. 3, pp. 641–648, 2022.
+[40] Medtronic-HCP, “Minimed™780g system changing the extended,”
+Available at https://hcp.medtronic-diabetes.com.au/sites/default/files/
+changing\ the\ extendedtm\ infusion\ set\ with\ mm780g\
+quick\ reference\ guide.pdf (2024/11/07).
+[41] U. Food and D. Administration, “Cybersecurity in medical devices:
+quality system considerations and content of premarket submissions,”
+Guidance for Industry and Food and Drug Administration Staff, 2023.
+[42] U.S. Food and Drug Administration, “Postmarket Management of
+Cybersecurity in Medical Devices,” Guidance for Industry and Food
+and Drug Administration Staff, 2016.
+[43] National Institute of Standards and Technology, “NIST Cybersecu-
+rity Framework,” https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.
+29.pdf, 2024, accessed: August 28, 2025.
+[44] “Medical Device Regulation,” Regulation (EU) 2017/745 of the Euro-
+pean Parliament and of the Council of 5 April 2017 on medical devices,
+2025, amending Directive 2001/83/EC, Regulation (EC) No 178/2002
+and Regulation (EC) No 1223/2009 and repealing Council Directives
+90/385/EEC and 93/42/EEC (Text with EEA relevance).
+[45] M. D. C. Group et al., “Mdcg 2019-16-guidance on cybersecurity for
+medical devices,” European Commission, 2019.
+[46] A. N. Skytterholm, C. Androutsos, A. Ntanis, and M. G. Jaatun,
+“Cybersecurity guidances for medical devices: An mdcg and fda
+regulatory comparison,” in 2025 IEEE International Conference on
+Smart Computing (SMARTCOMP).
+IEEE, 2025, pp. 336–341.
+[47] D. C. Klonoff and D. N. Kleidermacher, “Now is the time for a
+cybersecurity standard for connected diabetes devices,” pp. 623–626,
+2016.
+[48] Diabetes Technology Society, “DTSec: DTS Cybersecurity Standard
+for Connected Diabetes Devices,” https://www.diabetestechnology.org/
+dtsec.shtml, 2025, accessed: Aug 27, 2025.
+[49] P. Shen, “Risk assessment of medical devices: Leveraging mitre
+att&ck® and manufacturer disclosure statement for medical device
+security,” Ph.D. dissertation, Marymount University, 2025.
+[50] IMARC, “Artificial pancreas device systems (apds) market report by
+device type (threshold suspend device systems, control-to-range sys-
+tems, control-to-target systems), treatment type (bi-hormonal, insulin
+only, hybrid), end-user (hospitals, medical centres, and others), and
+region 2024-2032,” Brooklyn, NY, USA, Tech. Rep., 2023.
+[51] E. Marin, D. Singel´ee, B. Yang, I. Verbauwhede, and B. Preneel, “On
+the feasibility of cryptography for a wireless insulin pump system,” in
+Proceedings of the Sixth ACM Conference on Data and Application
+Security and Privacy, 2016, pp. 113–120.
+[52] I.
+Medtronic,
+“Urgent
+field
+safety
+notification
+of
+min-
+imed™
+remote
+controller
+(mmt-500
+or
+mmt-503),”
+Available
+at
+https://asiapac.medtronic.com/content/dam/
+medtronic-com/products/product-performance/documents/
+minimed-remote-controller-safety-notification-letter-aug-2018.pdf
+(2025/2/24).
+[53] T. Levy-Loboda, E. Sheetrit, I. F. Liberty, A. Haim, and N. Nissim,
+“Personalized insulin dose manipulation attack and its detection using
+interval-based temporal patterns and machine learning algorithms,”
+Journal of Biomedical Informatics, vol. 132, p. 104129, 2022.
+[54] CamDiab, CamAPS FX User Manual, 2025, accessed: August
+29, 2025. [Online]. Available: https://s3-eu-west-1.amazonaws.com/
+camdiab.user.manual/user manual fx mmoll commercial.pdf
+[55] F. Khorrami, P. Krishnamurthy, and R. Karri, “Cybersecurity for control
+systems: A process-aware perspective,” IEEE Design & Test, vol. 33,
+no. 5, pp. 75–83, 2016.
+[56] P. Chang, V. Krish, and A. Rahmati, “Security analysis of rl-based
+artificial pancreas systems,” in Proceedings of the 2024 Workshop on
+Cybersecurity in Healthcare, 2023, pp. 69–76.
+[57] M. Elnawawy, M. Hallajiyan, G. Mitra, S. Iqbal, and K. Pattabiraman,
+“Systematically assessing the security risks of ai/ml-enabled connected
+healthcare systems,” arXiv preprint arXiv:2401.17136, 2024.
+[58] M. Walenda, A. Lektorov, S. Saxena, S. Bhatia, and N. Kumar, “Secap:
+Security analysis of the artificial pancreas,” in 2023 International
+Conference on Computing, Communication, and Intelligent Systems
+(ICCCIS).
+IEEE, 2023, pp. 1092–1099.
+[59] A. Kashyap, S. M. Iqbal, K. Pattabiraman, and M. Seltzer, “Relusyn:
+Synthesizing stealthy attacks for deep neural network based cyber-
+physical systems,” arXiv preprint arXiv:2105.10393, 2021.
+[60] Y. Park, Y. Son, H. Shin, D. Kim, and Y. Kim, “This ain’t your dose:
+Sensor spoofing attack on medical infusion pump,” in 10th USENIX
+workshop on offensive technologies (WOOT 16), 2016.
+[61] R. Nozaripour and K. Khorasani, “Replay cyberattack detection in
+an iot-based healthcare system using rfid sensors,” in 2023 IEEE
+13th International Conference on RFID Technology and Applications
+(RFID-TA).
+IEEE, 2023, pp. 95–98.
+[62] H. Venugopalan, S. M. A. Vijayanand, C. Stanford, S. Crossen, and
+S. T. King, “Glucos: Security, correctness, and simplicity for automated
+insulin delivery,” arXiv preprint arXiv:2406.18262, 2024.
+[63] C. Strydis, R. M. Seepers, P. Peris-Lopez, D. Siskos, and I. Sourdis, “A
+system architecture, processor, and communication protocol for secure
+implants,” ACM Transactions on Architecture and Code Optimization
+(TACO), vol. 10, no. 4, pp. 1–23, 2013.
+[64] T.-G. Braham, S. Butakov, and R. Ruhl, “Reference security architec-
+ture for body area networks in healthcare applications,” in 2018 Inter-
+national Conference on Platform Technology and Service (PlatCon).
+IEEE, 2018, pp. 1–6.
+[65] C. Lazaro, E. Oruklu, and A. Cinar, “Security challenges and solu-
+tions for closed-loop artificial pancreas systems,” in 2017 IEEE 60th
+International Midwest Symposium on Circuits and Systems (MWSCAS).
+IEEE, 2017, pp. 1097–1100.
+[66] G. Zheng, W. Yang, C. Valli, R. Shankaran, H. Abbas, G. Zhang,
+G. Fang, J. Chaudhry, and L. Qiao, “Fingerprint access control for
+wireless insulin pump systems using cancelable delaunay triangula-
+tions,” IEEE Access, vol. 7, pp. 75 629–75 641, 2019.
+[67] Y. Ping, B. Hao, X. Hei, Y. Tu, X. Du, and J. Wu, “Feature fusion and
+voiceprint-based access control for wireless insulin pump systems,”
+IEEE Access, vol. 7, pp. 121 286–121 302, 2019.
+[68] W. Wang, Q. Chen, Z. Yin, G. Srivastava, T. R. Gadekallu, F. Alsolami,
+and C. Su, “Blockchain and puf-based lightweight authentication
+protocol for wireless medical sensor networks,” IEEE Internet of Things
+Journal, vol. 9, no. 11, pp. 8883–8891, 2021.
+[69] A. M. Joshi, P. Jain, and S. P. Mohanty, “iglu 3.0: A secure noninvasive
+glucometer and automatic insulin delivery system in iomt,” IEEE
+Transactions on Consumer Electronics, vol. 68, no. 1, pp. 14–22, 2022.
+[70] S. Rahmadika, P. V. Astillo, G. Choudhary, D. G. Duguma, V. Sharma,
+and I. You, “Blockchain-based privacy preservation scheme for mis-
+behavior detection in lightweight iomt devices,” IEEE Journal of
+Biomedical and Health Informatics, vol. 27, no. 2, pp. 710–721, 2022.
+[71] H. Weng, C. Hettiarachchi, C. Nolan, H. Suominen, and A. Lenskiy,
+“Ensuring security of artificial pancreas device system using homomor-
+phic encryption,” Biomedical Signal Processing and Control, vol. 79,
+p. 104044, 2023.
+[72] H. Kwon, Y. Park, J. Kim, and I. You, “Implementation and evaluation
+of mutual authentication protocol for artificial pancreas system,”
+Research Briefs on Information and Communication Technology
+Evolution,
+vol.
+10,
+p.
+30–35,
+Apr.
+2024.
+[Online].
+Available:
+https://rebicte.org/index.php/rebicte/article/view/186
+[73] J. Zhao, K. Kong, X. Hei, Y. Tu, and X. Du, “A visible light channel
+based access control scheme for wireless insulin pump systems,” in
+2018 IEEE international conference on communications (ICC). IEEE,
+2018, pp. 1–6.
+[74] M. Zhang, A. Raghunathan, and N. K. Jha, “Medmon: Securing
+medical devices through wireless monitoring and anomaly detection,”
+IEEE Transactions on Biomedical circuits and Systems, vol. 7, no. 6,
+pp. 871–881, 2013.
+[75] D. P. Howsmon, N. Baysal, B. A. Buckingham, G. P. Forlenza, T. T. Ly,
+D. M. Maahs, T. Marcal, L. Towers, E. Mauritzen, S. Deshpande et al.,
+“Real-time detection of infusion site failures in a closed-loop artificial
+pancreas,” Journal of Diabetes Science and Technology, vol. 12, no. 3,
+pp. 599–607, 2018.
+[76] N. Baysal, F. Cameron, B. A. Buckingham, D. M. Wilson, H. P. Chase,
+D. M. Maahs, B. W. Bequette, and I. H. C.-L. S. G. (IHCL), “A
+novel method to detect pressure-induced sensor attenuations (pisa) in an
+artificial pancreas,” Journal of diabetes science and technology, vol. 8,
+no. 6, pp. 1091–1096, 2014.
+[77] X. Chen, S. Dutta, and S. Sankaranarayanan, “Formal verification of a
+multi-basal insulin infusion control model.” in Arch@ cpsweek, 2017,
+pp. 75–91.
+[78] X. Zhou, B. Ahmed, J. H. Aylor, P. Asare, and H. Alemzadeh, “Data-
+driven design of context-aware monitors for hazard prediction in arti-
+ficial pancreas systems,” in 2021 51st Annual IEEE/IFIP International
+Conference on Dependable Systems and Networks (DSN). IEEE, 2021,
+pp. 484–496.
+[79] A.-L. Alshalalfah, G. B. Hamad, and O. A. Mohamed, “Towards
+system level security analysis of artificial pancreas via uppaal-smc,” in
+2019 IEEE International Symposium on Circuits and Systems (ISCAS).
+IEEE, 2019, pp. 1–5.
+[80] P. V. Astillo, G. Choudhary, D. G. Duguma, J. Kim, and I. You,
+“Trmaps: Trust management in specification-based misbehavior detec-
+tion system for imd-enabled artificial pancreas system,” IEEE Journal
+of Biomedical and Health Informatics, vol. 25, no. 10, pp. 3763–3775,
+2021.
+[81] M. R. Aliabadi, M. Seltzer, M. V. Asl, and R. Ghavamizadeh,
+“Artinali#: An efficient intrusion detection technique for resource-
+constrained cyber-physical systems,” International Journal of Critical
+Infrastructure Protection, vol. 33, p. 100430, 2021.
+[82] M. Prematilake, Y. Kim, V. Raghunathan, A. Raghunathan, and N. K.
+Jha, “Hw/sw framework for improving the safety of implantable and
+wearable medical devices,” arXiv preprint arXiv:2103.01781, 2021.
+[83] A. Panda, S. Pinisetty, and P. Roop, “A secure insulin infusion system
+using verification monitors,” in Proceedings of the 19th ACM-IEEE
+International Conference on Formal Methods and Models for System
+Design, 2021, pp. 56–65.
+[84] O. Vega-Hernandez, F. Campos-Cornejo, D. Campos-Delgado, and
+D. Espinoza-Trejo, “Increasing security in an artificial pancreas: diag-
+nosis of actuator faults,” in 2009 Pan American Health Care Exchanges.
+IEEE, 2009, pp. 137–142.
+[85] Z. Mahmoudi, S. L. Wendt, D. Boiroux, M. Hagdrup, K. Nørgaard,
+N. K. Poulsen, H. Madsen, and J. B. Jørgensen, “Comparison of three
+nonlinear filters for fault detection in continuous glucose monitors,” in
+2016 38th Annual International Conference of the IEEE Engineering in
+Medicine and Biology Society (EMBC).
+IEEE, 2016, pp. 3507–3510.
+[86] F. E. Tosun and A. Teixeira, “Robust sequential detection of non-
+stealthy sensor deception attacks in an artificial pancreas system,” in
+2023 62nd IEEE Conference on Decision and Control (CDC).
+IEEE,
+2023, pp. 2827–2832.
+[87] F. E. Tosun, A. M. Teixeira, M. R.-H. Abdalmoaty, A. Ahl´en, and
+S. Dey, “Quickest detection of bias injection attacks on the glucose
+sensor in the artificial pancreas under meal disturbances,” Journal of
+Process Control, vol. 135, p. 103162, 2024.
+[88] F. E. Tosun, A. Teixeira, A. Ahl´en, and S. Dey, “Kullback–leibler
+divergence-based tuning of kalman filter for bias injection attacks in
+an artificial pancreas system,” IFAC-PapersOnLine, vol. 58, no. 4, pp.
+508–513, 2024.
+[89] L. Avila and E. Mart´ınez, “An active inference approach to on-line
+agent monitoring in safety–critical systems,” Advanced Engineering
+Informatics, vol. 29, no. 4, pp. 1083–1095, 2015.
+[90] A. Facchinetti, S. Favero, G. Sparacino, and C. Cobelli, “An online
+failure detection method of the glucose sensor-insulin pump system:
+improved overnight safety of type-1 diabetic subjects,” IEEE Transac-
+tions on Biomedical Engineering, vol. 60, no. 2, pp. 406–416, 2012.
+[91] S. Del Favero, M. Monaro, A. Facchinetti, A. Tagliavini, G. Sparacino,
+and C. Cobelli, “Real-time detection of glucose sensor and insulin
+pump faults in an artificial pancreas.” IFAC Proceedings Volumes,
+vol. 47, no. 3, pp. 1941–1946, 2014.
+[92] L. Meneghetti, A. Facchinetti, and S. Del Favero, “Model-based
+detection and classification of insulin pump faults and missed meal
+announcements in artificial pancreas systems for type 1 diabetes
+therapy,” IEEE Transactions on Biomedical Engineering, vol. 68, no. 1,
+pp. 170–180, 2020.
+[93] E. Manzoni, M. Rampazzo, A. Facchinetti, G. Sparacino, and
+S. Del Favero, “Monitoring statistical properties of kalman filter
+residuals in an artificial pancreas to detect overnight pump malfunctions
+causing insulin suspension,” Control Engineering Practice, vol. 141, p.
+105673, 2023.
+[94] B. Olney, S. Mahmud, and R. Karam, “Efficient nonlinear autoregres-
+sive neural network architecture for real-time biomedical applications,”
+in 2022 IEEE 4th International Conference on Artificial Intelligence
+Circuits and Systems (AICAS).
+IEEE, 2022, pp. 411–414.
+[95] A. Maity, A. Banerjee, and S. K. Gupta, “Detection of unknown-
+unknowns in human-in-loop human-in-plant systems using physics
+guided process models,” in 2023 57th Asilomar Conference on Signals,
+Systems, and Computers.
+IEEE, 2023, pp. 1500–1504.
+[96] X. Zhou, M. Kouzel, and H. Alemzadeh, “Robustness testing of data
+and knowledge driven anomaly detection in cyber-physical systems,” in
+2022 52nd Annual IEEE/IFIP International Conference on Dependable
+Systems and Networks Workshops (DSN-W).
+IEEE, 2022, pp. 44–51.
+[97] K. Turksoy, A. Roy, and A. Cinar, “Real-time model-based fault detec-
+tion of continuous glucose sensor measurements,” IEEE Transactions
+on Biomedical Engineering, vol. 64, no. 7, pp. 1437–1445, 2016.
+[98] X. Zhou, M. Kouzel, C. Smith, and H. Alemzadeh, “Knowsafe:
+Combined knowledge and data driven hazard mitigation in artificial
+pancreas systems,” arXiv preprint arXiv:2311.07460, 2023.
+[99] R. Rojas, W. Garcia-Gabin, and B. W. Bequette, “Multivariate statistical
+analysis to detect insulin infusion set failure,” in Proceedings of the
+2011 American Control Conference.
+IEEE, 2011, pp. 1952–1957.
+[100] A. Judith, G. J. W. Kathrine, and S. Silas, “Efficient deep learning-
+based cyber-attack detection for internet of medical things devices,”
+Engineering Proceedings, vol. 59, no. 1, p. 139, 2023.
+[101] L. Meneghetti, G. A. Susto, and S. Del Favero, “Detection of insulin
+pump malfunctioning to improve safety in artificial pancreas using
+unsupervised algorithms,” Journal of diabetes science and technology,
+vol. 13, no. 6, pp. 1065–1076, 2019.
+[102] L. Meneghetti, M. Terzi, S. Del Favero, G. A. Susto, and C. Cobelli,
+“Data-driven anomaly recognition for unsupervised model-free fault
+detection in artificial pancreas,” IEEE Transactions on Control Systems
+Technology, vol. 28, no. 1, pp. 33–47, 2018.
+[103] P. Herrero, M. Reddy, P. Georgiou, and N. S. Oliver, “Identifying
+continuous glucose monitoring data using machine learning,” Diabetes
+Technology & Therapeutics, vol. 24, no. 6, pp. 403–408, 2022.
+[104] L. Meneghetti, M. Terzi, G. A. Susto, S. Del Favero, and C. Cobelli,
+“Fault detection in artificial pancreas: A model-free approach,” in 2018
+IEEE Conference on Decision and Control (CDC).
+IEEE, 2018, pp.
+303–308.
+[105] P. V. Astillo, D. G. Duguma, H. Park, J. Kim, B. Kim, and I. You,
+“Federated intelligence of anomaly detection agent in iotmd-enabled
+diabetes management control system,” Future Generation Computer
+Systems, vol. 128, pp. 395–405, 2022.
+[106] X. Hei, X. Du, S. Lin, I. Lee, and O. Sokolsky, “Patient infusion pattern
+based access control schemes for wireless insulin pump system,” IEEE
+Transactions on Parallel and Distributed Systems, vol. 26, no. 11, pp.
+3108–3121, 2014.
+[107] A. Revert, F. Garelli, J. Pic´o, H. De Battista, P. Rossetti, J. Veh´ı, and
+J. Bondia, “Safety auxiliary feedback element for the artificial pancreas
+in type 1 diabetes,” IEEE transactions on Biomedical Engineering,
+vol. 60, no. 8, pp. 2113–2122, 2013.
+[108] A. Parmar, “Hacker shows off vulnerabilities of wireless insulin
+pumps,” MedCity News, 2012.
+[109] A. Teixeira, K. C. Sou, H. Sandberg, and K. H. Johansson, “Secure
+control systems: A quantitative risk management approach,” IEEE
+Control Systems Magazine, vol. 35, no. 1, pp. 24–45, 2015.
+[110] M. R. Aliabadi, M. V. Asl, and R. Ghavamizadeh, “Artinali++: Multi-
+dimensional specification mining for complex cyber-physical system
+security,” Journal of Systems and Software, vol. 180, p. 111016, 2021.
+[111] P. G. Jacobs, P. Herrero, A. Facchinetti, J. Vehi, B. Kovatchev,
+M. Breton, A. Cinar, K. Nikita, F. Doyle, J. Bondia et al., “Artificial
+intelligence and machine learning for improving glycemic control in
+diabetes: best practices, pitfalls and opportunities,” IEEE reviews in
+biomedical engineering, 2023.
+[112] I. Fox, J. Lee, R. Pop-Busui, and J. Wiens, “Deep reinforcement
+learning for closed-loop blood glucose control,” in Machine Learning
+for Healthcare Conference.
+PMLR, 2020, pp. 508–536.
+[113] M. Novotn`y and T. Kasper, “Cryptanalysis of keeloq with copacobana,”
+in Workshop on Special Purpose Hardware for Attacking Crypto-
+graphic Systems (SHARCS 2009), 2009, pp. 159–164.
+[114] R. Hovorka, V. Canonico, L. J. Chassin, U. Haueter, M. Massi-
+Benedetti, M. O. Federici, T. R. Pieber, H. C. Schaller, L. Schaupp,
+T. Vering et al., “Nonlinear model predictive control of glucose concen-
+tration in subjects with type 1 diabetes,” Physiological measurement,
+vol. 25, no. 4, p. 905, 2004.
+[115] L. F. Quesada, J. D. Rojas, O. Arrieta, and R. Vilanova, “Open-source
+low-cost hardware-in-the-loop simulation platform for testing control
+strategies for artificial pancreas research,” IFAC-PapersOnLine, vol. 52,
+no. 1, pp. 275–280, 2019.
+[116] S. Saxena, S. Bhatia, N. Kumar et al., “Fortifying artificial pancreas:
+A hardware-in-the-loop simulation study of cyber-attacks and defense
+mechanisms,” in 2024 15th International Conference on Computing
+Communication and Networking Technologies (ICCCNT). IEEE, 2024,
+pp. 1–8.
+[117] S. Ahmed, S. Mahmud, and R. Karam, “Modular security evaluation
+platform for physiological closed-loop control systems,” in Proceedings
+of the Great Lakes Symposium on VLSI 2024, 2024, pp. 682–687.
+[118] P. Bagade, A. Banerjee, and S. K. Gupta, “Rapid evidence-based
+development of mobile medical iot apps,” in 2016 IEEE International
+Conference on Pervasive Computing and Communication Workshops
+(PerCom Workshops).
+IEEE, 2016, pp. 1–6.
+[119] D. R. Wada and D. S. Ward, “The hybrid model: a new pharmacokinetic
+model for computer-controlled infusion pumps,” IEEE transactions on
+biomedical engineering, vol. 41, no. 2, pp. 134–142, 1994.
+[120] J. Xie, “Simglucose v0.2.1,” Available at https://github.com/jxx123/
+simglucose (2024/11/05).
+[121] C. D. Man, F. Micheletto, D. Lv, M. Breton, B. Kovatchev, and
+C. Cobelli, “The uva/padova type 1 diabetes simulator: new features,”
+Journal of diabetes science and technology, vol. 8, no. 1, pp. 26–34,
+2014.
+[122] R. Visentin, E. Campos-N´a˜nez, M. Schiavon, D. Lv, M. Vettoretti,
+M. Breton, B. P. Kovatchev, C. Dalla Man, and C. Cobelli, “The
+uva/padova type 1 diabetes simulator goes from single meal to single
+day,” Journal of diabetes science and technology, vol. 12, no. 2, pp.
+273–281, 2018.
+[123] #OpenAPS, “#wearenotwaiting to reduce the burden of type 1 dia-
+betes,” Available at https://openaps.org/ (2024/11/05).
+[124] I. S. Mughal, L. Patan`e, and R. Caponetto, “A comprehensive review
+of models and nonlinear control strategies for blood glucose regulation
+in artificial pancreas,” Annual Reviews in Control, vol. 57, p. 100937,
+2024.
+[125] LoopInsightT1 (LT1) Project, “LoopInsightT1,” https://lt1.org/, 2025,
+accessed: August 29, 2025.
+[126] X. Zhou, M. Kouzel, H. Ren, and H. Alemzadeh, “Design and
+validation of an open-source closed-loop testbed for artificial pancreas
+systems,” in 2022 IEEE/ACM Conference on Connected Health: Ap-
+plications, Systems and Engineering Technologies (CHASE).
+IEEE,
+2022, pp. 1–12.
+[127] J. Hedengren, “Blood glucose regulation in a type-i diabetic in
+simulink,” Matlab Central File Exchange, 2014.
+[128] S. A. Brown, B. P. Kovatchev, D. Raghinaru, J. W. Lum, B. A.
+Buckingham, Y. C. Kudva, L. M. Laffel, C. J. Levy, J. E. Pinsker, R. P.
+Wadwa et al., “Six-month randomized, multicenter trial of closed-loop
+control in type 1 diabetes,” New England Journal of Medicine, vol.
+381, no. 18, pp. 1707–1717, 2019.
+[129] G. Aleppo, K. J. Ruedy, T. D. Riddlesworth, D. F. Kruger, A. L. Peters,
+I. Hirsch, R. M. Bergenstal, E. Toschi, A. J. Ahmann, V. N. Shah
+et al., “Replace-bg: a randomized trial comparing continuous glucose
+monitoring with and without routine blood glucose monitoring in adults
+with well-controlled type 1 diabetes,” Diabetes care, vol. 40, no. 4, pp.
+538–545, 2017.
+[130] F. Dubosson, J.-E. Ranvier, S. Bromuri, J.-P. Calbimonte, J. Ruiz, and
+M. Schumacher, “The open d1namo dataset: A multi-modal dataset for
+research on non-invasive type 1 diabetes management,” Informatics in
+Medicine Unlocked, vol. 13, pp. 92–100, 2018.
+[131] C. Marling and R. Bunescu, “The ohiot1dm dataset for blood glucose
+level prediction: Update 2020,” in CEUR workshop proceedings, vol.
+2675.
+NIH Public Access, 2020, p. 71.
+[132] S. Mahmud, F. Zareen, B. Olney, R. Karam et al., “Trojan resilience
+in implantable and wearable medical devices with virtual biosensing,”
+in 2022 IEEE 40th International Conference on Computer Design
+(ICCD).
+IEEE, 2022, pp. 577–584.
+[133] C. A. Ledezma, E. Severeyn, G. Perpinan, M. Altuve, and S. Wong, “A
+new on-line electrocardiographic records database and computer rou-
+tines for data analysis,” in 2014 36th Annual International Conference
+of the IEEE Engineering in Medicine and Biology Society.
+IEEE,
+2014, pp. 2738–2741.
+[134] A. A. Hady, A. Ghubaish, T. Salman, D. Unal, and R. Jain, “Intrusion
+detection system for healthcare systems using medical and network
+data: A comparison study,” IEEE Access, vol. 8, pp. 106 576–106 584,
+2020.
+[135] danamlewis, “Openhumansdatatools,” Available at https://github.com/
+danamlewis/OpenHumansDataTools (2024/11/05).
+[136] CamDiab, “Privacy Policy – CamAPS FX,” https://camdiab.com/
+privacy, 2024, version dated December 4, 2024; accessed August 27,
+2025.
+[137] Medtronic, “Security at Medtronic: Product Security and Cyberse-
+curity,” https://www.medtronic.com/ph-en/product-security.html, 2022,
+last updated May 2022; accessed August 29, 2025.
+[138] T.
+D.
+Care,
+“Important
+safety
+information:
+t:slim
+x2
+insulin
+pump with control-iq technology,” 2025, accessed: August 29,
+2025.
+[Online].
+Available:
+https://www.tandemdiabetes.com/en-gb/
+legal/important-safety-information/control-iq\#risks-pump
+[139] Insulet Corporation, “Security at Insulet: Product Security and Cyber-
+security,” https://www.omnipod.com/product-security, 2025, accessed:
+August 29, 2025.
+[140] Diabeloop, “Dblg1 system: Features and components,” 2024, accessed:
+August 29, 2025. [Online]. Available: https://www.dbl-diabetes.com/
+dblg1system-dh22/features-dblg1system-dh22
+[141] F. E. Tosun, A. Teixeira, A. Ahl´en, and S. Dey, “Detection of bias
+injection attacks on the glucose sensor in the artificial pancreas under
+meal disturbance,” in 2022 American Control Conference (ACC).
+IEEE, 2022, pp. 1398–1405.
+[142] I. Pagkalos, P. Herrero, M. El-Sharkawy, P. Pesl, N. Oliver, and
+P. Georgiou, “Vhdl implementation of the biostator ii glucose control
+algorithm for critical care,” in 2011 IEEE Biomedical Circuits and
+Systems Conference (BioCAS).
+IEEE, 2011, pp. 94–97.
+[143] B. P. Kovatchev, M. D. Breton, C. Cobelli, and C. Dalla Man, “Method,
+system and computer simulation environment for testing of monitoring
+and control strategies in diabetes,” Jan. 28 2020, uS Patent 10,546,659.
+[144] L. Meneghetti, G. A. Susto, and S. Del Favero, “Detection of insulin
+pump malfunctioning to improve safety in artificial pancreas using
+unsupervised algorithms,” Journal of diabetes science and technology,
+vol. 13, no. 6, pp. 1065–1076, 2019.
+[145] Perceptus, “Glucosym,” Available at https://github.com/Perceptus/
+GlucoSym (2024/11/05).
+[146] S. S. Kanderian, S. Weinzimer, G. Voskanyan, and G. M. Steil, “Iden-
+tification of intraday metabolic profiles during closed-loop glucose
+control in individuals with type 1 diabetes,” 2009.
+[147] E. Ackerman, L. C. Gatewood, J. W. Rosevear, and G. D. Molnar,
+“Model studies of blood-glucose regulation,” The bulletin of mathe-
+matical biophysics, vol. 27, pp. 21–37, 1965.
+[148] R. N. Bergman, “Toward physiological understanding of glucose toler-
+ance: minimal-model approach,” Diabetes, vol. 38, no. 12, pp. 1512–
+1527, 1989.
+[149] X. Zhou, B. Ahmed, J. H. Aylor, P. Asare, and H. Alemzadeh, “Hybrid
+knowledge and data driven synthesis of runtime monitors for cyber-
+physical systems,” IEEE Transactions on Dependable and Secure
+Computing, vol. 21, no. 1, pp. 12–30, 2023.
+[150] R. Jain, “Wustl ehms 2020 dataset for internet of medical things (iomt)
+cybersecurity research,” Available at https://www.cse.wustl.edu/∼jain/
+ehms/index.html (2024/11/05).
